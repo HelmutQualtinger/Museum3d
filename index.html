@@ -3,7 +3,32 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>3D Museum</title>
+<title>Galerie der Meister — begehbares 3D-Museum</title>
+<meta name="description" content="Ein begehbares 3D-Museum im Browser: drei Säle, neun Meisterwerke von Leonardo bis Kandinsky. Ziehen zum Umsehen, klicken zum Gehen — ohne Installation.">
+<link rel="canonical" href="https://helmutqualtinger.github.io/Museum3d/">
+<meta name="theme-color" content="#0a0806">
+
+<!-- Vorschaukarte für soziale Netzwerke. Die Bild-URL muss absolut sein —
+     Facebook, LinkedIn, X und WhatsApp lösen relative Pfade nicht auf. -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Galerie der Meister">
+<meta property="og:locale" content="de_DE">
+<meta property="og:title" content="Galerie der Meister — begehbares 3D-Museum">
+<meta property="og:description" content="Drei Säle, neun Meisterwerke von Leonardo bis Kandinsky. Ziehen zum Umsehen, klicken zum Gehen — direkt im Browser, ohne Installation.">
+<meta property="og:url" content="https://helmutqualtinger.github.io/Museum3d/">
+<meta property="og:image" content="https://helmutqualtinger.github.io/Museum3d/docs/og-image.jpg">
+<meta property="og:image:type" content="image/jpeg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Blick durch den Saal Porträt mit Rembrandts Selbstbildnis, durch einen breiten Durchgang in den Saal Landschaft.">
+
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Galerie der Meister — begehbares 3D-Museum">
+<meta name="twitter:description" content="Drei Säle, neun Meisterwerke von Leonardo bis Kandinsky. Ziehen zum Umsehen, klicken zum Gehen — direkt im Browser.">
+<meta name="twitter:image" content="https://helmutqualtinger.github.io/Museum3d/docs/og-image.jpg">
+<meta name="twitter:image:alt" content="Blick durch den Saal Porträt mit Rembrandts Selbstbildnis, durch einen breiten Durchgang in den Saal Landschaft.">
+
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='26' font-size='26'>%F0%9F%96%BC%EF%B8%8F</text></svg>">
 <style>
   html, body { margin: 0; padding: 0; overflow: hidden; height: 100%; background: #050505; }
   canvas { display: block; cursor: grab; touch-action: none; }
@@ -95,6 +120,11 @@ const ROOM_D = 14;   // Tiefe (Z)
 const ROOM_H = 7.2;  // Höhe
 const WALL_T = 0.3;
 const TOTAL_W = ROOM_W * 3;
+
+// Durchgang in der Trennwand zwischen zwei Sälen — bewusst breit,
+// damit die Saalflucht sichtbar bleibt und man bequem hindurchgeht
+const DOOR_W = 5.4;
+const DOOR_H = 4.8;
 
 // Bounding-Box, in die jedes Gemälde unverzerrt eingepasst wird (Seitenverhältnis bleibt erhalten)
 const PAINT_MAX_H = 3.5;
@@ -384,6 +414,8 @@ function addCollider(x, z, w, d) {
 const paintingHotspots = [];
 // Böden aller Säle — Klick darauf lässt den Besucher dorthin gehen
 const floorMeshes = [];
+// Wände verdecken Gemälde: sie begrenzen sowohl Sicht als auch Klick
+const occluders = [];
 
 /* ---------------------------------------------------------------
    Einen Saal bauen
@@ -438,6 +470,7 @@ function buildRoom(index, def) {
     upper.rotation.y = zPos === 0 ? 0 : Math.PI;
     upper.receiveShadow = true;
     group.add(upper);
+    occluders.push(lower, upper);
 
     const trim = new THREE.Mesh(new THREE.BoxGeometry(ROOM_W, 0.12, WALL_T), trimMat);
     trim.position.set(ROOM_W / 2, ROOM_H * 0.62, zPos + (zPos === 0 ? 0.01 : -0.01));
@@ -448,7 +481,7 @@ function buildRoom(index, def) {
   addCollider(originX + ROOM_W / 2, 0, ROOM_W, WALL_T * 2);
   addCollider(originX + ROOM_W / 2, ROOM_D, ROOM_W, WALL_T * 2);
 
-  // Seitenwand außen (nur wenn kein Durchgang)
+  // Seitenwand: außen geschlossen, zwischen zwei Sälen eine Wand mit breitem Durchgang
   function buildSideWall(xLocal, hasDoor) {
     if (!hasDoor) {
       const wall = new THREE.Mesh(new THREE.PlaneGeometry(ROOM_D, ROOM_H), wallMat(0xd8cdb8));
@@ -456,18 +489,52 @@ function buildRoom(index, def) {
       wall.position.set(xLocal, ROOM_H / 2, ROOM_D / 2);
       wall.receiveShadow = true;
       group.add(wall);
+      occluders.push(wall);
       addCollider(originX + xLocal, ROOM_D / 2, WALL_T * 2, ROOM_D);
-    } else {
-      // Türsturz + schmale Eckpfosten (rein dekorativ, keine Kollision)
-      const lintel = new THREE.Mesh(new THREE.BoxGeometry(0.5, ROOM_H * 0.14, ROOM_D), trimMat);
-      lintel.position.set(xLocal, ROOM_H * 0.93, ROOM_D / 2);
-      group.add(lintel);
-      [1.1, ROOM_D - 1.1].forEach(zp => {
-        const post = new THREE.Mesh(new THREE.BoxGeometry(0.35, ROOM_H, 0.35), trimMat);
-        post.position.set(xLocal, ROOM_H / 2, zp);
-        group.add(post);
-      });
+      return;
     }
+
+    // Die Trennwand steht genau zwischen zwei Sälen und wird deshalb nur einmal
+    // gebaut — vom linken der beiden (xLocal === ROOM_W). Sonst lägen zwei
+    // identische Wände ineinander: Z-Fighting und doppelte Kollision.
+    if (xLocal === 0) return;
+
+    const dividerMat = wallMat(0xd8cdb8);
+    const segD = (ROOM_D - DOOR_W) / 2;   // Tiefe der beiden Wandstücke neben dem Durchgang
+
+    // Massive Boxen statt Ebenen: die Wand wird von beiden Sälen aus gesehen
+    [segD / 2, ROOM_D - segD / 2].forEach((zCenter) => {
+      const seg = new THREE.Mesh(new THREE.BoxGeometry(WALL_T, ROOM_H, segD), dividerMat);
+      seg.position.set(xLocal, ROOM_H / 2, zCenter);
+      seg.receiveShadow = true;
+      group.add(seg);
+      occluders.push(seg);
+      addCollider(originX + xLocal, zCenter, WALL_T * 2, segD);
+    });
+
+    // Sturz über dem Durchgang
+    const header = new THREE.Mesh(
+      new THREE.BoxGeometry(WALL_T, ROOM_H - DOOR_H, DOOR_W),
+      dividerMat
+    );
+    header.position.set(xLocal, DOOR_H + (ROOM_H - DOOR_H) / 2, ROOM_D / 2);
+    header.receiveShadow = true;
+    group.add(header);
+    occluders.push(header);
+
+    // Laibung dunkel absetzen, damit die Öffnung als Türrahmen liest
+    const jambT = 0.14;
+    [segD, ROOM_D - segD].forEach((zp) => {
+      const jamb = new THREE.Mesh(new THREE.BoxGeometry(WALL_T + 0.05, DOOR_H, jambT), trimMat);
+      jamb.position.set(xLocal, DOOR_H / 2, zp);
+      group.add(jamb);
+    });
+    const lintelTrim = new THREE.Mesh(
+      new THREE.BoxGeometry(WALL_T + 0.05, jambT, DOOR_W + jambT * 2),
+      trimMat
+    );
+    lintelTrim.position.set(xLocal, DOOR_H, ROOM_D / 2);
+    group.add(lintelTrim);
   }
   buildSideWall(0, index > 0);
   buildSideWall(ROOM_W, index < 2);
@@ -546,6 +613,15 @@ document.addEventListener('keyup', (e) => {
     case 'KeyD': case 'ArrowRight': move.right = false; break;
   }
 });
+
+// Steckt der Punkt in einer Wand (Spielerradius eingerechnet)?
+function isBlocked(x, z) {
+  for (const c of colliders) {
+    if (x > c.minX - PLAYER_R && x < c.maxX + PLAYER_R &&
+        z > c.minZ - PLAYER_R && z < c.maxZ + PLAYER_R) return true;
+  }
+  return false;
+}
 
 function resolveCollision(pos) {
   for (const c of colliders) {
@@ -677,6 +753,19 @@ function travelTo(point) {
   const target = point.clone();
   target.y = EYE_H;
   resolveCollision(target);
+
+  // Der Weg ist eine Gerade auf Augenhöhe — seit es Trennwände gibt, muss er
+  // abgetastet werden, sonst gleitet die Kamera durch die Wand neben dem Durchgang
+  const steps = Math.max(2, Math.ceil(camera.position.distanceTo(target) / 0.3));
+  const probe = new THREE.Vector3();
+  const reachable = camera.position.clone();
+  for (let i = 1; i <= steps; i++) {
+    probe.lerpVectors(camera.position, target, i / steps);
+    if (isBlocked(probe.x, probe.z)) break;
+    reachable.copy(probe);
+  }
+  target.copy(reachable);
+
   const dist = camera.position.distanceTo(target);
   if (dist < 0.3) return;
 
@@ -698,11 +787,13 @@ function eventToNDC(event) {
   );
 }
 
-// Kein Abstandslimit: Jedes sichtbare Gemälde ist anklickbar — der Klick führt
-// den Besucher davor, auch quer durch die Saalflucht
+// Kein Abstandslimit: Jedes *sichtbare* Gemälde ist anklickbar — der Klick führt
+// den Besucher davor, auch durch den Durchgang in den Nachbarsaal. Die Wände
+// kommen mit in den Raycast, sonst ließe sich ein Bild durch eine Wand anklicken.
 function raycastPaintingAt(event) {
   raycaster.setFromCamera(eventToNDC(event), camera);
-  const hits = raycaster.intersectObjects(paintingHotspots.map(h => h.mesh), false);
+  const targets = paintingHotspots.map(h => h.mesh).concat(occluders);
+  const hits = raycaster.intersectObjects(targets, false);
   if (hits.length === 0) return null;
   return paintingHotspots.find(h => h.mesh === hits[0].object) || null;
 }

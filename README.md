@@ -9,12 +9,13 @@ A walkable 3D art gallery in the browser — three themed halls (Portrait, Lands
 ## Features
 
 - Navigation that follows familiar web conventions — drag to look, click the floor to walk there, click a painting to view it
-- Three galleries: Portrait, Landscape, and Modern art, each with its own accent color and lighting
+- Three galleries: Portrait, Landscape, and Modern art, each with its own accent color and lighting, separated by walls with wide doorways that frame the view down the enfilade
 - Light oak plank flooring, generated procedurally at startup — no texture files to download
 - High-resolution paintings loaded from Wikimedia Commons, lit by narrow spots that pick out the artwork without washing it out
 - Hovering a painting shows its title and artist; clicking walks you up to it, even from another hall
 - Collision detection against walls so you can't walk through them
 - Works on touch devices: drag to look, tap to select
+- Open Graph / Twitter Card metadata, so shared links render a preview card
 
 ## Controls
 
