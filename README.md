@@ -4,22 +4,26 @@ A walkable 3D art gallery in the browser — three themed halls (Portrait, Lands
 
 **[Live demo →](https://helmutqualtinger.github.io/Museum3d/)**
 
+![The gallery, looking through all three halls](docs/screenshot.jpg)
+
 ## Features
 
-- First-person walkthrough with mouse-look and click-and-drag movement (WASD also supported)
+- Navigation that follows familiar web conventions — drag to look, click the floor to walk there, click a painting to view it
 - Three galleries: Portrait, Landscape, and Modern art, each with its own accent color and lighting
 - High-resolution paintings loaded from Wikimedia Commons, spotlit on the gallery walls
-- Double-click a painting for a close-up view
+- Hovering a painting shows its title and artist; clicking walks you up to it, even from another hall
 - Collision detection against walls so you can't walk through them
+- Works on touch devices: drag to look, tap to select
 
 ## Controls
 
 | Action | Input |
-|---|---|
-| Look around | Move mouse |
-| Walk | Hold left mouse button and drag |
-| Walk (alternative) | `W` `A` `S` `D` / arrow keys |
-| Close-up view | Double-click a painting |
+| --- | --- |
+| Look around | Drag (the scene follows your pointer, like a map) |
+| Walk to a spot | Click the floor there |
+| View a painting | Click it — you'll be walked in front of it |
+| Leave the close-up | Click beside the painting, the **← Zurück** button, or `Esc` |
+| Move | `W` `A` `S` `D` / arrow keys, or the scroll wheel |
 | Menu | `Esc` |
 
 ## Running locally

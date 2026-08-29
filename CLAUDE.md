@@ -13,9 +13,18 @@ A walkable 3D art museum rendered entirely client-side with Three.js. The whole 
 - **Room construction** (`buildRoom`): builds floor, ceiling with light panels, front/back walls (two-tone: accent lower band, light upper band), side walls (solid or open doorway depending on room position), and a genre sign above the entrance.
 - **Painting construction** (`buildPainting`): fits each painting's texture into a bounding box preserving aspect ratio, adds a frame, a placard (rendered to a canvas texture), and two spotlights.
 - **Collision**: simple AABB colliders (`colliders` array) checked against a circular player radius in `resolveCollision`.
-- **Movement/look**: mouse movement always rotates the camera (pointer stays unlocked, no Pointer Lock API); holding the left mouse button and dragging translates the camera based on cursor offset from screen center. WASD/arrow keys also translate.
-- **Focus mode**: double-clicking a painting raycasts against `paintingHotspots` and animates the camera to a frontal close-up (`enterFocus`/`exitFocus`), with easing.
-- **UI**: a start overlay with a loading bar (driven by `THREE.LoadingManager`), a room-name label that fades in/out on room transitions, and an HUD hint.
+- **Look**: dragging rotates the camera using the "grab" metaphor — the scene follows the pointer, as in Street View or OrbitControls (`applyLook` *adds* the delta to yaw/pitch; an FPS scheme would subtract it). No Pointer Lock API, so the cursor stays free to click things.
+- **Movement**: WASD/arrows feed `velFwd`/`velStrafe`, which are lerped toward the input each frame for smooth start/stop; the scroll wheel adds to `wheelVel`, an impulse that decays exponentially. Both are applied along the camera yaw in the render loop.
+- **Click handling**: one `click` listener calls `handleSelect`, which resolves intent by raycast — a painting enters focus, the floor triggers `travelTo`, and anything else exits focus. `dragMoved` (set past `DRAG_THRESHOLD`) suppresses the click that ends a drag. Touch maps onto the same `pointerDown`/`pointerMove`/`pointerUp` helpers, with a tap calling `handleSelect`.
+- **Focus mode**: `enterFocus`/`exitFocus` animate the camera to a frontal close-up of a painting, easing over a distance-scaled duration. There is deliberately **no** distance limit on painting raycasts — clicking a painting several halls away walks you to it.
+- **`travelTo`**: reuses the same `focusState` animation machinery for click-to-walk, but leaves `focusState.active` false so normal movement resumes when it lands.
+- **UI**: a start overlay with a loading bar (driven by `THREE.LoadingManager`; the start button stays dimmed until `onLoad` fires, since clicking before the module initializes does nothing), a room-name label that fades in/out on room transitions, a hover tooltip with title/artist, a **← Zurück** button shown only in focus mode, and an HUD hint whose text swaps between `HUD_DEFAULT` and `HUD_FOCUS`.
+- **Esc**: exits the close-up first and only opens the menu when not focused.
+
+## Gotchas
+
+- `requestAnimationFrame` is paused entirely while the tab is backgrounded, so camera animations do not advance and any in-page wait that polls for them will hang. When testing with browser automation, step the animation by taking screenshots rather than sleeping in the page.
+- Placard textures are drawn to a fixed 1024px canvas; `makePlacardTexture` shrinks the font to fit, because long titles used to be clipped.
 
 ## Conventions
 
