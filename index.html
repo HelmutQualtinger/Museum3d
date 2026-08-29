@@ -112,7 +112,8 @@ const ROOMS = [
   {
     name: 'Saal I — Porträt',
     accent: 0x6e2b2b,      // gedämpftes Rot
-    floor: 0x3a2a20,
+    // floor tönt die Dielentextur nur noch leicht ein (multipliziert), daher hell halten
+    floor: 0xf2e6d4,
     paintings: [
       { title: 'Mona Lisa', artist: 'Leonardo da Vinci, um 1503', url: 'https://upload.wikimedia.org/wikipedia/commons/6/6a/Mona_Lisa.jpg', ratio: 1.513 },
       { title: 'Mädchen mit dem Perlenohrring', artist: 'Johannes Vermeer, 1665', url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/1665_Girl_with_a_Pearl_Earring.jpg/3840px-1665_Girl_with_a_Pearl_Earring.jpg', ratio: 1.184 },
@@ -122,7 +123,7 @@ const ROOMS = [
   {
     name: 'Saal II — Landschaft',
     accent: 0x2f4a3d,      // Salbeigrün
-    floor: 0x2c2620,
+    floor: 0xece2d2,
     paintings: [
       { title: 'Sternennacht', artist: 'Vincent van Gogh, 1889', url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg/3840px-Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg', ratio: 0.792 },
       { title: 'Impression, Sonnenaufgang', artist: 'Claude Monet, 1872', url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/Monet_-_Impression%2C_Sunrise.jpg/3840px-Monet_-_Impression%2C_Sunrise.jpg', ratio: 0.776 },
@@ -132,7 +133,7 @@ const ROOMS = [
   {
     name: 'Saal III — Moderne',
     accent: 0x3a3320,      // dunkles Gold
-    floor: 0x201d1a,
+    floor: 0xf4e8d2,
     paintings: [
       { title: 'Der Kuss', artist: 'Gustav Klimt, 1908', url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/40/The_Kiss_-_Gustav_Klimt_-_Google_Cultural_Institute.jpg/3840px-The_Kiss_-_Gustav_Klimt_-_Google_Cultural_Institute.jpg', ratio: 1.003 },
       { title: 'Der Schrei', artist: 'Edvard Munch, 1893', url: 'https://upload.wikimedia.org/wikipedia/commons/f/f4/The_Scream.jpg', ratio: 1.274 },
@@ -226,7 +227,70 @@ function makeSignTexture(text) {
   return tex;
 }
 
-const woodFloorMat = (color) => new THREE.MeshStandardMaterial({ color, roughness: 0.75, metalness: 0.05 });
+/* Eichendielen, prozedural auf ein Canvas gezeichnet — kein externes Asset.
+   Die Kachel wiederholt sich über den Boden, deshalb müssen die Maserlinien
+   an beiden Rändern auf gleicher Höhe beginnen und enden. */
+function makeWoodFloorTexture() {
+  const c = document.createElement('canvas');
+  c.width = 1024; c.height = 1024;
+  const ctx = c.getContext('2d');
+  const PLANKS = 10;
+  const ph = c.height / PLANKS;
+
+  for (let i = 0; i < PLANKS; i++) {
+    const y = i * ph;
+    // Jede Diele etwas anders hell und warm, sonst entsteht ein sichtbares Raster
+    const hue = 31 + Math.random() * 7;
+    const lum = 66 + Math.random() * 11;
+    ctx.fillStyle = `hsl(${hue}, 27%, ${lum}%)`;
+    ctx.fillRect(0, y, c.width, ph);
+
+    // Maserung längs der Diele
+    for (let g = 0; g < 44; g++) {
+      const gy = y + 2 + Math.random() * (ph - 4);
+      ctx.strokeStyle = Math.random() < 0.55
+        ? `hsla(${hue}, 26%, ${lum - 19}%, ${0.07 + Math.random() * 0.14})`
+        : `hsla(${hue}, 22%, ${lum + 12}%, ${0.05 + Math.random() * 0.10})`;
+      ctx.lineWidth = 0.6 + Math.random() * 1.9;
+      ctx.beginPath();
+      ctx.moveTo(0, gy);
+      const steps = 8;
+      for (let s = 1; s <= steps; s++) {
+        // letzter Punkt zurück auf gy, damit die Kachel nahtlos anschließt
+        const wobble = s === steps ? 0 : (Math.random() - 0.5) * 3.2;
+        ctx.lineTo((c.width / steps) * s, gy + wobble);
+      }
+      ctx.stroke();
+    }
+
+    // versetzte Stoßfugen zwischen den einzelnen Brettern
+    const joints = 2 + (Math.random() * 2 | 0);
+    for (let j = 0; j < joints; j++) {
+      const jx = 40 + Math.random() * (c.width - 80);
+      ctx.strokeStyle = 'rgba(58, 39, 22, 0.5)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(jx, y + 1.5);
+      ctx.lineTo(jx, y + ph - 1.5);
+      ctx.stroke();
+    }
+
+    // Fuge zur nächsten Diele
+    ctx.fillStyle = 'rgba(48, 32, 18, 0.55)';
+    ctx.fillRect(0, y + ph - 2, c.width, 2);
+  }
+
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  // eine Kachel ≈ 3,5 m, also Dielen von etwa 35 cm Breite
+  tex.repeat.set(ROOM_W / 3.5, ROOM_D / 3.5);
+  tex.anisotropy = 8;
+  return tex;
+}
+const woodFloorTex = makeWoodFloorTexture();
+
+const woodFloorMat = (color) => new THREE.MeshStandardMaterial({ map: woodFloorTex, color, roughness: 0.72, metalness: 0.02 });
 const wallMat = (color) => new THREE.MeshStandardMaterial({ color, roughness: 0.9, metalness: 0.0 });
 const ceilMat = new THREE.MeshStandardMaterial({ color: 0x0e0c0a, roughness: 1.0 });
 const trimMat = new THREE.MeshStandardMaterial({ color: 0x1a1512, roughness: 0.6, metalness: 0.2 });
