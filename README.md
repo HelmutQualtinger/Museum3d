@@ -1,6 +1,6 @@
 # 3D Museum
 
-A walkable 3D art gallery in the browser — three themed halls (Portrait, Landscape, Modern), nine masterpieces, built with [Three.js](https://threejs.org/). Single self-contained `index.html`, no build step, no dependencies to install.
+A walkable 3D art gallery in the browser — three themed halls (Portrait, Landscape, Modern), fifteen masterpieces, built with [Three.js](https://threejs.org/). Single self-contained `index.html`, no build step, no dependencies to install.
 
 **[Live demo →](https://helmutqualtinger.github.io/Museum3d/)**
 
@@ -11,7 +11,7 @@ A walkable 3D art gallery in the browser — three themed halls (Portrait, Lands
 - Navigation that follows familiar web conventions — drag to look, click the floor to walk there, click a painting to view it
 - Three galleries: Portrait, Landscape, and Modern art, each with its own accent color and lighting, separated by walls with wide doorways that frame the view down the enfilade
 - Light oak plank flooring, generated procedurally at startup — no texture files to download
-- High-resolution paintings loaded from Wikimedia Commons, lit by narrow spots that pick out the artwork without washing it out
+- Fifteen paintings loaded from Wikimedia Commons — five per hall, three on the back wall and two facing them — each lit by a narrow spot that picks out the artwork without washing it out
 - Hovering a painting shows its title and artist; clicking walks you up to it, even from another hall
 - Collision detection against walls so you can't walk through them
 - Works on touch devices: drag to look, tap to select
@@ -27,6 +27,16 @@ A walkable 3D art gallery in the browser — three themed halls (Portrait, Lands
 | Leave the close-up | Click beside the painting, the **← Zurück** button, or `Esc` |
 | Move | `W` `A` `S` `D` / arrow keys, or the scroll wheel |
 | Menu | `Esc` |
+
+## The collection
+
+| Hall | Works |
+| --- | --- |
+| I — Porträt | Mona Lisa · Mädchen mit dem Perlenohrring · Selbstbildnis (Rembrandt) · Selbstbildnis (van Gogh) · Die Arnolfini-Hochzeit |
+| II — Landschaft | Sternennacht · Impression, Sonnenaufgang · Der Wanderer über dem Nebelmeer · Die große Welle vor Kanagawa · Die letzte Fahrt der Temeraire |
+| III — Moderne | Der Kuss · Der Schrei · Blaues Pferd I · Komposition VIII · Komposition II in Rot, Blau und Gelb |
+
+All images are public-domain reproductions served from Wikimedia Commons.
 
 ## Running locally
 

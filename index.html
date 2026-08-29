@@ -128,8 +128,8 @@ const DOOR_H = 4.8;
 
 // Bounding-Box, in die jedes Gemälde unverzerrt eingepasst wird (Seitenverhältnis bleibt erhalten)
 const PAINT_MAX_H = 3.5;
-const PAINT_MAX_W_SIDE = 4.0;   // Rückwand: zwei Bilder nebeneinander
-const PAINT_MAX_W_FRONT = 4.4;  // Frontwand: ein Bild allein, mehr Platz
+const PAINT_MAX_W_BACK = 3.8;   // Rückwand: drei Bilder nebeneinander
+const PAINT_MAX_W_FRONT = 4.2;  // Frontwand: zwei Bilder, etwas mehr Platz je Bild
 
 // ratio = Höhe/Breite des Originalbilds; liefert die größte Größe, die in die Box passt
 function fitPaintingSize(ratio, maxW, maxH) {
@@ -145,9 +145,13 @@ const ROOMS = [
     // floor tönt die Dielentextur nur noch leicht ein (multipliziert), daher hell halten
     floor: 0xf2e6d4,
     paintings: [
-      { title: 'Mona Lisa', artist: 'Leonardo da Vinci, um 1503', url: 'https://upload.wikimedia.org/wikipedia/commons/6/6a/Mona_Lisa.jpg', ratio: 1.513 },
-      { title: 'Mädchen mit dem Perlenohrring', artist: 'Johannes Vermeer, 1665', url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/1665_Girl_with_a_Pearl_Earring.jpg/3840px-1665_Girl_with_a_Pearl_Earring.jpg', ratio: 1.184 },
-      { title: 'Selbstbildnis', artist: 'Rembrandt van Rijn, 1659', url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/bd/Rembrandt_van_Rijn_-_Self-Portrait_-_Google_Art_Project.jpg/3840px-Rembrandt_van_Rijn_-_Self-Portrait_-_Google_Art_Project.jpg', ratio: 1.295 },
+      // Rückwand (drei Bilder)
+      { title: 'Mona Lisa', artist: 'Leonardo da Vinci, um 1503', url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Mona_Lisa.jpg/1280px-Mona_Lisa.jpg', ratio: 1.513 },
+      { title: 'Mädchen mit dem Perlenohrring', artist: 'Johannes Vermeer, 1665', url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0f/1665_Girl_with_a_Pearl_Earring.jpg/1280px-1665_Girl_with_a_Pearl_Earring.jpg', ratio: 1.184 },
+      { title: 'Selbstbildnis', artist: 'Rembrandt van Rijn, 1659', url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/bd/Rembrandt_van_Rijn_-_Self-Portrait_-_Google_Art_Project.jpg/1280px-Rembrandt_van_Rijn_-_Self-Portrait_-_Google_Art_Project.jpg', ratio: 1.295 },
+      // Frontwand (zwei Bilder)
+      { title: 'Selbstbildnis', artist: 'Vincent van Gogh, 1889', url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b2/Vincent_van_Gogh_-_Self-Portrait_-_Google_Art_Project.jpg/1280px-Vincent_van_Gogh_-_Self-Portrait_-_Google_Art_Project.jpg', ratio: 1.216 },
+      { title: 'Die Arnolfini-Hochzeit', artist: 'Jan van Eyck, 1434', url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/33/Van_Eyck_-_Arnolfini_Portrait.jpg/1280px-Van_Eyck_-_Arnolfini_Portrait.jpg', ratio: 1.368 },
     ]
   },
   {
@@ -155,9 +159,13 @@ const ROOMS = [
     accent: 0x2f4a3d,      // Salbeigrün
     floor: 0xece2d2,
     paintings: [
-      { title: 'Sternennacht', artist: 'Vincent van Gogh, 1889', url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg/3840px-Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg', ratio: 0.792 },
-      { title: 'Impression, Sonnenaufgang', artist: 'Claude Monet, 1872', url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/Monet_-_Impression%2C_Sunrise.jpg/3840px-Monet_-_Impression%2C_Sunrise.jpg', ratio: 0.776 },
-      { title: 'Der Wanderer über dem Nebelmeer', artist: 'Caspar David Friedrich, 1818', url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/af/Caspar_David_Friedrich_-_Wanderer_above_the_Sea_of_Fog.jpeg/3840px-Caspar_David_Friedrich_-_Wanderer_above_the_Sea_of_Fog.jpeg', ratio: 1.283 },
+      // Rückwand (drei Bilder)
+      { title: 'Sternennacht', artist: 'Vincent van Gogh, 1889', url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ea/Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg/1280px-Van_Gogh_-_Starry_Night_-_Google_Art_Project.jpg', ratio: 0.792 },
+      { title: 'Impression, Sonnenaufgang', artist: 'Claude Monet, 1872', url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/Monet_-_Impression%2C_Sunrise.jpg/1280px-Monet_-_Impression%2C_Sunrise.jpg', ratio: 0.776 },
+      { title: 'Der Wanderer über dem Nebelmeer', artist: 'Caspar David Friedrich, 1818', url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/af/Caspar_David_Friedrich_-_Wanderer_above_the_Sea_of_Fog.jpeg/1280px-Caspar_David_Friedrich_-_Wanderer_above_the_Sea_of_Fog.jpeg', ratio: 1.283 },
+      // Frontwand (zwei Bilder) — Querformate, dort ist mehr Breite je Bild
+      { title: 'Die große Welle vor Kanagawa', artist: 'Katsushika Hokusai, um 1831', url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0a/The_Great_Wave_off_Kanagawa.jpg/1280px-The_Great_Wave_off_Kanagawa.jpg', ratio: 0.69 },
+      { title: 'Die letzte Fahrt der Temeraire', artist: 'William Turner, 1839', url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/30/The_Fighting_Temeraire%2C_JMW_Turner%2C_National_Gallery.jpg/1280px-The_Fighting_Temeraire%2C_JMW_Turner%2C_National_Gallery.jpg', ratio: 0.743 },
     ]
   },
   {
@@ -165,9 +173,13 @@ const ROOMS = [
     accent: 0x3a3320,      // dunkles Gold
     floor: 0xf4e8d2,
     paintings: [
-      { title: 'Der Kuss', artist: 'Gustav Klimt, 1908', url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/40/The_Kiss_-_Gustav_Klimt_-_Google_Cultural_Institute.jpg/3840px-The_Kiss_-_Gustav_Klimt_-_Google_Cultural_Institute.jpg', ratio: 1.003 },
-      { title: 'Der Schrei', artist: 'Edvard Munch, 1893', url: 'https://upload.wikimedia.org/wikipedia/commons/f/f4/The_Scream.jpg', ratio: 1.274 },
-      { title: 'Komposition VIII', artist: 'Wassily Kandinsky, 1923', url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/Kandinsky_-_Composition_8%2C_July_1923.jpg/3840px-Kandinsky_-_Composition_8%2C_July_1923.jpg', ratio: 0.728 },
+      // Rückwand (drei Bilder)
+      { title: 'Der Kuss', artist: 'Gustav Klimt, 1908', url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/40/The_Kiss_-_Gustav_Klimt_-_Google_Cultural_Institute.jpg/1280px-The_Kiss_-_Gustav_Klimt_-_Google_Cultural_Institute.jpg', ratio: 1.003 },
+      { title: 'Der Schrei', artist: 'Edvard Munch, 1893', url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/The_Scream.jpg/1280px-The_Scream.jpg', ratio: 1.274 },
+      { title: 'Blaues Pferd I', artist: 'Franz Marc, 1911', url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Marc%2C_Franz_-_Blue_Horse_I_-_Google_Art_Project.jpg/1280px-Marc%2C_Franz_-_Blue_Horse_I_-_Google_Art_Project.jpg', ratio: 1.335 },
+      // Frontwand (zwei Bilder)
+      { title: 'Komposition VIII', artist: 'Wassily Kandinsky, 1923', url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/80/Kandinsky_-_Composition_8%2C_July_1923.jpg/1280px-Kandinsky_-_Composition_8%2C_July_1923.jpg', ratio: 0.728 },
+      { title: 'Komposition II in Rot, Blau und Gelb', artist: 'Piet Mondrian, 1930', url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a4/Piet_Mondriaan%2C_1930_-_Mondrian_Composition_II_in_Red%2C_Blue%2C_and_Yellow.jpg/1280px-Piet_Mondriaan%2C_1930_-_Mondrian_Composition_II_in_Red%2C_Blue%2C_and_Yellow.jpg', ratio: 1.014 },
     ]
   },
 ];
@@ -384,20 +396,16 @@ function buildPainting(def, maxW, maxH) {
   // Strahler wie im Museum: enger, weicher Kegel dicht an der Wand statt
   // Flutlicht — sonst überstrahlt der Lichtfleck Bild und Wand.
   // Feste Höhe relativ zur Decke (nicht von h abhängig), damit hohe Hochformate die Leuchte nicht durch die Decke schieben
-  const spot = new THREE.SpotLight(0xfff4e0, 11, 13, THREE.MathUtils.degToRad(30), 0.8, 1.25);
+  // Genau ein Strahler je Bild: bei 15 Gemälden zählt jede Lichtquelle doppelt,
+  // weil der Forward-Renderer sie für jedes Fragment durchläuft. Der frühere
+  // zweite Streulichtkegel entfällt — seit die Leinwand emissiv ist, trug er
+  // kaum bei; die weiche Kante liefert stattdessen die höhere Penumbra.
+  const spot = new THREE.SpotLight(0xfff4e0, 13, 13, THREE.MathUtils.degToRad(32), 0.92, 1.25);
   spot.position.set(0, ROOM_H * 0.5 - 0.5, 1.7);
   spot.target = canvasMesh;
   spot.castShadow = false;
   group.add(spot);
   group.add(spot.target);
-
-  // sehr dezenter Streulichtkegel, damit die Ränder nicht hart abreißen
-  const fill = new THREE.SpotLight(0xfff4e0, 3.5, 9, THREE.MathUtils.degToRad(48), 0.95, 1.4);
-  fill.position.set(0, ROOM_H * 0.5 - 1.5, 1.4);
-  fill.target = canvasMesh;
-  fill.castShadow = false;
-  group.add(fill);
-  group.add(fill.target);
 
   return group;
 }
@@ -547,36 +555,28 @@ function buildRoom(index, def) {
   sign.position.set(ROOM_W / 2, ROOM_H - 0.9, WALL_T + 0.02);
   group.add(sign);
 
-  // Gemälde platzieren: 2 an der Rückwand, 1 an der Frontwand
-  const back = def.paintings;
-  const positionsBack = [ROOM_W * 0.28, ROOM_W * 0.72];
-  [0, 1].forEach((i) => {
-    const p = buildPainting(back[i], PAINT_MAX_W_SIDE, PAINT_MAX_H);
-    p.position.set(positionsBack[i], ROOM_H * 0.5, ROOM_D - WALL_T - 0.02);
-    p.rotation.y = Math.PI;
+  // Gemälde platzieren: drei an der Rückwand, zwei an der Frontwand
+  function placePainting(pdef, x, onBackWall, maxW) {
+    const z = onBackWall ? ROOM_D - WALL_T - 0.02 : WALL_T + 0.02;
+    const p = buildPainting(pdef, maxW, PAINT_MAX_H);
+    p.position.set(x, ROOM_H * 0.5, z);
+    if (onBackWall) p.rotation.y = Math.PI;
     group.add(p);
     paintingHotspots.push({
       mesh: p.userData.canvasMesh,
-      worldPos: new THREE.Vector3(originX + p.position.x, p.position.y, p.position.z),
-      normal: new THREE.Vector3(0, 0, -1),
+      worldPos: new THREE.Vector3(originX + x, p.position.y, z),
+      normal: new THREE.Vector3(0, 0, onBackWall ? -1 : 1),
       width: p.userData.width,
       height: p.userData.height,
-      title: back[i].title,
-      artist: back[i].artist,
+      title: pdef.title,
+      artist: pdef.artist,
     });
-  });
-  const front = buildPainting(back[2], PAINT_MAX_W_FRONT, PAINT_MAX_H);
-  front.position.set(ROOM_W / 2, ROOM_H * 0.5, WALL_T + 0.02);
-  group.add(front);
-  paintingHotspots.push({
-    mesh: front.userData.canvasMesh,
-    worldPos: new THREE.Vector3(originX + front.position.x, front.position.y, front.position.z),
-    normal: new THREE.Vector3(0, 0, 1),
-    width: front.userData.width,
-    height: front.userData.height,
-    title: back[2].title,
-    artist: back[2].artist,
-  });
+  }
+
+  const BACK_X = [0.19, 0.5, 0.81];
+  const FRONT_X = [0.3, 0.7];
+  BACK_X.forEach((f, i) => placePainting(def.paintings[i], ROOM_W * f, true, PAINT_MAX_W_BACK));
+  FRONT_X.forEach((f, i) => placePainting(def.paintings[BACK_X.length + i], ROOM_W * f, false, PAINT_MAX_W_FRONT));
 
   scene.add(group);
 }
