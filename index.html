@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Galerie der Meister — begehbares 3D-Museum</title>
-<meta name="description" content="Ein begehbares 3D-Museum im Browser: drei Säle, fünfzehn Meisterwerke von Leonardo bis Kandinsky. Ziehen zum Umsehen, klicken zum Gehen — ohne Installation.">
+<meta name="description" content="Ein begehbares 3D-Museum im Browser: drei Säle, dreiundzwanzig Meisterwerke von Leonardo bis Kandinsky. Ziehen zum Umsehen, klicken zum Gehen — ohne Installation.">
 <link rel="canonical" href="https://helmutqualtinger.github.io/Museum3d/">
 <meta name="theme-color" content="#0a0806">
 
@@ -14,7 +14,7 @@
 <meta property="og:site_name" content="Galerie der Meister">
 <meta property="og:locale" content="de_DE">
 <meta property="og:title" content="Galerie der Meister — begehbares 3D-Museum">
-<meta property="og:description" content="Drei Säle, fünfzehn Meisterwerke von Leonardo bis Kandinsky. Ziehen zum Umsehen, klicken zum Gehen — direkt im Browser, ohne Installation.">
+<meta property="og:description" content="Drei Säle, dreiundzwanzig Meisterwerke von Leonardo bis Kandinsky. Ziehen zum Umsehen, klicken zum Gehen — direkt im Browser, ohne Installation.">
 <meta property="og:url" content="https://helmutqualtinger.github.io/Museum3d/">
 <meta property="og:image" content="https://helmutqualtinger.github.io/Museum3d/docs/og-image.jpg">
 <meta property="og:image:type" content="image/jpeg">
@@ -24,7 +24,7 @@
 
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Galerie der Meister — begehbares 3D-Museum">
-<meta name="twitter:description" content="Drei Säle, fünfzehn Meisterwerke von Leonardo bis Kandinsky. Ziehen zum Umsehen, klicken zum Gehen — direkt im Browser.">
+<meta name="twitter:description" content="Drei Säle, dreiundzwanzig Meisterwerke von Leonardo bis Kandinsky. Ziehen zum Umsehen, klicken zum Gehen — direkt im Browser.">
 <meta name="twitter:image" content="https://helmutqualtinger.github.io/Museum3d/docs/og-image.jpg">
 <meta name="twitter:image:alt" content="Blick durch den Saal Porträt mit Rembrandts Selbstbildnis, durch einen breiten Durchgang in den Saal Landschaft.">
 
@@ -113,7 +113,7 @@
 import * as THREE from 'three';
 
 /* ---------------------------------------------------------------
-   Sammlung: drei Säle, drei Genres, fünfzehn Meisterwerke
+   Sammlung: drei Säle, drei Genres, dreiundzwanzig Meisterwerke
 --------------------------------------------------------------- */
 const ROOM_W = 16;   // Breite (X) je Saal
 const ROOM_D = 14;   // Tiefe (Z)
@@ -130,6 +130,7 @@ const DOOR_H = 4.8;
 const PAINT_MAX_H = 3.5;
 const PAINT_MAX_W_BACK = 3.8;   // Rückwand: drei Bilder nebeneinander
 const PAINT_MAX_W_FRONT = 4.2;  // Frontwand: zwei Bilder, etwas mehr Platz je Bild
+const PAINT_MAX_W_DIVIDER = 3.0; // Trennwand-Segment neben dem Durchgang: schmaler, nur ein Bild je Seite
 
 // ratio = Höhe/Breite des Originalbilds; liefert die größte Größe, die in die Box passt
 function fitPaintingSize(ratio, maxW, maxH) {
@@ -142,6 +143,7 @@ const ROOMS = [
   {
     name: 'Saal I — Porträt',
     accent: 0x6e2b2b,      // gedämpftes Rot
+    bench: 0xa04a42,       // Polster: warmes Terrakotta
     // floor tönt die Dielentextur nur noch leicht ein (multipliziert), daher hell halten
     floor: 0xf2e6d4,
     paintings: [
@@ -157,6 +159,7 @@ const ROOMS = [
   {
     name: 'Saal II — Landschaft',
     accent: 0x2f4a3d,      // Salbeigrün
+    bench: 0x4a7d68,       // Polster: kräftiges Grün
     floor: 0xece2d2,
     paintings: [
       // Rückwand (drei Bilder)
@@ -171,6 +174,7 @@ const ROOMS = [
   {
     name: 'Saal III — Moderne',
     accent: 0x3a3320,      // dunkles Gold
+    bench: 0xb98f36,       // Polster: Ocker/Gold
     floor: 0xf4e8d2,
     paintings: [
       // Rückwand (drei Bilder)
@@ -183,6 +187,35 @@ const ROOMS = [
     ]
   },
 ];
+
+// Zusätzliche Gemälde an den beiden Kopfwänden (äußere Stirnwände an den Enden
+// der Saalflucht, bei Raumindex 0 und 2) — thematisch zum jeweiligen Saal passend
+const HEAD_WALL_PAINTINGS = {
+  0: [
+    { title: 'Bildnis Adele Bloch-Bauer I', artist: 'Gustav Klimt, 1907', url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/18/Gustav_Klimt%2C_1907%2C_Adele_Bloch-Bauer_I%2C_Neue_Galerie_New_York.jpg/1280px-Gustav_Klimt%2C_1907%2C_Adele_Bloch-Bauer_I%2C_Neue_Galerie_New_York.jpg', ratio: 1.0 },
+    { title: 'Selbstbildnis im Pelzrock', artist: 'Albrecht Dürer, 1500', url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/dc/Albrecht_D%C3%BCrer_-_1500_self-portrait_%28High_resolution_and_detail%29.jpg/1280px-Albrecht_D%C3%BCrer_-_1500_self-portrait_%28High_resolution_and_detail%29.jpg', ratio: 1.383 },
+  ],
+  2: [
+    { title: 'Der Tanz', artist: 'Henri Matisse, 1910', url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/df/Henri_Matisse_-_Dance_1910.jpg/1280px-Henri_Matisse_-_Dance_1910.jpg', ratio: 0.659 },
+    { title: 'Senecio', artist: 'Paul Klee, 1922', url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/3f/Paul_Klee%2C_1922%2C_Senecio%2C_oil_on_gauze%2C_40.3_%C3%97_37.4_cm%2C_Kunstmuseum_Basel.jpg/1280px-Paul_Klee%2C_1922%2C_Senecio%2C_oil_on_gauze%2C_40.3_%C3%97_37.4_cm%2C_Kunstmuseum_Basel.jpg', ratio: 1.09 },
+  ],
+};
+
+// Zusätzliche Gemälde an den Trennwänden zwischen den Sälen — je Wandsegment
+// (links/rechts vom Durchgang) genau eine Seite bespielt, damit die
+// Trennwand nicht doppelt so viele Strahler wie eine Saalwand braucht.
+// segIndex 0 = vorderes Segment (Richtung Frontwand), 1 = hinteres (Richtung Rückwand).
+// face: 1 = Wandnormale zeigt +X (in den Saal rechts der Wand), -1 = -X (Saal links)
+const DIVIDER_PAINTINGS = {
+  16: [ // zwischen Saal I (Porträt) und Saal II (Landschaft)
+    { segIndex: 0, face: -1, def: { title: 'Whistlers Mutter', artist: 'James McNeill Whistler, 1871', url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fb/James_Abbott_McNeill_Whistler_-_Portrait_of_the_Artist%27s_Mother_-_Google_Art_Project.jpg/1280px-James_Abbott_McNeill_Whistler_-_Portrait_of_the_Artist%27s_Mother_-_Google_Art_Project.jpg', ratio: 0.887 } },
+    { segIndex: 1, face: 1, def: { title: 'Der Seerosenteich', artist: 'Claude Monet, 1899', url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Claude_Monet%2C_The_Water-Lily_Pond_%28National_Gallery%2C_London%29.jpg/1280px-Claude_Monet%2C_The_Water-Lily_Pond_%28National_Gallery%2C_London%29.jpg', ratio: 0.97 } },
+  ],
+  32: [ // zwischen Saal II (Landschaft) und Saal III (Moderne)
+    { segIndex: 0, face: -1, def: { title: 'Der Heuwagen', artist: 'John Constable, 1821', url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/John_Constable_-_The_Hay_Wain_%281821%29.jpg/1280px-John_Constable_-_The_Hay_Wain_%281821%29.jpg', ratio: 0.69 } },
+    { segIndex: 1, face: 1, def: { title: 'Der Traum', artist: 'Henri Rousseau, 1910', url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/eb/Henri_Rousseau_-_Le_R%C3%AAve_-_Google_Art_Project.jpg/1280px-Henri_Rousseau_-_Le_R%C3%AAve_-_Google_Art_Project.jpg', ratio: 0.681 } },
+  ],
+};
 
 /* ---------------------------------------------------------------
    Grundgerüst
@@ -396,7 +429,7 @@ function buildPainting(def, maxW, maxH) {
   // Strahler wie im Museum: enger, weicher Kegel dicht an der Wand statt
   // Flutlicht — sonst überstrahlt der Lichtfleck Bild und Wand.
   // Feste Höhe relativ zur Decke (nicht von h abhängig), damit hohe Hochformate die Leuchte nicht durch die Decke schieben
-  // Genau ein Strahler je Bild: bei 15 Gemälden zählt jede Lichtquelle doppelt,
+  // Genau ein Strahler je Bild: bei 23 Gemälden zählt jede Lichtquelle doppelt,
   // weil der Forward-Renderer sie für jedes Fragment durchläuft. Der frühere
   // zweite Streulichtkegel entfällt — seit die Leinwand emissiv ist, trug er
   // kaum bei; die weiche Kante liefert stattdessen die höhere Penumbra.
@@ -406,6 +439,41 @@ function buildPainting(def, maxW, maxH) {
   spot.castShadow = false;
   group.add(spot);
   group.add(spot.target);
+
+  return group;
+}
+
+/* ---------------------------------------------------------------
+   Sitzbank in der Saalmitte
+--------------------------------------------------------------- */
+const BENCH_L = 2.6;    // Länge (X) — längs zu den Bilderwänden
+const BENCH_D = 0.72;   // Tiefe (Z)
+const BENCH_H = 0.46;   // Sitzhöhe
+const SEAT_T = 0.16;    // Polsterdicke
+
+function buildBench(color) {
+  const group = new THREE.Group();
+
+  // Polster: matt, damit die Deckenlichter keinen Glanzfleck darauf setzen
+  const seat = new THREE.Mesh(
+    new THREE.BoxGeometry(BENCH_L, SEAT_T, BENCH_D),
+    new THREE.MeshStandardMaterial({ color, roughness: 0.85, metalness: 0 })
+  );
+  seat.position.y = BENCH_H - SEAT_T / 2;
+  group.add(seat);
+
+  // Zarge und Beine aus dunklem Holz
+  const woodMat = new THREE.MeshStandardMaterial({ color: 0x2e241a, roughness: 0.7, metalness: 0 });
+  const rail = new THREE.Mesh(new THREE.BoxGeometry(BENCH_L - 0.1, 0.06, BENCH_D - 0.1), woodMat);
+  rail.position.y = BENCH_H - SEAT_T - 0.03;
+  group.add(rail);
+
+  const legX = BENCH_L / 2 - 0.18, legZ = BENCH_D / 2 - 0.14;
+  [[-legX, -legZ], [legX, -legZ], [-legX, legZ], [legX, legZ]].forEach(([x, z]) => {
+    const leg = new THREE.Mesh(new THREE.BoxGeometry(0.08, BENCH_H - SEAT_T - 0.06, 0.08), woodMat);
+    leg.position.set(x, (BENCH_H - SEAT_T - 0.06) / 2, z);
+    group.add(leg);
+  });
 
   return group;
 }
@@ -489,6 +557,26 @@ function buildRoom(index, def) {
   addCollider(originX + ROOM_W / 2, 0, ROOM_W, WALL_T * 2);
   addCollider(originX + ROOM_W / 2, ROOM_D, ROOM_W, WALL_T * 2);
 
+  // Gemälde an einer X-normalen Wand (Kopf- oder Trennwand) aufhängen — die
+  // Rückwand-/Frontwand-Logik in placePainting geht von einer Z-normalen
+  // Wand aus, deshalb ein eigener Zweig mit Rotation um 90°/-90°.
+  function placePaintingOnSideWall(pdef, xLocal, z, faceDir, maxW, standoff) {
+    const x = xLocal + faceDir * standoff;
+    const p = buildPainting(pdef, maxW, PAINT_MAX_H);
+    p.position.set(x, ROOM_H * 0.5, z);
+    p.rotation.y = faceDir === 1 ? Math.PI / 2 : -Math.PI / 2;
+    group.add(p);
+    paintingHotspots.push({
+      mesh: p.userData.canvasMesh,
+      worldPos: new THREE.Vector3(originX + x, p.position.y, z),
+      normal: new THREE.Vector3(faceDir, 0, 0),
+      width: p.userData.width,
+      height: p.userData.height,
+      title: pdef.title,
+      artist: pdef.artist,
+    });
+  }
+
   // Seitenwand: außen geschlossen, zwischen zwei Sälen eine Wand mit breitem Durchgang
   function buildSideWall(xLocal, hasDoor) {
     if (!hasDoor) {
@@ -499,6 +587,16 @@ function buildRoom(index, def) {
       group.add(wall);
       occluders.push(wall);
       addCollider(originX + xLocal, ROOM_D / 2, WALL_T * 2, ROOM_D);
+
+      // Kopfwand: hier ist noch Platz für zwei weitere Gemälde
+      const headPaintings = HEAD_WALL_PAINTINGS[index];
+      if (headPaintings) {
+        const faceDir = xLocal === 0 ? 1 : -1;
+        const HEAD_Z = [0.3, 0.7];
+        headPaintings.forEach((pdef, i) => {
+          placePaintingOnSideWall(pdef, xLocal, ROOM_D * HEAD_Z[i], faceDir, PAINT_MAX_W_FRONT, WALL_T + 0.02);
+        });
+      }
       return;
     }
 
@@ -543,6 +641,15 @@ function buildRoom(index, def) {
     );
     lintelTrim.position.set(xLocal, DOOR_H, ROOM_D / 2);
     group.add(lintelTrim);
+
+    // Trennwand: je Segment eine Seite mit einem Gemälde bespielt
+    const dividerPaintings = DIVIDER_PAINTINGS[originX + xLocal];
+    if (dividerPaintings) {
+      const segCenters = [segD / 2, ROOM_D - segD / 2];
+      dividerPaintings.forEach(({ segIndex, face, def }) => {
+        placePaintingOnSideWall(def, xLocal, segCenters[segIndex], face, PAINT_MAX_W_DIVIDER, WALL_T / 2 + 0.02);
+      });
+    }
   }
   buildSideWall(0, index > 0);
   buildSideWall(ROOM_W, index < 2);
@@ -572,6 +679,12 @@ function buildRoom(index, def) {
       artist: pdef.artist,
     });
   }
+
+  // Bank in der Saalmitte, quer zur Laufrichtung — mit eigenem Collider
+  const bench = buildBench(def.bench);
+  bench.position.set(ROOM_W / 2, 0, ROOM_D / 2);
+  group.add(bench);
+  addCollider(originX + ROOM_W / 2, ROOM_D / 2, BENCH_L, BENCH_D);
 
   const BACK_X = [0.19, 0.5, 0.81];
   const FRONT_X = [0.3, 0.7];
@@ -714,7 +827,15 @@ function enterFocus(spot, keepSavedPos) {
     focusState.savedQuat.copy(camera.quaternion);
   }
 
-  const dist = THREE.MathUtils.clamp(Math.max(spot.width, spot.height) * 1.05, 1.7, 4.6);
+  // Abstand aus dem Kamera-FOV ableiten statt aus einem festen Faktor, sonst
+  // füllt das Bild den Bildschirm nur zufällig — je nach Seitenverhältnis von
+  // Bild und Fenster blieb sonst viel Wand sichtbar ("contain"-Fit: der
+  // Abstand ergibt sich aus der Dimension, die den Rahmen zuerst berührt).
+  const halfV = Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2);
+  const halfH = halfV * camera.aspect;
+  const distForHeight = spot.height / 2 / halfV;
+  const distForWidth = spot.width / 2 / halfH;
+  const dist = THREE.MathUtils.clamp(Math.max(distForHeight, distForWidth) * 1.06, 1.0, 5.5);
   const target = spot.worldPos.clone().addScaledVector(spot.normal, dist);
   target.y = THREE.MathUtils.clamp(target.y, 1.1, ROOM_H - 0.6);
 
