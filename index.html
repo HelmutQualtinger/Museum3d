@@ -732,6 +732,53 @@ function buildRoom(index, def) {
 
 ROOMS.forEach((def, i) => buildRoom(i, def));
 
+// Lichter je Saal: Der Forward-Renderer wertet sonst in jedem Pixel alle 34
+// Lichter aus, obwohl die Strahler der Nachbarsäle hinter einer Wand stehen.
+// Jedes beleuchtete Material bekommt deshalb nur die Lichter der Säle, die es
+// berührt — eine Trennwand beide, alles andere nur den eigenen — plus die
+// globale Grundbeleuchtung. Der Saal ergibt sich aus der Welt-x-Position.
+function assignRoomLights() {
+  scene.updateMatrixWorld(true);
+  const roomOf = (x) => THREE.MathUtils.clamp(Math.floor(x / ROOM_W), 0, ROOMS.length - 1);
+  const globalLights = [];
+  const roomLights = ROOMS.map(() => []);
+  const p = new THREE.Vector3();
+  scene.traverse((o) => {
+    if (!o.isLight) return;
+    if (o.isSpotLight || o.isPointLight) roomLights[roomOf(o.getWorldPosition(p).x)].push(o);
+    else globalLights.push(o);
+  });
+
+  const lightsNodes = new Map();
+  const materials = new Map();
+  const box = new THREE.Box3();
+  scene.traverse((o) => {
+    if (!o.isMesh || !o.material.isMeshStandardMaterial) return;
+    box.setFromObject(o);
+    const a = roomOf(box.min.x + 0.01), b = roomOf(box.max.x - 0.01);
+    const from = Math.min(a, b), to = Math.max(a, b);
+    const key = `${from}-${to}`;
+    if (!lightsNodes.has(key)) {
+      const ls = [...globalLights];
+      for (let r = from; r <= to; r++) ls.push(...roomLights[r]);
+      lightsNodes.set(key, THREE.TSL.lights(ls));
+    }
+    // Geteilte Materialien (Zierleisten, Decke …) je Saalgruppe einmal klonen
+    const matKey = o.material.uuid + key;
+    let m = materials.get(matKey);
+    if (!m) {
+      m = o.material.clone();
+      m.lightsNode = lightsNodes.get(key);
+      // Der Shader-Cache unterscheidet lightsNode nicht — ohne eigenen Schlüssel
+      // bekämen gleich aussehende Materialien verschiedener Säle denselben Shader
+      m.customProgramCacheKey = () => 'saal' + key;
+      materials.set(matKey, m);
+    }
+    o.material = m;
+  });
+}
+assignRoomLights();
+
 // Außenwände an den Enden des Gebäudes
 addCollider(-WALL_T / 2, ROOM_D / 2, WALL_T, ROOM_D);
 addCollider(TOTAL_W + WALL_T / 2, ROOM_D / 2, WALL_T, ROOM_D);
