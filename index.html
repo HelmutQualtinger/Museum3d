@@ -274,6 +274,9 @@ const hiResLoader = new THREE.TextureLoader();
 // Fassung und erst in der Nahansicht eine große (Commons-Standardbreiten).
 const LO_RES_PX = 500;
 const HI_RES_PX = 1920;
+// Detailstufe beim starken Hineinzoomen. Die längere Seite bleibt ≤ 4096 px —
+// mehr erlauben ältere Handy-GPUs nicht als Texturgröße.
+const detailPx = (ratio) => (ratio > 1 ? 2560 : 3840);
 const sizedUrl = (url, px) => url.replace('/1280px-', `/${px}px-`);
 
 function preparePaintingTexture(tex) {
@@ -431,6 +434,7 @@ function buildPainting(def, maxW, maxH) {
   group.add(canvasMesh);
   canvasMesh.userData.url = def.url;
   canvasMesh.userData.loTex = tex;
+  canvasMesh.userData.ratio = def.ratio;
   group.userData.canvasMesh = canvasMesh;
   group.userData.width = width;
   group.userData.height = h;
@@ -891,7 +895,7 @@ overlay.addEventListener('click', (e) => { if (e.target === overlay) closeMenu()
    Nahansicht: Doppelklick auf ein Gemälde zoomt frontal heran
 --------------------------------------------------------------- */
 const HUD_DEFAULT = 'Ziehen: umsehen · Klick auf den Boden: dorthin gehen · Klick auf ein Bild: Nahansicht · WASD / Scrollrad: bewegen';
-const HUD_FOCUS = 'Scrollrad, S oder zwei Finger: herauszoomen · Klick daneben oder Esc: zurück in den Saal';
+const HUD_FOCUS = 'Scrollrad, W / S oder zwei Finger: zoomen · Ziehen: verschieben · Klick daneben oder Esc: zurück in den Saal';
 const raycaster = new THREE.Raycaster();
 const focusState = {
   active: false, animating: false, t: 0, duration: 0.55,
@@ -899,8 +903,11 @@ const focusState = {
   fromQuat: new THREE.Quaternion(), toQuat: new THREE.Quaternion(),
   savedPos: new THREE.Vector3(), savedQuat: new THREE.Quaternion(),
   currentSpot: null,
-  // 0 = Bild füllt den Schirm, 1 = herausgezoomt, Schild darunter lesbar
+  // 0 = Bild füllt den Schirm, 1 = herausgezoomt, Schild darunter lesbar,
+  // ZOOM_MIN = vierfache Vergrößerung für Details
   zoom: 0, zoomTarget: 0,
+  // Blickpunkt auf dem Bild (Meter ab Bildmitte, x nach rechts, y nach oben)
+  pan: new THREE.Vector2(), panTarget: new THREE.Vector2(),
 };
 const _lookDummy = new THREE.PerspectiveCamera(); // Camera.lookAt() uses eye→target (-Z forward), unlike plain Object3D
 function lookAtQuaternion(fromPos, toPos) {
@@ -912,18 +919,25 @@ function lookAtQuaternion(fromPos, toPos) {
 // Hochauflösende Textur nur für das Bild in der Nahansicht; höchstens eine
 // zur Zeit, sonst wüchse der GPU-Speicher mit jedem betrachteten Bild.
 let hiResSpot = null;
+let hiResPx = 0;
 function setPaintingTexture(mesh, tex) {
   mesh.material.map = tex;
   mesh.material.emissiveMap = tex;
   needsRender = true;
 }
-function showHiRes(spot) {
-  if (hiResSpot === spot) return;
-  dropHiRes();
+// Lädt das Bild in der Breite px; eine kleinere Stufe wird ersetzt, eine
+// größere bleibt (kein Zurückstufen beim Herauszoomen in derselben Ansicht).
+function showHiRes(spot, px = HI_RES_PX) {
+  if (hiResSpot === spot && hiResPx >= px) return;
+  if (hiResSpot !== spot) dropHiRes();
   hiResSpot = spot;
-  hiResLoader.load(sizedUrl(spot.mesh.userData.url, HI_RES_PX), (tex) => {
-    if (hiResSpot !== spot) { tex.dispose(); return; } // inzwischen weitergegangen
+  hiResPx = px;
+  hiResLoader.load(sizedUrl(spot.mesh.userData.url, px), (tex) => {
+    // inzwischen weitergegangen oder schon eine größere Stufe angefordert
+    if (hiResSpot !== spot || hiResPx !== px) { tex.dispose(); return; }
+    const old = spot.mesh.material.map;
     setPaintingTexture(spot.mesh, preparePaintingTexture(tex));
+    if (old !== spot.mesh.userData.loTex) old.dispose();
   });
 }
 function dropHiRes() {
@@ -935,6 +949,7 @@ function dropHiRes() {
     hi.dispose();
   }
   hiResSpot = null;
+  hiResPx = 0;
 }
 
 // Kameraposition und Blickpunkt der Nahansicht. zoom 0 rahmt nur das Bild,
@@ -943,20 +958,53 @@ function dropHiRes() {
 // füllt das Bild den Bildschirm nur zufällig — je nach Seitenverhältnis von
 // Bild und Fenster blieb sonst viel Wand sichtbar ("contain"-Fit: der
 // Abstand ergibt sich aus der Dimension, die den Rahmen zuerst berührt).
-function focusPose(spot, zoom, outPos, outLook) {
+// Negatives zoom fährt näher heran (ZOOM_MIN = vierfach); pan verschiebt den
+// Blickpunkt auf dem Bild und wird hier so geklemmt, dass der Ausschnitt nicht
+// über den Bildrand hinausläuft — beim Zurückzoomen kehrt er so zur Mitte zurück.
+const ZOOM_MIN = -1;
+const focusDistScale = (zoom) => Math.pow(4, Math.min(zoom, 0));
+function focusPose(spot, zoom, pan, outPos, outLook) {
   const halfV = Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2);
   const halfH = halfV * camera.aspect;
   const top = spot.height / 2;
-  const bottom = -THREE.MathUtils.lerp(spot.height / 2, spot.placardDrop, zoom);
+  const bottom = -THREE.MathUtils.lerp(spot.height / 2, spot.placardDrop, Math.max(zoom, 0));
   const distForHeight = (top - bottom) / 2 / halfV;
   const distForWidth = spot.width / 2 / halfH;
-  const dist = THREE.MathUtils.clamp(Math.max(distForHeight, distForWidth) * 1.06, 1.0, 8);
+  const dist = THREE.MathUtils.clamp(Math.max(distForHeight, distForWidth) * 1.06, 1.0, 8) * focusDistScale(zoom);
+  const maxX = Math.max(0, spot.width / 2 - dist * halfH);
+  const maxY = Math.max(0, spot.height / 2 - dist * halfV);
+  pan.x = THREE.MathUtils.clamp(pan.x, -maxX, maxX);
+  pan.y = THREE.MathUtils.clamp(pan.y, -maxY, maxY);
   outLook.copy(spot.worldPos);
-  outLook.y += (top + bottom) / 2;
+  outLook.y += (top + bottom) / 2 + pan.y;
+  // Bild-rechts = oben × Normale
+  outLook.x += spot.normal.z * pan.x;
+  outLook.z -= spot.normal.x * pan.x;
   outPos.copy(outLook).addScaledVector(spot.normal, dist);
   outPos.y = THREE.MathUtils.clamp(outPos.y, 1.1, ROOM_H - 0.6);
+  return dist;
 }
 const _focusLook = new THREE.Vector3();
+const _focusPos = new THREE.Vector3();
+const _focusPlane = new THREE.Plane();
+const _focusHit = new THREE.Vector3();
+
+// Zoomen zum Zeiger hin: der Bildpunkt unter dem Zeiger bleibt stehen
+function zoomFocusAt(newZoom, clientX, clientY) {
+  const spot = focusState.currentSpot;
+  const z0 = focusState.zoomTarget;
+  const z1 = THREE.MathUtils.clamp(newZoom, ZOOM_MIN, 1);
+  focusState.zoomTarget = z1;
+  raycaster.setFromCamera(eventToNDC({ clientX, clientY }), camera);
+  _focusPlane.setFromNormalAndCoplanarPoint(spot.normal, spot.worldPos);
+  if (!raycaster.ray.intersectPlane(_focusPlane, _focusHit)) return;
+  _focusHit.sub(spot.worldPos);
+  const cx = _focusHit.x * spot.normal.z - _focusHit.z * spot.normal.x;
+  const cy = _focusHit.y;
+  const k = focusDistScale(z1) / focusDistScale(z0);
+  const p = focusState.panTarget;
+  p.set(cx - (cx - p.x) * k, cy - (cy - p.y) * k);
+}
 
 function enterFocus(spot, keepSavedPos) {
   showHiRes(spot);
@@ -966,8 +1014,10 @@ function enterFocus(spot, keepSavedPos) {
   }
 
   focusState.zoom = focusState.zoomTarget = 0;
+  focusState.pan.set(0, 0);
+  focusState.panTarget.set(0, 0);
   const target = new THREE.Vector3();
-  focusPose(spot, 0, target, _focusLook);
+  focusPose(spot, 0, focusState.pan, target, _focusLook);
 
   focusState.fromPos.copy(camera.position);
   focusState.toPos.copy(target);
@@ -1149,6 +1199,14 @@ function pointerMove(x, y) {
   lastX = x; lastY = y;
   if (Math.abs(dx) + Math.abs(dy) > DRAG_THRESHOLD) dragMoved = true;
   if (canNavigate()) applyLook(dx, dy);
+  // Nahansicht: Ziehen verschiebt das Bild unter dem Zeiger ("Griff" wie beim Umsehen)
+  else if (focusState.active && !focusState.animating) {
+    const halfV = Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2);
+    const mpp = 2 * camera.position.distanceTo(_focusLook) * halfV / window.innerHeight;
+    focusState.panTarget.x -= dx * mpp;
+    focusState.panTarget.y += dy * mpp;
+    focusState.pan.copy(focusState.panTarget); // direkt folgen, nicht nachziehen
+  }
 }
 
 function pointerUp() {
@@ -1174,10 +1232,10 @@ document.addEventListener('mouseleave', () => setHover(null));
 
 // Scrollrad: vor und zurück in Blickrichtung
 renderer.domElement.addEventListener('wheel', (e) => {
-  // In der Nahansicht zoomt das Rad stufenlos bis zum Schild hinaus
+  // In der Nahansicht zoomt das Rad stufenlos — hinein bis ins Detail, hinaus bis zum Schild
   if (focusState.active && !focusState.animating) {
     e.preventDefault();
-    focusState.zoomTarget = THREE.MathUtils.clamp(focusState.zoomTarget + e.deltaY * 0.0025, 0, 1);
+    zoomFocusAt(focusState.zoomTarget + e.deltaY * 0.0025, e.clientX, e.clientY);
     return;
   }
   if (!canNavigate()) return;
@@ -1198,7 +1256,9 @@ renderer.domElement.addEventListener('touchmove', (e) => {
     e.preventDefault();
     const d = touchDist(e.touches);
     if (focusState.active && !focusState.animating) {
-      focusState.zoomTarget = THREE.MathUtils.clamp(focusState.zoomTarget - (d - pinchDist) * 0.004, 0, 1);
+      const t = e.touches;
+      zoomFocusAt(focusState.zoomTarget - (d - pinchDist) * 0.004,
+        (t[0].clientX + t[1].clientX) / 2, (t[0].clientY + t[1].clientY) / 2);
     }
     pinchDist = d;
     return;
@@ -1246,16 +1306,24 @@ function animate() {
     updateRoomLabel(); // auch beim Hingehen den Saalnamen aktualisieren
   }
 
-  // Zoom in der Nahansicht: S/↓ heraus, W/↑ hinein; Rad und Pinch setzen zoomTarget
+  // Zoom in der Nahansicht: S/↓ heraus, W/↑ hinein (zur Bildschirmmitte);
+  // Rad und Pinch setzen zoomTarget/panTarget zum Zeiger hin, Ziehen verschiebt.
+  // Die Pose wird jeden Frame neu berechnet — gerendert wird trotzdem nur,
+  // wenn sich die Kamera dabei tatsächlich bewegt.
   if (focusState.active && !focusState.animating) {
+    const spot = focusState.currentSpot;
     const kb = (move.back ? 1 : 0) - (move.forward ? 1 : 0);
-    if (kb) focusState.zoomTarget = THREE.MathUtils.clamp(focusState.zoomTarget + kb * dt * 1.5, 0, 1);
-    if (focusState.zoom !== focusState.zoomTarget) {
-      focusState.zoom += (focusState.zoomTarget - focusState.zoom) * Math.min(1, dt * 10);
-      if (Math.abs(focusState.zoomTarget - focusState.zoom) < 0.001) focusState.zoom = focusState.zoomTarget;
-      focusPose(focusState.currentSpot, focusState.zoom, camera.position, _focusLook);
-      camera.quaternion.copy(lookAtQuaternion(camera.position, _focusLook));
-    }
+    if (kb) focusState.zoomTarget = THREE.MathUtils.clamp(focusState.zoomTarget + kb * dt * 1.5, ZOOM_MIN, 1);
+    // ab etwa 1,5-facher Vergrößerung reicht die 1920er-Fassung nicht mehr
+    if (focusState.zoomTarget < -0.3) showHiRes(spot, detailPx(spot.mesh.userData.ratio));
+    focusPose(spot, focusState.zoomTarget, focusState.panTarget, _focusPos, _focusLook); // klemmt panTarget
+    const k = Math.min(1, dt * 10);
+    focusState.zoom += (focusState.zoomTarget - focusState.zoom) * k;
+    if (Math.abs(focusState.zoomTarget - focusState.zoom) < 0.001) focusState.zoom = focusState.zoomTarget;
+    focusState.pan.lerp(focusState.panTarget, k);
+    if (focusState.pan.distanceTo(focusState.panTarget) < 0.0005) focusState.pan.copy(focusState.panTarget);
+    focusPose(spot, focusState.zoom, focusState.pan, camera.position, _focusLook);
+    camera.quaternion.copy(lookAtQuaternion(camera.position, _focusLook));
   }
 
   if (navActive && !focusState.active && !focusState.animating) {
