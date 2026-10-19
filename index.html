@@ -457,6 +457,8 @@ function buildPainting(def, maxW, maxH) {
   placard.position.y = -h / 2 - frameT - 0.32;
   placard.position.z = 0.01;
   group.add(placard);
+  // Abstand Bildmitte → Unterkante des Schilds (plus etwas Luft), für das Herauszoomen
+  group.userData.placardDrop = -placard.position.y + placard.geometry.parameters.height / 2 + 0.08;
 
   // Strahler wie im Museum: enger, weicher Kegel dicht an der Wand statt
   // Flutlicht — sonst überstrahlt der Lichtfleck Bild und Wand.
@@ -604,6 +606,7 @@ function buildRoom(index, def) {
       normal: new THREE.Vector3(faceDir, 0, 0),
       width: p.userData.width,
       height: p.userData.height,
+      placardDrop: p.userData.placardDrop,
       title: pdef.title,
       artist: pdef.artist,
     });
@@ -707,6 +710,7 @@ function buildRoom(index, def) {
       normal: new THREE.Vector3(0, 0, onBackWall ? -1 : 1),
       width: p.userData.width,
       height: p.userData.height,
+      placardDrop: p.userData.placardDrop,
       title: pdef.title,
       artist: pdef.artist,
     });
@@ -840,7 +844,7 @@ overlay.addEventListener('click', (e) => { if (e.target === overlay) closeMenu()
    Nahansicht: Doppelklick auf ein Gemälde zoomt frontal heran
 --------------------------------------------------------------- */
 const HUD_DEFAULT = 'Ziehen: umsehen · Klick auf den Boden: dorthin gehen · Klick auf ein Bild: Nahansicht · WASD / Scrollrad: bewegen';
-const HUD_FOCUS = 'Klick daneben oder Esc: zurück in den Saal';
+const HUD_FOCUS = 'Scrollrad, S oder zwei Finger: herauszoomen · Klick daneben oder Esc: zurück in den Saal';
 const raycaster = new THREE.Raycaster();
 const focusState = {
   active: false, animating: false, t: 0, duration: 0.55,
@@ -848,6 +852,8 @@ const focusState = {
   fromQuat: new THREE.Quaternion(), toQuat: new THREE.Quaternion(),
   savedPos: new THREE.Vector3(), savedQuat: new THREE.Quaternion(),
   currentSpot: null,
+  // 0 = Bild füllt den Schirm, 1 = herausgezoomt, Schild darunter lesbar
+  zoom: 0, zoomTarget: 0,
 };
 const _lookDummy = new THREE.PerspectiveCamera(); // Camera.lookAt() uses eye→target (-Z forward), unlike plain Object3D
 function lookAtQuaternion(fromPos, toPos) {
@@ -884,6 +890,27 @@ function dropHiRes() {
   hiResSpot = null;
 }
 
+// Kameraposition und Blickpunkt der Nahansicht. zoom 0 rahmt nur das Bild,
+// zoom 1 zusätzlich das Schild darunter — der Ausschnitt wächst nach unten.
+// Abstand aus dem Kamera-FOV ableiten statt aus einem festen Faktor, sonst
+// füllt das Bild den Bildschirm nur zufällig — je nach Seitenverhältnis von
+// Bild und Fenster blieb sonst viel Wand sichtbar ("contain"-Fit: der
+// Abstand ergibt sich aus der Dimension, die den Rahmen zuerst berührt).
+function focusPose(spot, zoom, outPos, outLook) {
+  const halfV = Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2);
+  const halfH = halfV * camera.aspect;
+  const top = spot.height / 2;
+  const bottom = -THREE.MathUtils.lerp(spot.height / 2, spot.placardDrop, zoom);
+  const distForHeight = (top - bottom) / 2 / halfV;
+  const distForWidth = spot.width / 2 / halfH;
+  const dist = THREE.MathUtils.clamp(Math.max(distForHeight, distForWidth) * 1.06, 1.0, 8);
+  outLook.copy(spot.worldPos);
+  outLook.y += (top + bottom) / 2;
+  outPos.copy(outLook).addScaledVector(spot.normal, dist);
+  outPos.y = THREE.MathUtils.clamp(outPos.y, 1.1, ROOM_H - 0.6);
+}
+const _focusLook = new THREE.Vector3();
+
 function enterFocus(spot, keepSavedPos) {
   showHiRes(spot);
   if (!keepSavedPos) {
@@ -891,22 +918,14 @@ function enterFocus(spot, keepSavedPos) {
     focusState.savedQuat.copy(camera.quaternion);
   }
 
-  // Abstand aus dem Kamera-FOV ableiten statt aus einem festen Faktor, sonst
-  // füllt das Bild den Bildschirm nur zufällig — je nach Seitenverhältnis von
-  // Bild und Fenster blieb sonst viel Wand sichtbar ("contain"-Fit: der
-  // Abstand ergibt sich aus der Dimension, die den Rahmen zuerst berührt).
-  const halfV = Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2);
-  const halfH = halfV * camera.aspect;
-  const distForHeight = spot.height / 2 / halfV;
-  const distForWidth = spot.width / 2 / halfH;
-  const dist = THREE.MathUtils.clamp(Math.max(distForHeight, distForWidth) * 1.06, 1.0, 5.5);
-  const target = spot.worldPos.clone().addScaledVector(spot.normal, dist);
-  target.y = THREE.MathUtils.clamp(target.y, 1.1, ROOM_H - 0.6);
+  focusState.zoom = focusState.zoomTarget = 0;
+  const target = new THREE.Vector3();
+  focusPose(spot, 0, target, _focusLook);
 
   focusState.fromPos.copy(camera.position);
   focusState.toPos.copy(target);
   focusState.fromQuat.copy(camera.quaternion);
-  focusState.toQuat.copy(lookAtQuaternion(target, spot.worldPos));
+  focusState.toQuat.copy(lookAtQuaternion(target, _focusLook));
 
   focusState.t = 0;
   // Weite Wege (anderer Saal) dauern länger, damit der Wechsel nachvollziehbar bleibt
@@ -1108,16 +1127,35 @@ document.addEventListener('mouseleave', () => setHover(null));
 
 // Scrollrad: vor und zurück in Blickrichtung
 renderer.domElement.addEventListener('wheel', (e) => {
+  // In der Nahansicht zoomt das Rad stufenlos bis zum Schild hinaus
+  if (focusState.active && !focusState.animating) {
+    e.preventDefault();
+    focusState.zoomTarget = THREE.MathUtils.clamp(focusState.zoomTarget + e.deltaY * 0.0025, 0, 1);
+    return;
+  }
   if (!canNavigate()) return;
   e.preventDefault();
   wheelVel = THREE.MathUtils.clamp(wheelVel - Math.sign(e.deltaY) * 4.0, -14, 14);
 }, { passive: false });
 
 // Touch: ein Finger zieht den Blick, ein Tippen wählt aus
+// Zwei Finger in der Nahansicht: auseinander = hinein, zusammen = heraus
+let pinchDist = 0;
+const touchDist = (t) => Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY);
 renderer.domElement.addEventListener('touchstart', (e) => {
   if (e.touches.length === 1) pointerDown(e.touches[0].clientX, e.touches[0].clientY);
+  if (e.touches.length === 2) { pinchDist = touchDist(e.touches); dragMoved = true; } // kein Tippen
 }, { passive: true });
 renderer.domElement.addEventListener('touchmove', (e) => {
+  if (e.touches.length === 2) {
+    e.preventDefault();
+    const d = touchDist(e.touches);
+    if (focusState.active && !focusState.animating) {
+      focusState.zoomTarget = THREE.MathUtils.clamp(focusState.zoomTarget - (d - pinchDist) * 0.004, 0, 1);
+    }
+    pinchDist = d;
+    return;
+  }
   if (e.touches.length !== 1) return;
   e.preventDefault();
   pointerMove(e.touches[0].clientX, e.touches[0].clientY);
@@ -1159,6 +1197,18 @@ function animate() {
       if (!focusState.active) dropHiRes();
     }
     updateRoomLabel(); // auch beim Hingehen den Saalnamen aktualisieren
+  }
+
+  // Zoom in der Nahansicht: S/↓ heraus, W/↑ hinein; Rad und Pinch setzen zoomTarget
+  if (focusState.active && !focusState.animating) {
+    const kb = (move.back ? 1 : 0) - (move.forward ? 1 : 0);
+    if (kb) focusState.zoomTarget = THREE.MathUtils.clamp(focusState.zoomTarget + kb * dt * 1.5, 0, 1);
+    if (focusState.zoom !== focusState.zoomTarget) {
+      focusState.zoom += (focusState.zoomTarget - focusState.zoom) * Math.min(1, dt * 10);
+      if (Math.abs(focusState.zoomTarget - focusState.zoom) < 0.001) focusState.zoom = focusState.zoomTarget;
+      focusPose(focusState.currentSpot, focusState.zoom, camera.position, _focusLook);
+      camera.quaternion.copy(lookAtQuaternion(camera.position, _focusLook));
+    }
   }
 
   if (navActive && !focusState.active && !focusState.animating) {
