@@ -103,8 +103,8 @@
 <script type="importmap">
 {
   "imports": {
-    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
-    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+    "three": "https://cdn.jsdelivr.net/npm/three@0.172.0/build/three.webgpu.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.172.0/examples/jsm/"
   }
 }
 </script>
@@ -227,11 +227,11 @@ scene.fog = new THREE.Fog(0x0a0806, 18, 40);
 const camera = new THREE.PerspectiveCamera(68, window.innerWidth / window.innerHeight, 0.1, 200);
 camera.position.set(ROOM_W / 2, 1.7, ROOM_D - 2.2);
 
-const renderer = new THREE.WebGLRenderer({ antialias: true });
+// WebGPU, wo der Browser es kann; sonst fällt der Renderer selbst auf WebGL 2 zurück.
+// Keine Lichtquelle wirft Schatten — daher keine Shadow-Map.
+const renderer = new THREE.WebGPURenderer({ antialias: true });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.05;
@@ -249,6 +249,22 @@ scene.add(sun);
 --------------------------------------------------------------- */
 const loadingManager = new THREE.LoadingManager();
 const texLoader = new THREE.TextureLoader(loadingManager);
+// Eigener Loader für die Nahansicht — läuft nicht über den Ladebalken
+const hiResLoader = new THREE.TextureLoader();
+
+// Die Daten nennen 1280px-Thumbnails; geladen wird beim Start eine kleine
+// Fassung und erst in der Nahansicht eine große (Commons-Standardbreiten).
+const LO_RES_PX = 500;
+const HI_RES_PX = 1920;
+const sizedUrl = (url, px) => url.replace('/1280px-', `/${px}px-`);
+
+function preparePaintingTexture(tex) {
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.anisotropy = 8;
+  tex.generateMipmaps = true;
+  tex.minFilter = THREE.LinearMipmapLinearFilter;
+  return tex;
+}
 
 function makePlacardTexture(title, artist) {
   const c = document.createElement('canvas');
@@ -377,11 +393,7 @@ function buildPainting(def, maxW, maxH) {
   const group = new THREE.Group();
   const { w: width, h } = fitPaintingSize(def.ratio, maxW, maxH);
 
-  const tex = texLoader.load(def.url);
-  tex.colorSpace = THREE.SRGBColorSpace;
-  tex.anisotropy = 8;
-  tex.generateMipmaps = true;
-  tex.minFilter = THREE.LinearMipmapLinearFilter;
+  const tex = preparePaintingTexture(texLoader.load(sizedUrl(def.url, LO_RES_PX)));
 
   // Ölfarbe auf Leinwand ist matt: hohe Rauheit, damit das Spotlicht keinen
   // breiten Glanzschleier über das Bild legt. Die Emissive-Map trägt die
@@ -399,6 +411,8 @@ function buildPainting(def, maxW, maxH) {
   canvasMesh.castShadow = false;
   canvasMesh.receiveShadow = true;
   group.add(canvasMesh);
+  canvasMesh.userData.url = def.url;
+  canvasMesh.userData.loTex = tex;
   group.userData.canvasMesh = canvasMesh;
   group.userData.width = width;
   group.userData.height = h;
@@ -767,6 +781,7 @@ const backBtn = document.getElementById('backBtn');
 
 let assetsReady = false;
 loadingManager.onProgress = (url, loaded, total) => {
+  needsRender = true; // neu geladene Textur zeigen
   loadFill.style.width = Math.round((loaded / total) * 100) + '%';
 };
 loadingManager.onLoad = () => {
@@ -781,6 +796,7 @@ function closeMenu() {
   overlay.style.display = 'none';
   hud.style.display = 'block';
   navActive = true;
+  needsRender = true; // unter dem Overlay verdeckter Canvas kann leer sein
 }
 function openMenu() {
   overlay.style.display = 'flex';
@@ -795,6 +811,7 @@ function openMenu() {
   }
   focusState.active = false;
   focusState.animating = false;
+  dropHiRes();
   backBtn.style.display = 'none';
   hud.textContent = HUD_DEFAULT;
 }
@@ -821,7 +838,36 @@ function lookAtQuaternion(fromPos, toPos) {
   return _lookDummy.quaternion.clone();
 }
 
+// Hochauflösende Textur nur für das Bild in der Nahansicht; höchstens eine
+// zur Zeit, sonst wüchse der GPU-Speicher mit jedem betrachteten Bild.
+let hiResSpot = null;
+function setPaintingTexture(mesh, tex) {
+  mesh.material.map = tex;
+  mesh.material.emissiveMap = tex;
+  needsRender = true;
+}
+function showHiRes(spot) {
+  if (hiResSpot === spot) return;
+  dropHiRes();
+  hiResSpot = spot;
+  hiResLoader.load(sizedUrl(spot.mesh.userData.url, HI_RES_PX), (tex) => {
+    if (hiResSpot !== spot) { tex.dispose(); return; } // inzwischen weitergegangen
+    setPaintingTexture(spot.mesh, preparePaintingTexture(tex));
+  });
+}
+function dropHiRes() {
+  if (!hiResSpot) return;
+  const mesh = hiResSpot.mesh;
+  const hi = mesh.material.map;
+  if (hi !== mesh.userData.loTex) {
+    setPaintingTexture(mesh, mesh.userData.loTex);
+    hi.dispose();
+  }
+  hiResSpot = null;
+}
+
 function enterFocus(spot, keepSavedPos) {
+  showHiRes(spot);
   if (!keepSavedPos) {
     focusState.savedPos.copy(camera.position);
     focusState.savedQuat.copy(camera.quaternion);
@@ -974,6 +1020,7 @@ window.addEventListener('resize', () => {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
   renderer.setSize(window.innerWidth, window.innerHeight);
+  needsRender = true;
 });
 
 /* ---------------------------------------------------------------
@@ -1069,9 +1116,12 @@ renderer.domElement.addEventListener('touchend', (e) => {
 /* ---------------------------------------------------------------
    Render-Loop
 --------------------------------------------------------------- */
+// Die Szene ist statisch: gerendert wird nur, wenn sich die Kamera bewegt
+// oder needsRender gesetzt ist (Textur geladen, Fenstergröße geändert).
+let needsRender = true;
+const lastCamMatrix = new THREE.Matrix4();
 const clock = new THREE.Clock();
 function animate() {
-  requestAnimationFrame(animate);
   const dt = Math.min(clock.getDelta(), 0.05);
 
   if (focusState.animating) {
@@ -1080,7 +1130,12 @@ function animate() {
     const ease = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
     camera.position.lerpVectors(focusState.fromPos, focusState.toPos, ease);
     camera.quaternion.slerpQuaternions(focusState.fromQuat, focusState.toQuat, ease);
-    if (k >= 1) focusState.animating = false;
+    if (k >= 1) {
+      focusState.animating = false;
+      // erst nach dem Zurückfahren auf die kleine Fassung wechseln — sonst
+      // würde das Bild noch in Großaufnahme sichtbar unscharf
+      if (!focusState.active) dropHiRes();
+    }
     updateRoomLabel(); // auch beim Hingehen den Saalnamen aktualisieren
   }
 
@@ -1117,9 +1172,16 @@ function animate() {
     updateRoomLabel();
   }
 
-  renderer.render(scene, camera);
+  camera.updateMatrixWorld();
+  if (needsRender || !camera.matrixWorld.equals(lastCamMatrix)) {
+    renderer.render(scene, camera);
+    lastCamMatrix.copy(camera.matrixWorld);
+    needsRender = false;
+  }
 }
-animate();
+// Zurück im Vordergrund neu zeichnen — der Browser verwirft den Canvas-Inhalt mitunter
+document.addEventListener('visibilitychange', () => { needsRender = true; });
+renderer.setAnimationLoop(animate); // wartet intern auf renderer.init()
 </script>
 </body>
 </html>
