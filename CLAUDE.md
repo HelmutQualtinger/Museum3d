@@ -28,6 +28,10 @@ A walkable 3D art museum rendered entirely client-side with Three.js. The whole 
 - **UI**: a start overlay with a loading bar (driven by `THREE.LoadingManager`; the start button stays dimmed until `onLoad` fires, since clicking before the module initializes does nothing), a room-name label that fades in/out on room transitions, a hover tooltip with title/artist, a **← Zurück** button shown only in focus mode, and an HUD hint whose text swaps between `HUD_DEFAULT` and `HUD_FOCUS`.
 - **Esc**: exits the close-up first and only opens the menu when not focused.
 
+## Installable app (PWA)
+
+`manifest.webmanifest`, `sw.js` and `icons/` sit next to `index.html` — the only exceptions to the single-file rule, since a service worker can't be inline. All paths are relative because the site lives under `/Museum3d/` on GitHub Pages. `sw.js` serves the page network-first (updates show up immediately when online) and three.js from jsDelivr plus the Commons images cache-first, so the gallery works offline after one visit. Bump `CACHE` in `sw.js` when the caching strategy or the shell file list changes. The icons are a square crop of `docs/og-image.jpg` (Vermeer).
+
 ## Social preview
 
 `<head>` carries Open Graph and Twitter Card tags pointing at `docs/og-image.jpg` (1200×630). Image URLs there **must stay absolute** — scrapers don't resolve relative paths. Regenerate the card by screenshotting the app with the HUD hidden and running `sips -c 784 1493 in.jpg --out crop.jpg && sips -z 630 1200 crop.jpg --out docs/og-image.jpg`. Scrapers cache aggressively; re-scrape via the platform's own debugger to see a change.

@@ -8,6 +8,14 @@
 <link rel="canonical" href="https://helmutqualtinger.github.io/Museum3d/">
 <meta name="theme-color" content="#0a0806">
 
+<!-- Als App installierbar (Startbildschirm / Desktop) -->
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Galerie">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
 <!-- Vorschaukarte für soziale Netzwerke. Die Bild-URL muss absolut sein —
      Facebook, LinkedIn, X und WhatsApp lösen relative Pfade nicht auf. -->
 <meta property="og:type" content="website">
@@ -111,6 +119,8 @@
 
 <script type="module">
 import * as THREE from 'three';
+
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
 
 /* ---------------------------------------------------------------
    Sammlung: drei Säle, drei Genres, dreiundzwanzig Meisterwerke
