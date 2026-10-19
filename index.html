@@ -240,8 +240,16 @@ camera.position.set(ROOM_W / 2, 1.7, ROOM_D - 2.2);
 // WebGPU, wo der Browser es kann; sonst fällt der Renderer selbst auf WebGL 2 zurück.
 // Keine Lichtquelle wirft Schatten — daher keine Shadow-Map.
 const renderer = new THREE.WebGPURenderer({ antialias: true });
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-renderer.setSize(window.innerWidth, window.innerHeight);
+// Jedes Pixel wertet alle 34 Lichter aus — die Kosten wachsen mit der Pixelzahl.
+// Ein Retina-Mac im Vollbild hätte bei Pixelratio 2 rund 4–5 Mio. Pixel, ein
+// Handy nur gut 1 Mio.; daher die Auflösung auf ein festes Pixelbudget deckeln.
+const MAX_PIXELS = 2.2e6;
+function applyRenderSize() {
+  const w = window.innerWidth, h = window.innerHeight;
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2, Math.sqrt(MAX_PIXELS / (w * h))));
+  renderer.setSize(w, h);
+}
+applyRenderSize();
 renderer.outputColorSpace = THREE.SRGBColorSpace;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.05;
@@ -1029,7 +1037,7 @@ function updateRoomLabel() {
 window.addEventListener('resize', () => {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
-  renderer.setSize(window.innerWidth, window.innerHeight);
+  applyRenderSize();
   needsRender = true;
 });
 
@@ -1129,6 +1137,10 @@ renderer.domElement.addEventListener('touchend', (e) => {
 // Die Szene ist statisch: gerendert wird nur, wenn sich die Kamera bewegt
 // oder needsRender gesetzt ist (Textur geladen, Fenstergröße geändert).
 let needsRender = true;
+// Nach jeder Änderung noch ein paar Frames weiterzeichnen: ein einzelner Frame
+// direkt nach Overlay-Wechsel oder Texturupload kam teils schwarz an.
+const SETTLE_FRAMES = 30;
+let settleFrames = 0;
 const lastCamMatrix = new THREE.Matrix4();
 const clock = new THREE.Clock();
 function animate() {
@@ -1183,10 +1195,12 @@ function animate() {
   }
 
   camera.updateMatrixWorld();
-  if (needsRender || !camera.matrixWorld.equals(lastCamMatrix)) {
+  if (needsRender || !camera.matrixWorld.equals(lastCamMatrix)) settleFrames = SETTLE_FRAMES;
+  if (settleFrames > 0) {
     renderer.render(scene, camera);
     lastCamMatrix.copy(camera.matrixWorld);
     needsRender = false;
+    settleFrames--;
   }
 }
 // Zurück im Vordergrund neu zeichnen — der Browser verwirft den Canvas-Inhalt mitunter
