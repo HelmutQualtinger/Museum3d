@@ -322,9 +322,10 @@ const hiResLoader = new THREE.TextureLoader();
 // Fassung und erst in der Nahansicht eine große (Commons-Standardbreiten).
 const LO_RES_PX = 500;
 const HI_RES_PX = 1920;
-// Detailstufe beim starken Hineinzoomen. Die längere Seite bleibt ≤ 4096 px —
-// mehr erlauben ältere Handy-GPUs nicht als Texturgröße.
-const detailPx = (ratio) => (ratio > 1 ? 2560 : 3840);
+// Detailstufe beim starken Hineinzoomen. Commons liefert nur Standardbreiten
+// (… 1280, 1920, 3840); alles dazwischen, etwa 2560, antwortet mit HTTP 400.
+// Hochformate werden damit bis ~5800 px hoch — WebGPU garantiert 8192.
+const DETAIL_PX = 3840;
 const sizedUrl = (url, px) => url.replace('/1280px-', `/${px}px-`);
 
 function preparePaintingTexture(tex) {
@@ -482,7 +483,6 @@ function buildPainting(def, maxW, maxH) {
   group.add(canvasMesh);
   canvasMesh.userData.url = def.url;
   canvasMesh.userData.loTex = tex;
-  canvasMesh.userData.ratio = def.ratio;
   group.userData.canvasMesh = canvasMesh;
   group.userData.width = width;
   group.userData.height = h;
@@ -975,17 +975,21 @@ function setPaintingTexture(mesh, tex) {
 }
 // Lädt das Bild in der Breite px; eine kleinere Stufe wird ersetzt, eine
 // größere bleibt (kein Zurückstufen beim Herauszoomen in derselben Ansicht).
+// Jede Stufe wird angezeigt, sobald sie da ist und größer ist als die
+// gezeigte — so bleibt bei einem Ladefehler die vorige Stufe stehen.
 function showHiRes(spot, px = HI_RES_PX) {
   if (hiResSpot === spot && hiResPx >= px) return;
   if (hiResSpot !== spot) dropHiRes();
   hiResSpot = spot;
   hiResPx = px;
   hiResLoader.load(sizedUrl(spot.mesh.userData.url, px), (tex) => {
-    // inzwischen weitergegangen oder schon eine größere Stufe angefordert
-    if (hiResSpot !== spot || hiResPx !== px) { tex.dispose(); return; }
-    const old = spot.mesh.material.map;
-    setPaintingTexture(spot.mesh, preparePaintingTexture(tex));
-    if (old !== spot.mesh.userData.loTex) old.dispose();
+    const mesh = spot.mesh;
+    // inzwischen weitergegangen, oder eine größere Stufe ist schon da
+    if (hiResSpot !== spot || (mesh.userData.shownPx || 0) >= px) { tex.dispose(); return; }
+    const old = mesh.material.map;
+    setPaintingTexture(mesh, preparePaintingTexture(tex));
+    mesh.userData.shownPx = px;
+    if (old !== mesh.userData.loTex) old.dispose();
   });
 }
 function dropHiRes() {
@@ -996,6 +1000,7 @@ function dropHiRes() {
     setPaintingTexture(mesh, mesh.userData.loTex);
     hi.dispose();
   }
+  mesh.userData.shownPx = 0;
   hiResSpot = null;
   hiResPx = 0;
 }
@@ -1363,7 +1368,7 @@ function animate() {
     const kb = (move.back ? 1 : 0) - (move.forward ? 1 : 0);
     if (kb) focusState.zoomTarget = THREE.MathUtils.clamp(focusState.zoomTarget + kb * dt * 1.5, ZOOM_MIN, 1);
     // ab etwa 1,5-facher Vergrößerung reicht die 1920er-Fassung nicht mehr
-    if (focusState.zoomTarget < -0.3) showHiRes(spot, detailPx(spot.mesh.userData.ratio));
+    if (focusState.zoomTarget < -0.3) showHiRes(spot, DETAIL_PX);
     focusPose(spot, focusState.zoomTarget, focusState.panTarget, _focusPos, _focusLook); // klemmt panTarget
     const k = Math.min(1, dt * 10);
     focusState.zoom += (focusState.zoomTarget - focusState.zoom) * k;
