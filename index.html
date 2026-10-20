@@ -211,7 +211,7 @@ const ROOMS = [
     cell: [0, 0],
     accent: 0x6e2b2b,      // gedämpftes Rot
     bench: 0xa04a42,       // Polster: warmes Terrakotta
-    // floor tönt die Dielentextur nur noch leicht ein (multipliziert), daher hell halten
+    // floor tönt die Marmortextur nur leicht ein (multipliziert), daher hell halten
     floor: 0xf2e6d4,
     back: [
       { title: 'Mona Lisa', artist: 'Leonardo da Vinci, um 1503', url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/6a/Mona_Lisa.jpg/1280px-Mona_Lisa.jpg', ratio: 1.513 },
@@ -329,9 +329,8 @@ const DIVIDER_PAINTINGS = {
   ],
   32: [ // zwischen Saal II (Landschaft) und Saal III (Moderne)
     { segIndex: 0, face: -1, def: { title: 'Der Heuwagen', artist: 'John Constable, 1821', url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/John_Constable_-_The_Hay_Wain_%281821%29.jpg/1280px-John_Constable_-_The_Hay_Wain_%281821%29.jpg', ratio: 0.69 } },
-    // selbst gerendert (art/mandelbrot.py), in den Commons-Standardbreiten abgelegt,
-    // damit sizedUrl und die Detailstufen der Nahansicht wie bei allen Bildern greifen
-    { segIndex: 0, face: 1, def: { title: 'Mandelbrot-Menge (Relief)', artist: 'Fraktal nach Benoît Mandelbrot, 1980 · Rendering 2026', url: 'art/1280px-mandelbrot-relief.jpg', ratio: 0.667 } },
+    // keine Bilddatei: die GPU rechnet die Spirale live und beliebig tief zoombar (makeMandelbrotTexture)
+    { segIndex: 0, face: 1, def: { title: 'Mandelbrot-Spirale (Relief)', artist: 'Fraktal nach Benoît Mandelbrot · in Echtzeit berechnet', procedural: makeMandelbrotTexture, ratio: 0.667 } },
     { segIndex: 1, face: 1, def: { title: 'Der Traum', artist: 'Henri Rousseau, 1910', url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/eb/Henri_Rousseau_-_Le_R%C3%AAve_-_Google_Art_Project.jpg/1280px-Henri_Rousseau_-_Le_R%C3%AAve_-_Google_Art_Project.jpg', ratio: 0.681 } },
   ],
 };
@@ -358,6 +357,17 @@ scene.background = new THREE.Color(0x0a0806);
 scene.fog = new THREE.Fog(0x0a0806, 18, 40);
 
 const camera = new THREE.PerspectiveCamera(68, window.innerWidth / window.innerHeight, 0.1, 200);
+// Sichtfeld: höchstens 68° vertikal und 80° horizontal. Ein festes vertikales
+// FOV ergab im Breitbild fast 100° in der Breite — die Ränder wurden so stark
+// gedehnt, dass die Bodenplatten beim Umsehen sichtbar größer und kleiner wurden.
+const MAX_FOV_V = 68, MAX_FOV_H = 80;
+function applyFov() {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  const vForH = 2 * Math.atan(Math.tan(THREE.MathUtils.degToRad(MAX_FOV_H) / 2) / camera.aspect);
+  camera.fov = Math.min(MAX_FOV_V, THREE.MathUtils.radToDeg(vForH));
+  camera.updateProjectionMatrix();
+}
+applyFov();
 camera.position.set(ROOM_W / 2, 1.7, ROOM_D - 2.2);
 
 // WebGPU, wo der Browser es kann; sonst fällt der Renderer selbst auf WebGL 2 zurück.
@@ -464,73 +474,357 @@ function makeSignTexture(text) {
   return tex;
 }
 
-/* Eichendielen, prozedural auf ein Canvas gezeichnet — kein externes Asset.
-   Die Kachel wiederholt sich über den Boden, deshalb müssen die Maserlinien
-   an beiden Rändern auf gleicher Höhe beginnen und enden. */
-function makeWoodFloorTexture() {
+/* Marmorplatten, prozedural auf ein Canvas gerechnet — kein externes Asset.
+   Eine Kachel trägt 4 × 4 Platten von je 1 m; jede Platte hat ihre eigene
+   Äderung, deshalb muss das Rauschen nicht über Plattengrenzen hinweg
+   kacheln — die Fugen trennen sie ohnehin. */
+const MARBLE_SLABS = 4;   // Platten je Kachelkante
+const MARBLE_SLAB_M = 1;  // Kantenlänge einer Platte in Metern
+
+function makeMarbleFloorTexture() {
+  const SIZE = 1024;
   const c = document.createElement('canvas');
-  c.width = 1024; c.height = 1024;
+  c.width = c.height = SIZE;
   const ctx = c.getContext('2d');
-  const PLANKS = 10;
-  const ph = c.height / PLANKS;
+  const img = ctx.createImageData(SIZE, SIZE);
+  const px = SIZE / MARBLE_SLABS;
 
-  for (let i = 0; i < PLANKS; i++) {
-    const y = i * ph;
-    // Jede Diele etwas anders hell und warm, sonst entsteht ein sichtbares Raster
-    const hue = 31 + Math.random() * 7;
-    const lum = 66 + Math.random() * 11;
-    ctx.fillStyle = `hsl(${hue}, 27%, ${lum}%)`;
-    ctx.fillRect(0, y, c.width, ph);
+  // Wertrauschen mit Gitter-Hash, je Platte über seed versetzt
+  const hash = (x, y, seed) => {
+    let h = (x * 374761393 + y * 668265263 + seed * 2147483647) | 0;
+    h = Math.imul(h ^ (h >>> 13), 1274126177);
+    return ((h ^ (h >>> 16)) >>> 0) / 4294967295;
+  };
+  const smooth = (t) => t * t * (3 - 2 * t);
+  const noise = (x, y, seed) => {
+    const xi = Math.floor(x), yi = Math.floor(y);
+    const xf = smooth(x - xi), yf = smooth(y - yi);
+    const a = hash(xi, yi, seed), b = hash(xi + 1, yi, seed);
+    const c0 = hash(xi, yi + 1, seed), d = hash(xi + 1, yi + 1, seed);
+    return a + (b - a) * xf + (c0 - a) * yf + (a - b - c0 + d) * xf * yf;
+  };
+  const fbm = (x, y, seed) => {
+    let v = 0, amp = 0.5;
+    for (let o = 0; o < 4; o++) { v += amp * noise(x, y, seed + o * 17); x *= 2.03; y *= 2.03; amp *= 0.5; }
+    return v;
+  };
 
-    // Maserung längs der Diele
-    for (let g = 0; g < 44; g++) {
-      const gy = y + 2 + Math.random() * (ph - 4);
-      ctx.strokeStyle = Math.random() < 0.55
-        ? `hsla(${hue}, 26%, ${lum - 19}%, ${0.07 + Math.random() * 0.14})`
-        : `hsla(${hue}, 22%, ${lum + 12}%, ${0.05 + Math.random() * 0.10})`;
-      ctx.lineWidth = 0.6 + Math.random() * 1.9;
-      ctx.beginPath();
-      ctx.moveTo(0, gy);
-      const steps = 8;
-      for (let s = 1; s <= steps; s++) {
-        // letzter Punkt zurück auf gy, damit die Kachel nahtlos anschließt
-        const wobble = s === steps ? 0 : (Math.random() - 0.5) * 3.2;
-        ctx.lineTo((c.width / steps) * s, gy + wobble);
+  for (let sy = 0; sy < MARBLE_SLABS; sy++) {
+    for (let sx = 0; sx < MARBLE_SLABS; sx++) {
+      const seed = sy * MARBLE_SLABS + sx + 1;
+      // Schachbrett aus hellem Carrara und etwas grauerem Marmor, jede Platte leicht anders
+      const grey = (sx + sy) % 2 === 1;
+      const base = (grey ? 214 : 236) + (hash(sx, sy, 99) - 0.5) * 10;
+      const warm = grey ? 0 : 4;
+      const angle = hash(sx, sy, 7) * Math.PI;           // Laufrichtung der Adern
+      const ca = Math.cos(angle), sa = Math.sin(angle);
+      const freq = 5 + hash(sx, sy, 11) * 4;
+      for (let y = 0; y < px; y++) {
+        for (let x = 0; x < px; x++) {
+          const u = x / px, v = y / px;
+          const turb = fbm(u * 2.2, v * 2.2, seed);
+          // Hauptadern: schmale dunkle Linien, wo der verzerrte Sinus durch null geht
+          const s1 = Math.abs(Math.sin((u * ca + v * sa) * freq + turb * 5));
+          // scharfer Kern plus weicher grauer Hof, damit die Ader nicht wie ein Riss wirkt
+          const vein = Math.pow(1 - s1, 26) * 0.45 + Math.pow(1 - s1, 5) * 0.12;
+          // feine Nebenadern und Wolkigkeit
+          const s2 = Math.abs(Math.sin((u * sa - v * ca) * freq * 2.3 + fbm(u * 6, v * 6, seed + 50) * 9));
+          const fine = Math.pow(1 - s2, 40) * 0.18;
+          const cloud = (turb - 0.5) * 18;
+          const l = base + cloud - (vein + fine) * 95;
+          const i = ((sy * px + y) * SIZE + sx * px + x) * 4;
+          img.data[i] = l + warm;
+          img.data[i + 1] = l + warm * 0.5;
+          img.data[i + 2] = l - warm * 0.3;
+          img.data[i + 3] = 255;
+        }
       }
-      ctx.stroke();
     }
+  }
+  ctx.putImageData(img, 0, 0);
 
-    // versetzte Stoßfugen zwischen den einzelnen Brettern
-    const joints = 2 + (Math.random() * 2 | 0);
-    for (let j = 0; j < joints; j++) {
-      const jx = 40 + Math.random() * (c.width - 80);
-      ctx.strokeStyle = 'rgba(58, 39, 22, 0.5)';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(jx, y + 1.5);
-      ctx.lineTo(jx, y + ph - 1.5);
-      ctx.stroke();
-    }
-
-    // Fuge zur nächsten Diele
-    ctx.fillStyle = 'rgba(48, 32, 18, 0.55)';
-    ctx.fillRect(0, y + ph - 2, c.width, 2);
+  // Fugen zwischen den Platten (an jedem Kachelrand nur halb, die Nachbarkachel ergänzt sie)
+  ctx.fillStyle = 'rgba(90, 84, 76, 0.55)';
+  for (let k = 0; k <= MARBLE_SLABS; k++) {
+    const p = k * px;
+    ctx.fillRect(p - 1, 0, 2, SIZE);
+    ctx.fillRect(0, p - 1, SIZE, 2);
   }
 
   const tex = new THREE.CanvasTexture(c);
   tex.colorSpace = THREE.SRGBColorSpace;
   tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
-  // eine Kachel ≈ 3,5 m, also Dielen von etwa 35 cm Breite
-  tex.repeat.set(ROOM_W / 3.5, ROOM_D / 3.5);
+  // Keine Wiederholung hier — die Böden bekommen Welt-UVs (floorGeometry)
   tex.anisotropy = 8;
   return tex;
 }
-const woodFloorTex = makeWoodFloorTexture();
+const marbleFloorTex = makeMarbleFloorTexture();
 
-const woodFloorMat = (color) => new THREE.MeshStandardMaterial({ map: woodFloorTex, color, roughness: 0.72, metalness: 0.02 });
+// Boden mit UVs aus Weltkoordinaten (eine Texturkachel = MARBLE_SLABS m): so läuft
+// das Plattenmuster über alle Säle durch. Mit UVs je Saal begann jede Kachel an
+// der eigenen Saalkante; Säle hinter und vor Saal II (14 m tief = 3,5 Kacheln)
+// lagen dadurch um eine halbe Kachel versetzt, gleichfarbige Platten stießen
+// aneinander und wirkten beim Saalwechsel wie doppelt so groß.
+function floorGeometry(originX, originZ) {
+  const g = new THREE.PlaneGeometry(ROOM_W, ROOM_D);
+  g.rotateX(-Math.PI / 2);
+  g.translate(ROOM_W / 2, 0, ROOM_D / 2);
+  const pos = g.attributes.position, uv = g.attributes.uv;
+  const tileM = MARBLE_SLABS * MARBLE_SLAB_M;
+  for (let i = 0; i < pos.count; i++) {
+    uv.setXY(i, (originX + pos.getX(i)) / tileM, -(originZ + pos.getZ(i)) / tileM);
+  }
+  return g;
+}
+
+// Polierter Stein: geringe Rauheit, damit die Deckenlichter als Glanz im Boden stehen
+const marbleFloorMat = (color) => new THREE.MeshStandardMaterial({ map: marbleFloorTex, color, roughness: 0.28, metalness: 0 });
 const wallMat = (color) => new THREE.MeshStandardMaterial({ color, roughness: 0.9, metalness: 0.0 });
 const ceilMat = new THREE.MeshStandardMaterial({ color: 0x0e0c0a, roughness: 1.0 });
 const trimMat = new THREE.MeshStandardMaterial({ color: 0x1a1512, roughness: 0.6, metalness: 0.2 });
+
+/* ---------------------------------------------------------------
+   Mandelbrot-Spirale: wird live auf der GPU berechnet und lässt sich in
+   der Nahansicht beliebig tief hineinzoomen (bis ~10²⁶-fach).
+   Einfache float32-Rechnung trüge nur bis ~10⁻⁶; darunter rechnet der
+   Shader per Störungstheorie: Eine Referenzbahn Z_n wird auf der CPU mit
+   BigInt-Festkomma in beliebiger Genauigkeit iteriert, die GPU rechnet je
+   Pixel nur die kleine Abweichung δ davon (δ' = 2Zδ + δ² + δc) in float32.
+   Wird δ größer als die Bahn selbst oder endet die Referenz, setzt der
+   Shader neu auf (Rebasing nach Zhuoran) — so reicht eine Referenz.
+   Das Fraktal wird nicht jeden Frame, sondern nur bei geänderter Ansicht in
+   ein Render-Target gezeichnet; die Leinwand trägt es als gewöhnliche Textur.
+   Beim Zoomen zuerst grob, kurz danach in voller Auflösung.
+--------------------------------------------------------------- */
+const MANDEL_CENTER = [-0.74325, 0.13116];
+const MANDEL_SPAN = 0.0034;      // Breite des Ausschnitts in der komplexen Ebene
+const MANDEL_SPAN_MIN = 1e-26;   // darunter unterliefe δ in float32
+const MANDEL_ZOOM_MIN = Math.log(MANDEL_SPAN_MIN / MANDEL_SPAN) / Math.log(4);
+const MANDEL_R2 = 100 * 100;     // großer Fluchtradius für glatte Farbübergänge
+const MANDEL_MAXIT_CAP = 20000;  // tief im Zoom brauchen randnahe Punkte zehntausende Schritte
+const MANDEL_MAXIT_LO = 8000;    // Vorschau beim Zoomen: schneller, Rest füllt die feine Fassung
+const MANDEL_FP = 160n;          // Nachkommabits der Referenzbahn — reicht für MANDEL_SPAN_MIN
+const REF_W = 1024;              // Referenzbahn als Float-Textur, REF_W Werte je Zeile
+const REF_H = Math.ceil((MANDEL_MAXIT_CAP + 1) / REF_W);
+const MANDEL_HI = [1600, 1067];  // Auflösung im Ruhezustand
+const MANDEL_LO = [640, 427];    // während gezoomt oder verschoben wird
+const MANDEL_SETTLE_MS = 180;
+// Die feine Fassung entsteht in Streifen, einer je Frame — sonst könnte ein
+// einzelner Durchlauf mit 20 000 Iterationen die GPU so lange blockieren,
+// dass der Browser das Gerät zurücksetzt
+const MANDEL_STRIPS = 8;
+
+// Festkomma-BigInt ↔ Zahl; f2b zerlegt in Mantisse und Exponent, sonst gingen
+// winzige Verschiebungen tief im Zoom in der Rundung verloren
+const MANDEL_ONE = 2 ** Number(MANDEL_FP);
+const b2f = (b) => Number(b) / MANDEL_ONE;
+function f2b(x) {
+  if (x === 0) return 0n;
+  const e = Math.floor(Math.log2(Math.abs(x))) - 52;
+  const m = BigInt(Math.round(x / 2 ** e));
+  const shift = BigInt(e) + MANDEL_FP;
+  return shift >= 0n ? m << shift : m >> -shift;
+}
+
+const mandelIterations = (span) =>
+  Math.min(MANDEL_MAXIT_CAP, Math.round(1000 + 400 * Math.log2(MANDEL_SPAN / span)));
+
+const mandel = {
+  cx: f2b(MANDEL_CENTER[0]), cy: f2b(MANDEL_CENTER[1]), span: MANDEL_SPAN,
+  refX: null, refY: null, refLen: 0, refEscaped: false,
+  mesh: null,           // Leinwand des Bildes, setzt buildPainting
+  dirty: false,         // Ansicht geändert → grob neu zeichnen
+  hiPending: true,      // danach (und beim Start) fein nachzeichnen
+  hiStrip: 0,           // nächster Streifen der feinen Fassung
+  changedAt: 0,
+};
+
+const refData = new Float32Array(REF_W * REF_H * 4);
+const refTex = new THREE.DataTexture(refData, REF_W, REF_H, THREE.RGBAFormat, THREE.FloatType);
+refTex.minFilter = refTex.magFilter = THREE.NearestFilter;
+
+// Referenzbahn am aktuellen Bildmittelpunkt
+function computeReference(maxit) {
+  const FP = MANDEL_FP;
+  const cx = mandel.cx, cy = mandel.cy;
+  let zx = 0n, zy = 0n, n = 0;
+  mandel.refEscaped = false;
+  for (; n < maxit; n++) {
+    const fx = b2f(zx), fy = b2f(zy);
+    refData[n * 4] = fx;
+    refData[n * 4 + 1] = fy;
+    if (fx * fx + fy * fy > MANDEL_R2) { mandel.refEscaped = true; break; }
+    const x2 = (zx * zx) >> FP, y2 = (zy * zy) >> FP, xy = (zx * zy) >> FP;
+    zx = x2 - y2 + cx;
+    zy = 2n * xy + cy;
+  }
+  mandel.refLen = mandel.refEscaped ? n : n - 1; // Index des letzten gültigen Z
+  mandel.refX = cx;
+  mandel.refY = cy;
+  refTex.needsUpdate = true;
+}
+
+const uSpan = THREE.TSL.uniform(MANDEL_SPAN);
+const uOffset = THREE.TSL.uniform(new THREE.Vector2());
+const uMaxIt = THREE.TSL.uniform(1000, 'int');
+const uRefLen = THREE.TSL.uniform(0, 'int');
+
+function makeMandelbrotQuad(ratio) {
+  const { Fn, Loop, If, Break, float, int, vec2, vec3, ivec2, uv, mix, log, fract, clamp, fwidth,
+    length, dot, normalize, pow, select, smoothstep, textureLoad } = THREE.TSL;
+  const cmul = (a, b) => vec2(a.x.mul(b.x).sub(a.y.mul(b.y)), a.x.mul(b.y).add(a.y.mul(b.x)));
+
+  const color = Fn(() => {
+    // w: Position auf dem Bild in Bildbreiten (x −½…½), c = Mitte + w·span
+    const w = uv().sub(0.5).mul(vec2(1, ratio));
+    const dc = w.mul(uSpan).add(uOffset);
+    // Pixelgröße — vor der Schleife, Ableitungen brauchen einheitlichen Kontrollfluss
+    const pixel = length(fwidth(w));
+    const d = vec2(0).toVar();     // δ
+    const Z = vec2(0).toVar();     // Referenz Z_m
+    const z = vec2(0).toVar();     // z = Z + δ
+    const dzw = vec2(0).toVar();   // dz/dw — in Bildbreiten statt dz/dc, sonst Überlauf tief im Zoom
+    const m = int(0).toVar();
+    const n = float(-1).toVar();
+    Loop(uMaxIt, ({ i }) => {
+      z.assign(Z.add(d));
+      If(dot(z, z).greaterThan(MANDEL_R2), () => {
+        n.assign(float(i));
+        Break();
+      });
+      dzw.assign(cmul(z, dzw).mul(2).add(vec2(uSpan, 0)));
+      d.assign(cmul(Z, d).mul(2).add(cmul(d, d)).add(dc));
+      m.addAssign(1);
+      // Index → Texel; WGSL kennt mod() nicht für Ganzzahlen, daher von Hand
+      const row = m.div(REF_W);
+      Z.assign(textureLoad(refTex, ivec2(m.sub(row.mul(REF_W)), row)).xy);
+      const zn = Z.add(d);
+      If(dot(zn, zn).lessThan(dot(d, d)).or(m.greaterThanEqual(uRefLen)), () => {
+        d.assign(zn);
+        m.assign(0);
+        Z.assign(vec2(0));
+      });
+    });
+
+    const r = length(z);
+    const nu = n.add(1).sub(log(log(r)).div(Math.LN2));
+    // Relief: Richtung von z/dz ist die Flächennormale, Licht schräg von oben
+    const normal = normalize(vec2(dot(z, dzw), z.y.mul(dzw.x).sub(z.x.mul(dzw.y))));
+    const refl = clamp(dot(normal, vec2(Math.SQRT1_2, Math.SQRT1_2)).add(0.9).div(1.9), 0, 1);
+
+    // Farbverlauf Nachtblau → Blau → Champagner → Gold → Kupfer → Nachtblau
+    const t = fract(log(nu.add(1)).mul(1.1).add(0.55));
+    const stops = [
+      [0.00, [0.02, 0.05, 0.16]], [0.16, [0.09, 0.27, 0.52]], [0.42, [0.93, 0.85, 0.62]],
+      [0.64, [0.86, 0.52, 0.16]], [0.86, [0.36, 0.11, 0.07]], [1.00, [0.02, 0.05, 0.16]],
+    ];
+    let col = vec3(...stops[0][1]);
+    for (let k = 1; k < stops.length; k++) {
+      const [t0] = stops[k - 1], [t1, rgb] = stops[k];
+      col = mix(col, vec3(...rgb), clamp(t.sub(t0).div(t1 - t0), 0, 1));
+    }
+    const lit = col.mul(refl.mul(1.05).add(0.08)).add(pow(refl, 24).mul(0.35));
+
+    // Wo die Filamente feiner als ein Pixel werden, flimmerten sie —
+    // dort über die Distanzschätzung zur unbeleuchteten Grundfarbe überblenden
+    const dist = r.mul(log(r)).div(length(dzw));
+    const sharp = smoothstep(0.05, 0.5, dist.div(pixel));
+    const exterior = mix(col.mul(0.75), lit, sharp);
+    const srgb = select(n.lessThan(0), vec3(0.015, 0.012, 0.02), exterior);
+    return pow(clamp(srgb, 0, 1), vec3(2.2)); // Palette ist in sRGB gedacht, gerechnet wird linear
+  })();
+
+  const mat = new THREE.MeshBasicNodeMaterial();
+  mat.colorNode = color;
+  return new THREE.QuadMesh(mat);
+}
+
+const mandelTarget = ([w, h]) => new THREE.RenderTarget(w, h, {
+  type: THREE.HalfFloatType, generateMipmaps: true, minFilter: THREE.LinearMipmapLinearFilter,
+});
+const mandelHi = mandelTarget(MANDEL_HI);
+const mandelLo = mandelTarget(MANDEL_LO);
+let mandelQuad = null;
+
+// Leinwand-Textur fürs Bild (procedural in den Daten): zeigt das hochaufgelöste Render-Target
+function makeMandelbrotTexture(ratio) {
+  mandelQuad = makeMandelbrotQuad(ratio);
+  return mandelHi.texture;
+}
+
+function setMandelView(cx, cy, span) {
+  if (cx === mandel.cx && cy === mandel.cy && span === mandel.span) return;
+  mandel.cx = cx;
+  mandel.cy = cy;
+  mandel.span = span;
+  mandel.dirty = true;
+  mandel.hiPending = true;
+  mandel.hiStrip = 0;
+  mandel.changedAt = performance.now();
+}
+const mandelSpanFor = (zoom) => MANDEL_SPAN * Math.pow(4, Math.min(zoom, 0));
+function resetMandelView() {
+  setMandelView(f2b(MANDEL_CENTER[0]), f2b(MANDEL_CENTER[1]), MANDEL_SPAN);
+}
+// Bildmitte um (wx, wy) Bildbreiten verschieben, beim aktuellen Ausschnitt
+function shiftMandelView(wx, wy) {
+  const s = mandel.span;
+  const lim = f2b(2.5);
+  const clampB = (v) => (v > lim ? lim : v < -lim ? -lim : v);
+  setMandelView(clampB(mandel.cx + f2b(wx * s)), clampB(mandel.cy + f2b(wy * s)), s);
+}
+
+// Referenz und Uniforms für den aktuellen Ausschnitt vorbereiten
+function prepareMandelView(maxit) {
+  // Neue Referenz, wenn die alte zu weit vom Bild entfernt liegt (float32-Versatz)
+  // oder zu kurz ist; sonst bleibt sie — die Rechnung kostet tief im Zoom einige ms
+  const offX = mandel.refX === null ? Infinity : b2f(mandel.cx - mandel.refX);
+  const offY = mandel.refX === null ? Infinity : b2f(mandel.cy - mandel.refY);
+  if (Math.hypot(offX, offY) > mandel.span * 4 || (!mandel.refEscaped && mandel.refLen < maxit - 1)) {
+    computeReference(maxit);
+  }
+  uOffset.value.set(b2f(mandel.cx - mandel.refX), b2f(mandel.cy - mandel.refY));
+  uSpan.value = mandel.span;
+  uMaxIt.value = maxit;
+  uRefLen.value = mandel.refLen;
+}
+
+// Im Render-Loop: nach einer Änderung sofort grob, nach kurzer Ruhe fein in Streifen
+function updateMandelbrot() {
+  if (!mandelQuad) return;
+  const maxit = mandelIterations(mandel.span);
+
+  if (mandel.dirty) {
+    mandel.dirty = false;
+    prepareMandelView(Math.min(maxit, MANDEL_MAXIT_LO));
+    renderer.setRenderTarget(mandelLo);
+    mandelQuad.render(renderer);
+    renderer.setRenderTarget(null);
+    if (mandel.mesh) setPaintingTexture(mandel.mesh, mandelLo.texture);
+    return;
+  }
+  if (!mandel.hiPending || performance.now() - mandel.changedAt < MANDEL_SETTLE_MS) return;
+
+  prepareMandelView(maxit);
+  const [w, h] = MANDEL_HI;
+  const stripH = Math.ceil(h / MANDEL_STRIPS);
+  const y0 = mandel.hiStrip * stripH;
+  mandelHi.scissor.set(0, y0, w, Math.min(stripH, h - y0)); // über den Rand hinaus wäre das Rechteck ungültig
+  // Löschen ginge über das ganze Target — die übrigen Streifen müssen bleiben
+  const autoClear = renderer.autoClear;
+  renderer.autoClear = mandel.hiStrip === 0;
+  renderer.setScissorTest(true);
+  renderer.setRenderTarget(mandelHi);
+  mandelQuad.render(renderer);
+  renderer.setRenderTarget(null);
+  renderer.setScissorTest(false);
+  renderer.autoClear = autoClear;
+
+  if (++mandel.hiStrip === MANDEL_STRIPS) {
+    mandel.hiPending = false;
+    if (mandel.mesh) setPaintingTexture(mandel.mesh, mandelHi.texture);
+  }
+}
 
 /* ---------------------------------------------------------------
    Ein Gemälde: Rahmen + Leinwand (Textur) + Spotlicht + Schild
@@ -539,7 +833,9 @@ function buildPainting(def, maxW, maxH) {
   const group = new THREE.Group();
   const { w: width, h } = fitPaintingSize(def.ratio, maxW, maxH);
 
-  const tex = preparePaintingTexture(texLoader.load(sizedUrl(def.url, LO_RES_PX)));
+  const tex = def.procedural
+    ? def.procedural(def.ratio)
+    : preparePaintingTexture(texLoader.load(sizedUrl(def.url, LO_RES_PX)));
 
   // Ölfarbe auf Leinwand ist matt: hohe Rauheit, damit das Spotlicht keinen
   // breiten Glanzschleier über das Bild legt. Die Emissive-Map trägt die
@@ -558,6 +854,7 @@ function buildPainting(def, maxW, maxH) {
   canvasMesh.receiveShadow = true;
   group.add(canvasMesh);
   canvasMesh.userData.url = def.url;
+  if (def.procedural) mandel.mesh = canvasMesh;
   canvasMesh.userData.loTex = tex;
   group.userData.canvasMesh = canvasMesh;
   group.userData.width = width;
@@ -666,9 +963,7 @@ function buildRoom(index, def) {
   group.position.set(originX, 0, originZ);
 
   // Boden
-  const floor = new THREE.Mesh(new THREE.PlaneGeometry(ROOM_W, ROOM_D), woodFloorMat(def.floor));
-  floor.rotation.x = -Math.PI / 2;
-  floor.position.set(ROOM_W / 2, 0, ROOM_D / 2);
+  const floor = new THREE.Mesh(floorGeometry(originX, originZ), marbleFloorMat(def.floor));
   floor.receiveShadow = true;
   group.add(floor);
   floorMeshes.push(floor);
@@ -766,6 +1061,7 @@ function buildRoom(index, def) {
       width: p.userData.width,
       height: p.userData.height,
       placardDrop: p.userData.placardDrop,
+      fractal: !!pdef.procedural, // Mandelbrot: Zoom rechnet das Fraktal statt die Kamera
       title: pdef.title,
       artist: pdef.artist,
     });
@@ -873,6 +1169,7 @@ function buildRoom(index, def) {
       width: p.userData.width,
       height: p.userData.height,
       placardDrop: p.userData.placardDrop,
+      fractal: !!pdef.procedural, // Mandelbrot: Zoom rechnet das Fraktal statt die Kamera
       title: pdef.title,
       artist: pdef.artist,
     });
@@ -1155,6 +1452,7 @@ function openMenu() {
   focusState.active = false;
   focusState.animating = false;
   dropHiRes();
+  resetMandelView();
   backBtn.style.display = 'none';
   hud.textContent = HUD_DEFAULT;
 }
@@ -1200,6 +1498,7 @@ function setPaintingTexture(mesh, tex) {
 // Jede Stufe wird angezeigt, sobald sie da ist und größer ist als die
 // gezeigte — so bleibt bei einem Ladefehler die vorige Stufe stehen.
 function showHiRes(spot, px = HI_RES_PX) {
+  if (spot.fractal) return; // wird ohnehin live berechnet
   if (hiResSpot === spot && hiResPx >= px) return;
   if (hiResSpot !== spot) dropHiRes();
   hiResSpot = spot;
@@ -1237,8 +1536,14 @@ function dropHiRes() {
 // Blickpunkt auf dem Bild und wird hier so geklemmt, dass der Ausschnitt nicht
 // über den Bildrand hinausläuft — beim Zurückzoomen kehrt er so zur Mitte zurück.
 const ZOOM_MIN = -1;
+// Beim Mandelbrot-Bild bleibt die Kamera bei zoom 0 stehen; tiefer zoomt das Fraktal selbst
+const zoomMinFor = (spot) => (spot.fractal ? MANDEL_ZOOM_MIN : ZOOM_MIN);
 const focusDistScale = (zoom) => Math.pow(4, Math.min(zoom, 0));
 function focusPose(spot, zoom, pan, outPos, outLook) {
+  if (spot.fractal) {
+    zoom = Math.max(zoom, 0);
+    pan.set(0, 0);
+  }
   const halfV = Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2);
   const halfH = halfV * camera.aspect;
   const top = spot.height / 2;
@@ -1268,7 +1573,7 @@ const _focusHit = new THREE.Vector3();
 function zoomFocusAt(newZoom, clientX, clientY) {
   const spot = focusState.currentSpot;
   const z0 = focusState.zoomTarget;
-  const z1 = THREE.MathUtils.clamp(newZoom, ZOOM_MIN, 1);
+  const z1 = THREE.MathUtils.clamp(newZoom, zoomMinFor(spot), 1);
   focusState.zoomTarget = z1;
   raycaster.setFromCamera(eventToNDC({ clientX, clientY }), camera);
   _focusPlane.setFromNormalAndCoplanarPoint(spot.normal, spot.worldPos);
@@ -1276,6 +1581,14 @@ function zoomFocusAt(newZoom, clientX, clientY) {
   _focusHit.sub(spot.worldPos);
   const cx = _focusHit.x * spot.normal.z - _focusHit.z * spot.normal.x;
   const cy = _focusHit.y;
+  if (spot.fractal) {
+    // Punkt unter dem Zeiger in Bildbreiten; die Mitte rückt so nach, dass er stehen bleibt
+    const wx = THREE.MathUtils.clamp(cx / spot.width, -0.5, 0.5);
+    const wy = THREE.MathUtils.clamp(cy / spot.width, -spot.height / spot.width / 2, spot.height / spot.width / 2);
+    const s0 = mandelSpanFor(z0), s1 = mandelSpanFor(z1);
+    setMandelView(mandel.cx + f2b(wx * (s0 - s1)), mandel.cy + f2b(wy * (s0 - s1)), s1);
+    return;
+  }
   const k = focusDistScale(z1) / focusDistScale(z0);
   const p = focusState.panTarget;
   p.set(cx - (cx - p.x) * k, cy - (cy - p.y) * k);
@@ -1283,6 +1596,7 @@ function zoomFocusAt(newZoom, clientX, clientY) {
 
 function enterFocus(spot, keepSavedPos) {
   showHiRes(spot);
+  resetMandelView();
   if (!keepSavedPos) {
     focusState.savedPos.copy(camera.position);
     focusState.savedQuat.copy(camera.quaternion);
@@ -1311,6 +1625,7 @@ function enterFocus(spot, keepSavedPos) {
 }
 
 function exitFocus() {
+  resetMandelView();
   focusState.fromPos.copy(camera.position);
   focusState.toPos.copy(focusState.savedPos);
   focusState.fromQuat.copy(camera.quaternion);
@@ -1426,8 +1741,7 @@ function updateRoomLabel() {
 }
 
 window.addEventListener('resize', () => {
-  camera.aspect = window.innerWidth / window.innerHeight;
-  camera.updateProjectionMatrix();
+  applyFov();
   applyRenderSize();
   needsRender = true;
 });
@@ -1478,6 +1792,12 @@ function pointerMove(x, y) {
   else if (focusState.active && !focusState.animating) {
     const halfV = Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2);
     const mpp = 2 * camera.position.distanceTo(_focusLook) * halfV / window.innerHeight;
+    if (focusState.currentSpot.fractal) {
+      // Mandelbrot: Ziehen verschiebt den Ausschnitt im Fraktal (erst unterhalb des Ganzbilds)
+      const w = focusState.currentSpot.width;
+      if (focusState.zoomTarget < 0) shiftMandelView(-dx * mpp / w, dy * mpp / w);
+      return;
+    }
     focusState.panTarget.x -= dx * mpp;
     focusState.panTarget.y += dy * mpp;
     focusState.pan.copy(focusState.panTarget); // direkt folgen, nicht nachziehen
@@ -1588,13 +1908,16 @@ function animate() {
   if (focusState.active && !focusState.animating) {
     const spot = focusState.currentSpot;
     const kb = (move.back ? 1 : 0) - (move.forward ? 1 : 0);
-    if (kb) focusState.zoomTarget = THREE.MathUtils.clamp(focusState.zoomTarget + kb * dt * 1.5, ZOOM_MIN, 1);
+    if (kb) focusState.zoomTarget = THREE.MathUtils.clamp(focusState.zoomTarget + kb * dt * 1.5, zoomMinFor(spot), 1);
+    if (spot.fractal) setMandelView(mandel.cx, mandel.cy, mandelSpanFor(focusState.zoomTarget));
     // ab etwa 1,5-facher Vergrößerung reicht die 1920er-Fassung nicht mehr
     if (focusState.zoomTarget < -0.3) showHiRes(spot, DETAIL_PX);
     focusPose(spot, focusState.zoomTarget, focusState.panTarget, _focusPos, _focusLook); // klemmt panTarget
     const k = Math.min(1, dt * 10);
     focusState.zoom += (focusState.zoomTarget - focusState.zoom) * k;
     if (Math.abs(focusState.zoomTarget - focusState.zoom) < 0.001) focusState.zoom = focusState.zoomTarget;
+    // Mandelbrot: die Kamera kennt nur 0…1, sonst hinkte sie beim Herauszoomen aus der Tiefe nach
+    if (spot.fractal) focusState.zoom = Math.max(focusState.zoom, 0);
     focusState.pan.lerp(focusState.panTarget, k);
     if (focusState.pan.distanceTo(focusState.panTarget) < 0.0005) focusState.pan.copy(focusState.panTarget);
     focusPose(spot, focusState.zoom, focusState.pan, camera.position, _focusLook);
@@ -1634,6 +1957,7 @@ function animate() {
     updateRoomLabel();
   }
 
+  updateMandelbrot(); // setzt bei neuem Fraktalbild selbst needsRender
   camera.updateMatrixWorld();
   if (needsRender || !camera.matrixWorld.equals(lastCamMatrix)) settleFrames = SETTLE_FRAMES;
   if (settleFrames > 0) {
