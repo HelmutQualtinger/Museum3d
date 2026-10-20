@@ -336,13 +336,14 @@ const DIVIDER_PAINTINGS = {
 };
 
 // Skulpturen in der Mitte von Saal IV. Position in Saalkoordinaten (x, z);
-// height = Höhe der Figur in Metern, plinth = Sockel [Breite, Höhe, Tiefe].
+// height = Höhe der Figur in Metern, plinth = Sockel [Breite, Höhe, Tiefe],
+// turnSecs = Dauer einer Umdrehung auf dem Drehteller.
 // Die Modelle sind Draco-komprimierte GLBs im Ordner models/ (Quellen siehe README).
 const SCULPTURES = [
   { room: 3, x: 5.4, z: 7.6, title: 'David', artist: 'Michelangelo Buonarroti, 1501–1504',
-    url: 'models/david.glb', height: 4.2, plinth: [2.0, 0.9, 1.5], marble: true, rotY: Math.PI, light: 60 },
+    url: 'models/david.glb', height: 4.2, plinth: [1.9, 0.9, 1.9], marble: true, rotY: Math.PI, light: 60, turnSecs: 60 },
   { room: 3, x: 10.6, z: 7.6, title: 'Goldmaske des Tutanchamun', artist: 'Ägypten, 18. Dynastie, um 1323 v. Chr.',
-    url: 'models/tutanchamun.glb', height: 0.54, plinth: [0.8, 1.15, 0.8], vitrine: 0.8, rotY: Math.PI, light: 25 },
+    url: 'models/tutanchamun.glb', height: 0.54, plinth: [0.8, 1.15, 0.8], vitrine: 0.8, rotY: Math.PI, light: 25, turnSecs: 40 },
 ];
 
 // Saal an Rasterposition bzw. an einem Weltpunkt; -1, wenn dort keiner liegt
@@ -1208,6 +1209,25 @@ gltfLoader.setDRACOLoader(dracoLoader);
 
 const plinthMat = new THREE.MeshStandardMaterial({ color: 0x2a2622, roughness: 0.75, metalness: 0 });
 const marbleMat = new THREE.MeshStandardMaterial({ color: 0xebe5da, roughness: 0.55, metalness: 0 });
+const turntableMat = new THREE.MeshStandardMaterial({ color: 0x8a8378, roughness: 0.35, metalness: 0.6 });
+const TURNTABLE_H = 0.05;
+
+// Drehteller: drehen sich nur, solange sie im Blickfeld liegen — dann muss
+// jedes Frame gezeichnet werden, sonst bleibt es beim Rendern auf Abruf
+const turntables = [];
+const _frustum = new THREE.Frustum();
+const _projScreen = new THREE.Matrix4();
+function updateTurntables(dt) {
+  if (!navActive || document.hidden) return;
+  _projScreen.multiplyMatrices(camera.projectionMatrix, camera.matrixWorldInverse);
+  _frustum.setFromProjectionMatrix(_projScreen);
+  for (const t of turntables) {
+    if (!_frustum.intersectsSphere(t.sphere)) continue;
+    t.group.rotation.y += dt * Math.PI * 2 / t.turnSecs;
+    needsRender = true;
+  }
+}
+
 const glassMat = new THREE.MeshStandardMaterial({
   color: 0xffffff, roughness: 0.05, metalness: 0, transparent: true, opacity: 0.1, depthWrite: false,
 });
@@ -1239,6 +1259,21 @@ function buildSculpture(def) {
     glass.position.y = ph + def.vitrine / 2;
     group.add(glass);
   }
+
+  // Drehteller auf dem Sockel; das Modell kommt nach dem Laden darauf
+  const turntable = new THREE.Group();
+  turntable.position.y = ph;
+  const disc = new THREE.Mesh(
+    new THREE.CylinderGeometry(Math.min(pw, pd) / 2 * 0.92, Math.min(pw, pd) / 2 * 0.95, TURNTABLE_H, 64),
+    turntableMat
+  );
+  disc.position.y = TURNTABLE_H / 2;
+  turntable.add(disc);
+  group.add(turntable);
+  turntables.push({
+    group: turntable, turnSecs: def.turnSecs,
+    sphere: new THREE.Sphere(new THREE.Vector3(x, ph + def.height / 2, z), def.height / 2 + Math.max(pw, pd) / 2),
+  });
 
   // Unsichtbarer Ersatzkörper für den Klick-Raycast: verdeckt Gemälde hinter
   // der Figur, ohne dass jede Mausbewegung 100 000 Dreiecke testen muss
@@ -1278,10 +1313,10 @@ function buildSculpture(def) {
     model.scale.setScalar(s);
     model.position.set(-(box.min.x + box.max.x) / 2 * s, -box.min.y * s, -(box.min.z + box.max.z) / 2 * s);
     const holder = new THREE.Group();
-    holder.position.y = ph;
+    holder.position.y = TURNTABLE_H;
     holder.rotation.y = def.rotY;
     holder.add(model);
-    group.add(holder);
+    turntable.add(holder);
     assignRoomLights(holder);
     needsRender = true;
   });
@@ -1959,6 +1994,7 @@ function animate() {
 
   updateMandelbrot(); // setzt bei neuem Fraktalbild selbst needsRender
   camera.updateMatrixWorld();
+  updateTurntables(dt);
   if (needsRender || !camera.matrixWorld.equals(lastCamMatrix)) settleFrames = SETTLE_FRAMES;
   if (settleFrames > 0) {
     renderer.render(scene, camera);

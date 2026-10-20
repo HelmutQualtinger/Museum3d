@@ -12,7 +12,7 @@ A walkable 3D art gallery in the browser — five themed halls (Portrait, Landsc
 - Five galleries: Portrait, Landscape and Modern art in an enfilade, plus a Sculpture hall behind and a Gauguin hall in front of the Landscape hall — each with its own accent color and lighting, joined by wide doorways
 - Polished marble floor in a checkerboard of light and grey slabs, generated procedurally at startup — no texture files to download
 - Forty paintings loaded from Wikimedia Commons, each lit by a narrow spot that picks out the artwork without washing it out
-- Two 3D sculptures in the Sculpture hall: Michelangelo's David and the golden mask of Tutankhamun
+- Two 3D sculptures in the Sculpture hall: Michelangelo's David and the golden mask of Tutankhamun, each slowly turning on a turntable
 - Hovering a painting shows its title and artist; clicking walks you up to it, even from another hall
 - Collision detection against walls so you can't walk through them
 - Works on touch devices: drag to look, tap to select
