@@ -670,9 +670,12 @@ const uOffset = THREE.TSL.uniform(new THREE.Vector2());
 const uMaxIt = THREE.TSL.uniform(1000, 'int');
 const uRefLen = THREE.TSL.uniform(0, 'int');
 
+// Zwei Durchgänge: der teure rechnet nur Farbposition, Relief und Schärfe
+// (Daten-Target), der billige färbt daraus ein — so kann die Palette jedes
+// Frame weiterlaufen, ohne das Fraktal neu zu iterieren
 function makeMandelbrotQuad(ratio) {
-  const { Fn, Loop, If, Break, float, int, vec2, vec3, ivec2, uv, mix, log, fract, clamp, fwidth,
-    length, dot, normalize, pow, select, smoothstep, textureLoad } = THREE.TSL;
+  const { Fn, Loop, If, Break, float, int, vec2, vec4, ivec2, uv, log, fract, clamp, fwidth,
+    length, dot, normalize, select, smoothstep, textureLoad } = THREE.TSL;
   const cmul = (a, b) => vec2(a.x.mul(b.x).sub(a.y.mul(b.y)), a.x.mul(b.y).add(a.y.mul(b.x)));
 
   const color = Fn(() => {
@@ -713,8 +716,30 @@ function makeMandelbrotQuad(ratio) {
     const normal = normalize(vec2(dot(z, dzw), z.y.mul(dzw.x).sub(z.x.mul(dzw.y))));
     const refl = clamp(dot(normal, vec2(Math.SQRT1_2, Math.SQRT1_2)).add(0.9).div(1.9), 0, 1);
 
-    // Farbverlauf Nachtblau → Blau → Champagner → Gold → Kupfer → Nachtblau
+    // Wo die Filamente feiner als ein Pixel werden, flimmerten sie —
+    // dort über die Distanzschätzung zur unbeleuchteten Grundfarbe überblenden
+    const dist = r.mul(log(r)).div(length(dzw));
+    const sharp = smoothstep(0.05, 0.5, dist.div(pixel));
     const t = fract(log(nu.add(1)).mul(1.1).add(0.55));
+    return vec4(select(n.lessThan(0), float(-1), t), refl, sharp, 1); // −1: innen
+  })();
+
+  const mat = new THREE.MeshBasicNodeMaterial();
+  mat.colorNode = color;
+  return new THREE.QuadMesh(mat);
+}
+
+const uHue = THREE.TSL.uniform(0); // Versatz in der Palette, läuft mit der Zeit
+const MANDEL_CYCLE_SECS = 30;      // eine volle Runde durch die Palette
+
+function makeMandelColorQuad() {
+  const { Fn, vec3, uv, mix, fract, clamp, pow, select, texture } = THREE.TSL;
+  const dataNode = texture(mandelDataHi.texture, uv());
+  const color = Fn(() => {
+    const data = dataNode;
+    const refl = data.y;
+    // Farbverlauf Nachtblau → Blau → Champagner → Gold → Kupfer → Nachtblau
+    const t = fract(data.x.add(uHue));
     const stops = [
       [0.00, [0.02, 0.05, 0.16]], [0.16, [0.09, 0.27, 0.52]], [0.42, [0.93, 0.85, 0.62]],
       [0.64, [0.86, 0.52, 0.16]], [0.86, [0.36, 0.11, 0.07]], [1.00, [0.02, 0.05, 0.16]],
@@ -725,32 +750,59 @@ function makeMandelbrotQuad(ratio) {
       col = mix(col, vec3(...rgb), clamp(t.sub(t0).div(t1 - t0), 0, 1));
     }
     const lit = col.mul(refl.mul(1.05).add(0.08)).add(pow(refl, 24).mul(0.35));
-
-    // Wo die Filamente feiner als ein Pixel werden, flimmerten sie —
-    // dort über die Distanzschätzung zur unbeleuchteten Grundfarbe überblenden
-    const dist = r.mul(log(r)).div(length(dzw));
-    const sharp = smoothstep(0.05, 0.5, dist.div(pixel));
-    const exterior = mix(col.mul(0.75), lit, sharp);
-    const srgb = select(n.lessThan(0), vec3(0.015, 0.012, 0.02), exterior);
+    const exterior = mix(col.mul(0.75), lit, data.z);
+    const srgb = select(data.x.lessThan(0), vec3(0.015, 0.012, 0.02), exterior);
     return pow(clamp(srgb, 0, 1), vec3(2.2)); // Palette ist in sRGB gedacht, gerechnet wird linear
   })();
 
   const mat = new THREE.MeshBasicNodeMaterial();
   mat.colorNode = color;
-  return new THREE.QuadMesh(mat);
+  const quad = new THREE.QuadMesh(mat);
+  quad.dataNode = dataNode;
+  return quad;
 }
 
 const mandelTarget = ([w, h]) => new THREE.RenderTarget(w, h, {
   type: THREE.HalfFloatType, generateMipmaps: true, minFilter: THREE.LinearMipmapLinearFilter,
 });
+// Daten pixelgenau lesen: gemittelte Farbpositionen ergäben Säume, wo t von 1 auf 0 springt
+const mandelDataTarget = ([w, h]) => new THREE.RenderTarget(w, h, {
+  type: THREE.HalfFloatType, minFilter: THREE.NearestFilter, magFilter: THREE.NearestFilter,
+});
 const mandelHi = mandelTarget(MANDEL_HI);
 const mandelLo = mandelTarget(MANDEL_LO);
+const mandelDataHi = mandelDataTarget(MANDEL_HI);
+const mandelDataLo = mandelDataTarget(MANDEL_LO);
 let mandelQuad = null;
+let mandelColorQuad = null;
+let mandelShown = 'hi'; // welche Fassung die Leinwand gerade zeigt
 
 // Leinwand-Textur fürs Bild (procedural in den Daten): zeigt das hochaufgelöste Render-Target
 function makeMandelbrotTexture(ratio) {
   mandelQuad = makeMandelbrotQuad(ratio);
+  mandelColorQuad = makeMandelColorQuad();
   return mandelHi.texture;
+}
+
+// Daten der gezeigten Fassung mit der aktuellen Palette einfärben
+function colorizeMandel(which) {
+  mandelShown = which;
+  mandelColorQuad.dataNode.value = (which === 'hi' ? mandelDataHi : mandelDataLo).texture;
+  renderer.setRenderTarget(which === 'hi' ? mandelHi : mandelLo);
+  mandelColorQuad.render(renderer);
+  renderer.setRenderTarget(null);
+  needsRender = true;
+}
+
+// Palette läuft nur, solange das Bild im Blickfeld liegt (wie die Drehteller)
+const _mandelSphere = new THREE.Sphere();
+function cycleMandelColors() {
+  if (!navActive || document.hidden || !mandel.mesh) return;
+  if (!mandel.mesh.geometry.boundingSphere) mandel.mesh.geometry.computeBoundingSphere();
+  _mandelSphere.copy(mandel.mesh.geometry.boundingSphere).applyMatrix4(mandel.mesh.matrixWorld);
+  if (!_frustum.intersectsSphere(_mandelSphere)) return;
+  uHue.value = (performance.now() / 1000 / MANDEL_CYCLE_SECS) % 1;
+  colorizeMandel(mandelShown);
 }
 
 function setMandelView(cx, cy, span) {
@@ -798,24 +850,28 @@ function updateMandelbrot() {
   if (mandel.dirty) {
     mandel.dirty = false;
     prepareMandelView(Math.min(maxit, MANDEL_MAXIT_LO));
-    renderer.setRenderTarget(mandelLo);
+    renderer.setRenderTarget(mandelDataLo);
     mandelQuad.render(renderer);
     renderer.setRenderTarget(null);
+    colorizeMandel('lo');
     if (mandel.mesh) setPaintingTexture(mandel.mesh, mandelLo.texture);
     return;
   }
-  if (!mandel.hiPending || performance.now() - mandel.changedAt < MANDEL_SETTLE_MS) return;
+  if (!mandel.hiPending || performance.now() - mandel.changedAt < MANDEL_SETTLE_MS) {
+    cycleMandelColors();
+    return;
+  }
 
   prepareMandelView(maxit);
   const [w, h] = MANDEL_HI;
   const stripH = Math.ceil(h / MANDEL_STRIPS);
   const y0 = mandel.hiStrip * stripH;
-  mandelHi.scissor.set(0, y0, w, Math.min(stripH, h - y0)); // über den Rand hinaus wäre das Rechteck ungültig
+  mandelDataHi.scissor.set(0, y0, w, Math.min(stripH, h - y0)); // über den Rand hinaus wäre das Rechteck ungültig
   // Löschen ginge über das ganze Target — die übrigen Streifen müssen bleiben
   const autoClear = renderer.autoClear;
   renderer.autoClear = mandel.hiStrip === 0;
   renderer.setScissorTest(true);
-  renderer.setRenderTarget(mandelHi);
+  renderer.setRenderTarget(mandelDataHi);
   mandelQuad.render(renderer);
   renderer.setRenderTarget(null);
   renderer.setScissorTest(false);
@@ -823,6 +879,7 @@ function updateMandelbrot() {
 
   if (++mandel.hiStrip === MANDEL_STRIPS) {
     mandel.hiPending = false;
+    colorizeMandel('hi');
     if (mandel.mesh) setPaintingTexture(mandel.mesh, mandelHi.texture);
   }
 }
@@ -1992,9 +2049,9 @@ function animate() {
     updateRoomLabel();
   }
 
-  updateMandelbrot(); // setzt bei neuem Fraktalbild selbst needsRender
   camera.updateMatrixWorld();
-  updateTurntables(dt);
+  updateTurntables(dt); // stellt auch _frustum für die Palette ein
+  updateMandelbrot(); // setzt bei neuem Fraktalbild selbst needsRender
   if (needsRender || !camera.matrixWorld.equals(lastCamMatrix)) settleFrames = SETTLE_FRAMES;
   if (settleFrames > 0) {
     renderer.render(scene, camera);
