@@ -1,6 +1,6 @@
 # 3D Museum
 
-A walkable 3D art gallery in the browser — five themed halls (Portrait, Landscape, Modern, Sculpture, Gauguin), forty paintings, a live-rendered Mandelbrot spiral and two 3D sculptures, built with [Three.js](https://threejs.org/). Single self-contained `index.html`, no build step, no dependencies to install.
+A walkable 3D art gallery in the browser — six themed halls (Portrait, Landscape, Modern, Sculpture, Gauguin, Cave painting), forty-nine pictures, a live-rendered Mandelbrot spiral and three 3D sculptures, built with [Three.js](https://threejs.org/). Single self-contained `index.html`, no build step, no dependencies to install.
 
 **[Live demo →](https://helmutqualtinger.github.io/Museum3d/)**
 
@@ -9,12 +9,12 @@ A walkable 3D art gallery in the browser — five themed halls (Portrait, Landsc
 ## Features
 
 - Navigation that follows familiar web conventions — drag to look, click the floor to walk there, click a painting to view it
-- Five galleries: Portrait, Landscape and Modern art in an enfilade, plus a Sculpture hall behind and a Gauguin hall in front of the Landscape hall — each with its own accent color and lighting, joined by wide doorways
+- Six galleries: Portrait, Landscape and Modern art in an enfilade, plus a Sculpture hall behind and a Gauguin hall in front of the Landscape hall, and a Cave-painting hall in front of that — each with its own accent color and lighting, joined by wide doorways
 - Polished marble floor in a checkerboard of light and grey slabs, generated procedurally at startup — no texture files to download
-- Forty paintings loaded from Wikimedia Commons, each lit by a narrow spot that picks out the artwork without washing it out
-- Two 3D sculptures in the Sculpture hall: Michelangelo's David and the golden mask of Tutankhamun, each slowly turning on a turntable
+- Forty-nine pictures loaded from Wikimedia Commons, each lit by a narrow spot that picks out the artwork without washing it out
+- Three 3D sculptures, each slowly turning on a turntable: Michelangelo's David and the golden mask of Tutankhamun in the Sculpture hall, and the Venus of Willendorf enlarged fourfold (44 cm instead of 11 cm) in the Cave-painting hall
 - Hovering a painting shows its title and artist; clicking walks you up to it, even from another hall
-- Collision detection against walls so you can't walk through them
+- Collision detection against walls so you can't walk through them; benches are no obstacle — you step over them
 - Works on touch devices: drag to look, tap to select
 - Open Graph / Twitter Card metadata, so shared links render a preview card
 
@@ -38,15 +38,17 @@ A walkable 3D art gallery in the browser — five themed halls (Portrait, Landsc
 | III — Moderne | Der Kuss · Der Schrei · Blaues Pferd I · Komposition VIII · Komposition II in Rot, Blau und Gelb |
 | IV — Skulptur | *David* (3D) · *Goldmaske des Tutanchamun* (3D) · Dame mit dem Hermelin · Das Abendmahl · Johannes der Täufer · Die Verkündigung · Felsgrottenmadonna (Leonardo) · Die Erschaffung Adams · Tondo Doni · Die Delphische Sibylle · Das Jüngste Gericht (Michelangelo) |
 | V — Gauguin | Vision nach der Predigt · Ia Orana Maria · Woher kommen wir? Wer sind wir? Wohin gehen wir? · Arearea · Der gelbe Christus · Selbstbildnis · Manaò tupapaú · Zwei Tahitianerinnen |
+| VI — Höhlenmalerei | *Venus von Willendorf* (3D, 4×) · Lascaux: Saal der Stiere (3 Ausschnitte), Das „Chinesische Pferd“ · Chauvet: Pferdefries, Löwenfries · Niaux: Bisons im Salon noir, Zwei Bisons · Pech Merle: Gefleckte Pferde |
 
 Halls I–III also carry further works on their head and dividing walls (Klimt, Dürer, Matisse, Klee, Whistler, Monet, Constable, Rousseau), and hall III a Mandelbrot spiral rendered in real time by a GPU shader with relief shading — no image file. In its close-up you can zoom roughly 10²³-fold into the fractal: a BigInt reference orbit on the CPU plus perturbation theory on the GPU keeps it sharp far beyond float32 precision.
 
-All images are public-domain reproductions served from Wikimedia Commons.
+All images are served from Wikimedia Commons. The paintings are public-domain reproductions; most cave-painting photos show museum replicas (Anthropos Brno, public domain). Three photos are CC BY-SA: *Pferdefries* (Chauvet) by Thomas T. (2.0), *Gefleckte Pferde* (Pech Merle) by Céréales Killer (4.0), *Zwei Bisons* (Niaux) by Christelle Molinié (4.0).
 
 3D models (in `models/`, Draco-compressed GLB):
 
 - **David** — [Scan the World](https://www.myminifactory.com/scantheworld/), via [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:David_(Michelangelo).stl), CC BY-SA 4.0; decimated to ~144k triangles
 - **Tutankhamun mask** — [vmmaniac on Sketchfab](https://sketchfab.com/3d-models/tutankhamun-mask-hunyuan-f79ba82300cc4b9b9637d94f8959e970), CC BY 4.0 (an AI-assisted reconstruction, not a scan); textures reduced to 1024 px
+- **Venus of Willendorf** — [Scan the World](https://www.myminifactory.com/scantheworld/), via [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Scan_the_World_-_Venus_of_Willendorf.stl), CC BY-SA 4.0; decimated to 110k triangles, shown at 4× the original 11 cm
 
 ## Running locally
 

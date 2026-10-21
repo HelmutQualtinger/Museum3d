@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Galerie der Meister — begehbares 3D-Museum</title>
-<meta name="description" content="Ein begehbares 3D-Museum im Browser: fünf Säle, vierzig Meisterwerke von Leonardo bis Kandinsky und ein Mandelbrot-Fraktal, dazu Michelangelos David und die Goldmaske des Tutanchamun in 3D. Ziehen zum Umsehen, klicken zum Gehen — ohne Installation.">
+<meta name="description" content="Ein begehbares 3D-Museum im Browser: sechs Säle, neunundvierzig Werke von der Höhlenmalerei aus Lascaux und Chauvet bis Kandinsky und ein Mandelbrot-Fraktal, dazu Michelangelos David, die Venus von Willendorf und die Goldmaske des Tutanchamun in 3D. Ziehen zum Umsehen, klicken zum Gehen — ohne Installation.">
 <link rel="canonical" href="https://helmutqualtinger.github.io/Museum3d/">
 <meta name="theme-color" content="#0a0806">
 
@@ -22,7 +22,7 @@
 <meta property="og:site_name" content="Galerie der Meister">
 <meta property="og:locale" content="de_DE">
 <meta property="og:title" content="Galerie der Meister — begehbares 3D-Museum">
-<meta property="og:description" content="Fünf Säle, vierzig Meisterwerke von Leonardo bis Kandinsky und ein Mandelbrot-Fraktal, dazu Michelangelos David und die Maske des Tutanchamun in 3D. Ziehen zum Umsehen, klicken zum Gehen — direkt im Browser, ohne Installation.">
+<meta property="og:description" content="Sechs Säle, neunundvierzig Werke von der Höhlenmalerei aus Lascaux und Chauvet bis Kandinsky und ein Mandelbrot-Fraktal, dazu Michelangelos David, die Venus von Willendorf und die Maske des Tutanchamun in 3D. Ziehen zum Umsehen, klicken zum Gehen — direkt im Browser, ohne Installation.">
 <meta property="og:url" content="https://helmutqualtinger.github.io/Museum3d/">
 <meta property="og:image" content="https://helmutqualtinger.github.io/Museum3d/docs/og-image.jpg">
 <meta property="og:image:type" content="image/jpeg">
@@ -32,7 +32,7 @@
 
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Galerie der Meister — begehbares 3D-Museum">
-<meta name="twitter:description" content="Fünf Säle, vierzig Meisterwerke von Leonardo bis Kandinsky und ein Mandelbrot-Fraktal, dazu Michelangelos David und die Maske des Tutanchamun in 3D. Ziehen zum Umsehen, klicken zum Gehen — direkt im Browser.">
+<meta name="twitter:description" content="Sechs Säle, neunundvierzig Werke von der Höhlenmalerei aus Lascaux und Chauvet bis Kandinsky und ein Mandelbrot-Fraktal, dazu Michelangelos David, die Venus von Willendorf und die Maske des Tutanchamun in 3D. Ziehen zum Umsehen, klicken zum Gehen — direkt im Browser.">
 <meta name="twitter:image" content="https://helmutqualtinger.github.io/Museum3d/docs/og-image.jpg">
 <meta name="twitter:image:alt" content="Blick durch den Saal Porträt mit Rembrandts Selbstbildnis, durch einen breiten Durchgang in den Saal Landschaft.">
 
@@ -100,14 +100,14 @@
 <div id="overlay">
   <div class="panel">
     <h1>Galerie der Meister</h1>
-    <p>Ein begehbares 3D-Museum mit fünf Sälen &mdash; Porträt, Landschaft, Moderne, Skulptur und Gauguin.</p>
+    <p>Ein begehbares 3D-Museum mit sechs Sälen &mdash; Porträt, Landschaft, Moderne, Skulptur, Gauguin und Höhlenmalerei.</p>
     <p>Ziehen &mdash; umsehen &nbsp;·&nbsp; Klick auf den Boden &mdash; dorthin gehen</p>
     <p>Klick auf ein Gemälde &mdash; Nahansicht &nbsp;·&nbsp; <span class="key">W</span><span class="key">A</span><span class="key">S</span><span class="key">D</span> oder Scrollrad &mdash; bewegen</p>
     <p><span class="key">Esc</span> &mdash; zurück bzw. Menü</p>
     <div class="start" id="startBtn">Klicken zum Betreten</div>
     <div id="loadbar"><div id="loadfill"></div></div>
     <div id="loadtext">Lade hochauflösende Gemälde …</div>
-    <p class="credits">3D-Modelle: David &mdash; Scan the World (CC BY-SA 4.0) &nbsp;·&nbsp; Maske des Tutanchamun &mdash; vmmaniac (CC BY 4.0)</p>
+    <p class="credits">3D-Modelle: David &mdash; Scan the World (CC BY-SA 4.0) &nbsp;·&nbsp; Maske des Tutanchamun &mdash; vmmaniac (CC BY 4.0) &nbsp;·&nbsp; Venus von Willendorf &mdash; Scan the World (CC BY-SA 4.0)<br>Fotos Höhlenmalerei: Thomas T. (CC BY-SA 2.0), Céréales Killer, Christelle Molinié (CC BY-SA 4.0)</p>
     <button id="installBtn" type="button">Als App installieren</button>
     <div id="installHint">Tippe auf das Teilen-Symbol <svg width="14" height="17" viewBox="0 0 14 17" fill="none" stroke="currentColor" stroke-width="1.4" style="vertical-align:-3px"><path d="M7 1v10M3.5 4.5 7 1l3.5 3.5M4.5 7H1.5v9h11V7h-3"/></svg> und dann auf <b>„Zum Home-Bildschirm“</b>.</div>
   </div>
@@ -175,7 +175,7 @@ import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
 
 /* ---------------------------------------------------------------
-   Sammlung: fünf Säle, einundvierzig Bilder, zwei Skulpturen
+   Sammlung: sechs Säle, fünfzig Bilder, drei Skulpturen
 --------------------------------------------------------------- */
 const ROOM_W = 16;   // Breite (X) je Saal
 const ROOM_D = 14;   // Tiefe (Z)
@@ -313,6 +313,31 @@ const ROOMS = [
       { title: 'Zwei Tahitianerinnen', artist: 'Paul Gauguin, 1899', url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Two_Tahitian_Women_MET_DT1342.jpg/1280px-Two_Tahitian_Women_MET_DT1342.jpg', ratio: 1.291 },
     ],
   },
+  {
+    // vor Saal V, ganz vorn — Altsteinzeit; in der Mitte steht die Venus von Willendorf (SCULPTURES), daher keine Bank
+    name: 'Saal VI — Höhlenmalerei',
+    cell: [1, -2],
+    accent: 0x4a3324,      // Erdbraun wie Ocker und Höhlenlehm
+    floor: 0xf0e2cc,
+    // Rückwand hat den Durchgang zu Saal V — zwei Bilder
+    back: [
+      { title: 'Gefleckte Pferde', artist: 'Grotte du Pech Merle, Lot · um 23 000 v. Chr.', url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Chevaux_ponctu%C3%A9s_de_la_grotte_du_Pech_Merle.jpg/1280px-Chevaux_ponctu%C3%A9s_de_la_grotte_du_Pech_Merle.jpg', ratio: 0.75 },
+      { title: 'Saal der Stiere: Auerochsen und Pferde', artist: 'Höhle von Lascaux, Dordogne · um 15 000 v. Chr. · Nachbildung', url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/bf/Lascaux%2C_replica_04.JPG/1280px-Lascaux%2C_replica_04.JPG', ratio: 0.75 },
+    ],
+    front: [
+      { title: 'Saal der Stiere: Rote Kuh und Pferde', artist: 'Höhle von Lascaux, Dordogne · um 15 000 v. Chr. · Nachbildung', url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/1/19/Lascaux%2C_replica_03.JPG/1280px-Lascaux%2C_replica_03.JPG', ratio: 0.75 },
+      { title: 'Pferdefries', artist: 'Grotte Chauvet, Ardèche · um 34 000 v. Chr.', url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/0d/Chauvet%C2%B4s_cave_horses.jpg/1280px-Chauvet%C2%B4s_cave_horses.jpg', ratio: 0.991 },
+      { title: 'Löwenfries', artist: 'Grotte Chauvet, Ardèche · um 34 000 v. Chr. · Nachbildung', url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2d/Lions_painting%2C_Chauvet_Cave_%28museum_replica%29.jpg/1280px-Lions_painting%2C_Chauvet_Cave_%28museum_replica%29.jpg', ratio: 0.854 },
+    ],
+    left: [
+      { title: 'Das „Chinesische Pferd“', artist: 'Höhle von Lascaux, Dordogne · um 15 000 v. Chr. · Nachbildung', url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/42/Lascaux%2C_horse.JPG/1280px-Lascaux%2C_horse.JPG', ratio: 0.957 },
+      { title: 'Saal der Stiere: Großer Auerochse', artist: 'Höhle von Lascaux, Dordogne · um 15 000 v. Chr. · Nachbildung', url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/35/Lascaux%2C_replica_05.JPG/1280px-Lascaux%2C_replica_05.JPG', ratio: 0.75 },
+    ],
+    right: [
+      { title: 'Bisons im Salon noir', artist: 'Grotte de Niaux, Ariège · um 12 000 v. Chr. · Nachbildung', url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/b/b8/Niaux%2C_bisons.JPG/1280px-Niaux%2C_bisons.JPG', ratio: 0.75 },
+      { title: 'Zwei Bisons', artist: 'Grotte de Niaux, Ariège · um 12 000 v. Chr. · Nachbildung', url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/31/Niaux-bisons-affrontes.jpg/1280px-Niaux-bisons-affrontes.jpg', ratio: 0.75 },
+    ],
+  },
 ];
 
 // Zusätzliche Gemälde an den Trennwänden zwischen den Sälen — je Wandsegment
@@ -335,15 +360,19 @@ const DIVIDER_PAINTINGS = {
   ],
 };
 
-// Skulpturen in der Mitte von Saal IV. Position in Saalkoordinaten (x, z);
+// Skulpturen in der Mitte von Saal IV und VI. Position in Saalkoordinaten (x, z);
 // height = Höhe der Figur in Metern, plinth = Sockel [Breite, Höhe, Tiefe],
-// turnSecs = Dauer einer Umdrehung auf dem Drehteller.
+// turnSecs = Dauer einer Umdrehung auf dem Drehteller. flip dreht Schild und
+// Strahler zur Rückwand, wenn man den Saal von dort betritt; stone färbt den Scan als Stein.
 // Die Modelle sind Draco-komprimierte GLBs im Ordner models/ (Quellen siehe README).
 const SCULPTURES = [
   { room: 3, x: 5.4, z: 7.6, title: 'David', artist: 'Michelangelo Buonarroti, 1501–1504',
     url: 'models/david.glb', height: 4.2, plinth: [1.9, 0.9, 1.9], marble: true, rotY: Math.PI, light: 60, turnSecs: 60 },
   { room: 3, x: 10.6, z: 7.6, title: 'Goldmaske des Tutanchamun', artist: 'Ägypten, 18. Dynastie, um 1323 v. Chr.',
     url: 'models/tutanchamun.glb', height: 0.54, plinth: [0.8, 1.15, 0.8], vitrine: 0.8, rotY: Math.PI, light: 25, turnSecs: 40 },
+  // Original 11 cm hoch — hier vierfach vergrößert, also 44 cm
+  { room: 5, x: 8, z: 7, title: 'Venus von Willendorf · vierfach vergrößert', artist: 'Gravettien, Niederösterreich, um 27 500 v. Chr.',
+    url: 'models/venus.glb', height: 0.444, plinth: [0.9, 1.1, 0.9], marble: true, stone: 0xc9a77e, rotY: 0, flip: true, light: 25, turnSecs: 45 },
 ];
 
 // Saal an Rasterposition bzw. an einem Weltpunkt; -1, wenn dort keiner liegt
@@ -967,6 +996,12 @@ const BENCH_L = 2.6;    // Länge (X) — längs zu den Bilderwänden
 const BENCH_D = 0.72;   // Tiefe (Z)
 const BENCH_H = 0.46;   // Sitzhöhe
 const SEAT_T = 0.16;    // Polsterdicke
+const benches = [];     // Weltmitten der Bänke — für das Darübersteigen
+
+// Steht der Besucher auf einer Bank? Ein Fußbreit Vorlauf, damit er schon beim Aufsetzen steigt
+function onBench(x, z) {
+  return benches.some((b) => Math.abs(x - b.x) < BENCH_L / 2 + 0.15 && Math.abs(z - b.z) < BENCH_D / 2 + 0.15);
+}
 
 function buildBench(color) {
   const group = new THREE.Group();
@@ -1233,12 +1268,12 @@ function buildRoom(index, def) {
     });
   }
 
-  // Bank in der Saalmitte, quer zur Laufrichtung — mit eigenem Collider
+  // Bank in der Saalmitte, quer zur Laufrichtung — kein Hindernis, man steigt darüber
   if (def.bench !== undefined) {
     const bench = buildBench(def.bench);
     bench.position.set(ROOM_W / 2, 0, ROOM_D / 2);
     group.add(bench);
-    addCollider(originX + ROOM_W / 2, originZ + ROOM_D / 2, BENCH_L, BENCH_D);
+    benches.push({ x: originX + ROOM_W / 2, z: originZ + ROOM_D / 2 });
   }
 
   // Drei Bilder je Wand, zwei mit mehr Breite — oder zwei neben einem Durchgang
@@ -1295,6 +1330,7 @@ function buildSculpture(def) {
   const [pw, ph, pd] = def.plinth;
   const group = new THREE.Group();
   group.position.set(x, 0, z);
+  if (def.flip) group.rotation.y = Math.PI;
 
   const plinth = new THREE.Mesh(new THREE.BoxGeometry(pw, ph, pd), plinthMat);
   plinth.position.y = ph / 2;
@@ -1302,7 +1338,7 @@ function buildSculpture(def) {
   occluders.push(plinth);
   addCollider(x, z, pw, pd);
 
-  // Schild vorn am Sockel, zum Eingang aus Saal II (−Z) gewandt
+  // Schild vorn am Sockel, zum Eingang aus Saal II (−Z) gewandt — mit flip zur Rückwand (+Z)
   const placard = new THREE.Mesh(
     new THREE.PlaneGeometry(0.72, 0.18),
     new THREE.MeshBasicMaterial({ map: makePlacardTexture(def.title, def.artist) })
@@ -1352,10 +1388,10 @@ function buildSculpture(def) {
     const model = gltf.scene;
     model.traverse((o) => {
       if (!o.isMesh) return;
-      // Der David-Scan bringt weder Normalen noch Material mit
+      // Die Scans (David, Venus) bringen weder brauchbare Normalen noch Material mit
       if (def.marble) {
         o.geometry.computeVertexNormals();
-        o.material = marbleMat;
+        o.material = def.stone ? new THREE.MeshStandardMaterial({ color: def.stone, roughness: 0.85, metalness: 0 }) : marbleMat;
       } else if (o.material.map) {
         // Gold wirkt ohne Umgebungsspiegelung fast schwarz — wie bei den
         // Gemälden trägt die Farbtextur einen Teil selbst (emissiv)
@@ -1734,7 +1770,7 @@ function exitFocus() {
 // Klick auf den Boden: sanft zum angeklickten Punkt gehen, Blickrichtung bleibt erhalten
 function travelTo(point) {
   const target = point.clone();
-  target.y = EYE_H;
+  target.y = EYE_H + (onBench(target.x, target.z) ? BENCH_H : 0);
   resolveCollision(target);
 
   // Der Weg ist eine Gerade auf Augenhöhe — seit es Trennwände gibt, muss er
@@ -2044,7 +2080,9 @@ function animate() {
       camera.position.z += -cosY * stepFwd - sinY * stepSide;
     }
 
-    camera.position.y = EYE_H;
+    // Über eine Bank steigt man hinweg: die Augenhöhe hebt sich sanft um die Sitzhöhe
+    const eyeY = EYE_H + (onBench(camera.position.x, camera.position.z) ? BENCH_H : 0);
+    camera.position.y += (eyeY - camera.position.y) * Math.min(1, dt * 10);
     resolveCollision(camera.position);
     updateRoomLabel();
   }
