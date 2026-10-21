@@ -1,6 +1,6 @@
 # 3D Museum
 
-A walkable 3D art gallery in the browser — six themed halls (Portrait, Landscape, Modern, Sculpture, Gauguin, Cave painting), forty-nine pictures, a live-rendered Mandelbrot spiral and three 3D sculptures, built with [Three.js](https://threejs.org/). Single self-contained `index.html`, no build step, no dependencies to install.
+A walkable 3D art gallery in the browser — six themed halls (Portrait, Landscape, Modern, Sculpture, Gauguin, Cave painting), forty-nine pictures, a live-rendered Mandelbrot spiral and four 3D sculptures, built with [Three.js](https://threejs.org/). Single self-contained `index.html`, no build step, no dependencies to install.
 
 **[Live demo →](https://helmutqualtinger.github.io/Museum3d/)**
 
@@ -12,9 +12,11 @@ A walkable 3D art gallery in the browser — six themed halls (Portrait, Landsca
 - Six galleries: Portrait, Landscape and Modern art in an enfilade, plus a Sculpture hall behind and a Gauguin hall in front of the Landscape hall, and a Cave-painting hall in front of that — each with its own accent color and lighting, joined by wide doorways
 - Polished marble floor in a checkerboard of light and grey slabs, generated procedurally at startup — no texture files to download
 - Forty-nine pictures loaded from Wikimedia Commons, each lit by a narrow spot that picks out the artwork without washing it out
-- Three 3D sculptures, each slowly turning on a turntable: Michelangelo's David and the golden mask of Tutankhamun in the Sculpture hall, and the Venus of Willendorf enlarged fourfold (44 cm instead of 11 cm) in the Cave-painting hall
+- Four 3D sculptures, each slowly turning on a turntable: Michelangelo's David in the Sculpture hall, the golden mask of Tutankhamun and the bust of Nefertiti (both enlarged threefold — Nefertiti wearing sunglasses, Tutankhamun smoking a glowing cigarette) in the Portrait hall, and the Venus of Willendorf enlarged twelvefold (1.33 m instead of 11 cm) in the Cave-painting hall
 - Hovering a painting shows its title and artist; clicking walks you up to it, even from another hall
+- Every painting and sculpture has a short German explanation of the work and the artist — open it with **ⓘ Über das Werk** in the close-up or by clicking a sculpture — and can be read aloud with the browser's most natural German voice
 - Collision detection against walls so you can't walk through them; benches are no obstacle — you step over them
+- Quiet cool jazz in the background, synthesised live in the browser (electric piano, walking bass, brushes, vibraphone — no vocals, no audio files); toggle it with the ♪ button
 - Works on touch devices: drag to look, tap to select
 - Open Graph / Twitter Card metadata, so shared links render a preview card
 
@@ -33,10 +35,10 @@ A walkable 3D art gallery in the browser — six themed halls (Portrait, Landsca
 
 | Hall | Works |
 | --- | --- |
-| I — Porträt | Mona Lisa · Mädchen mit dem Perlenohrring · Selbstbildnis (Rembrandt) · Selbstbildnis (van Gogh) · Die Arnolfini-Hochzeit |
+| I — Porträt | *Goldmaske des Tutanchamun* (3D, 3×) · *Büste der Nofretete* (3D, 3×) · Mona Lisa · Mädchen mit dem Perlenohrring · Selbstbildnis (Rembrandt) · Selbstbildnis (van Gogh) · Die Arnolfini-Hochzeit |
 | II — Landschaft | Sternennacht · Impression, Sonnenaufgang · Der Wanderer über dem Nebelmeer · Die große Welle vor Kanagawa · Die letzte Fahrt der Temeraire |
 | III — Moderne | Der Kuss · Der Schrei · Blaues Pferd I · Komposition VIII · Komposition II in Rot, Blau und Gelb |
-| IV — Skulptur | *David* (3D) · *Goldmaske des Tutanchamun* (3D) · Dame mit dem Hermelin · Das Abendmahl · Johannes der Täufer · Die Verkündigung · Felsgrottenmadonna (Leonardo) · Die Erschaffung Adams · Tondo Doni · Die Delphische Sibylle · Das Jüngste Gericht (Michelangelo) |
+| IV — Skulptur | *David* (3D) · Dame mit dem Hermelin · Das Abendmahl · Johannes der Täufer · Die Verkündigung · Felsgrottenmadonna (Leonardo) · Die Erschaffung Adams · Tondo Doni · Die Delphische Sibylle · Das Jüngste Gericht (Michelangelo) |
 | V — Gauguin | Vision nach der Predigt · Ia Orana Maria · Woher kommen wir? Wer sind wir? Wohin gehen wir? · Arearea · Der gelbe Christus · Selbstbildnis · Manaò tupapaú · Zwei Tahitianerinnen |
 | VI — Höhlenmalerei | *Venus von Willendorf* (3D, 4×) · Lascaux: Saal der Stiere (3 Ausschnitte), Das „Chinesische Pferd“ · Chauvet: Pferdefries, Löwenfries · Niaux: Bisons im Salon noir, Zwei Bisons · Pech Merle: Gefleckte Pferde |
 
@@ -48,7 +50,8 @@ All images are served from Wikimedia Commons. The paintings are public-domain re
 
 - **David** — [Scan the World](https://www.myminifactory.com/scantheworld/), via [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:David_(Michelangelo).stl), CC BY-SA 4.0; decimated to ~144k triangles
 - **Tutankhamun mask** — [vmmaniac on Sketchfab](https://sketchfab.com/3d-models/tutankhamun-mask-hunyuan-f79ba82300cc4b9b9637d94f8959e970), CC BY 4.0 (an AI-assisted reconstruction, not a scan); textures reduced to 1024 px
-- **Venus of Willendorf** — [Scan the World](https://www.myminifactory.com/scantheworld/), via [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Scan_the_World_-_Venus_of_Willendorf.stl), CC BY-SA 4.0; decimated to 110k triangles, shown at 4× the original 11 cm
+- **Venus of Willendorf** — [Scan the World](https://www.myminifactory.com/scantheworld/), via [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Scan_the_World_-_Venus_of_Willendorf.stl), CC BY-SA 4.0; decimated to 110k triangles, shown at 12× the original 11 cm
+- **Nefertiti** — [Scan the World](https://www.myminifactory.com/object/3d-print-bust-of-nefertiti-at-the-egyptian-museum-berlin-2951), via [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Bust_of_Nefertiti_at_the_Neues_Museum,_Berlin.stl), CC0; decimated to 120k triangles, the scan is colourless — collar, skin, diadem and crown are tinted by zone as vertex colours
 
 ## Running locally
 

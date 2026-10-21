@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Galerie der Meister — begehbares 3D-Museum</title>
-<meta name="description" content="Ein begehbares 3D-Museum im Browser: sechs Säle, neunundvierzig Werke von der Höhlenmalerei aus Lascaux und Chauvet bis Kandinsky und ein Mandelbrot-Fraktal, dazu Michelangelos David, die Venus von Willendorf und die Goldmaske des Tutanchamun in 3D. Ziehen zum Umsehen, klicken zum Gehen — ohne Installation.">
+<meta name="description" content="Ein begehbares 3D-Museum im Browser: sechs Säle, neunundvierzig Werke von der Höhlenmalerei aus Lascaux und Chauvet bis Kandinsky und ein Mandelbrot-Fraktal, dazu Michelangelos David, die Venus von Willendorf, Nofretete und die Goldmaske des Tutanchamun in 3D. Ziehen zum Umsehen, klicken zum Gehen — ohne Installation.">
 <link rel="canonical" href="https://helmutqualtinger.github.io/Museum3d/">
 <meta name="theme-color" content="#0a0806">
 
@@ -22,7 +22,7 @@
 <meta property="og:site_name" content="Galerie der Meister">
 <meta property="og:locale" content="de_DE">
 <meta property="og:title" content="Galerie der Meister — begehbares 3D-Museum">
-<meta property="og:description" content="Sechs Säle, neunundvierzig Werke von der Höhlenmalerei aus Lascaux und Chauvet bis Kandinsky und ein Mandelbrot-Fraktal, dazu Michelangelos David, die Venus von Willendorf und die Maske des Tutanchamun in 3D. Ziehen zum Umsehen, klicken zum Gehen — direkt im Browser, ohne Installation.">
+<meta property="og:description" content="Sechs Säle, neunundvierzig Werke von der Höhlenmalerei aus Lascaux und Chauvet bis Kandinsky und ein Mandelbrot-Fraktal, dazu Michelangelos David, die Venus von Willendorf, Nofretete und die Maske des Tutanchamun in 3D. Ziehen zum Umsehen, klicken zum Gehen — direkt im Browser, ohne Installation.">
 <meta property="og:url" content="https://helmutqualtinger.github.io/Museum3d/">
 <meta property="og:image" content="https://helmutqualtinger.github.io/Museum3d/docs/og-image.jpg">
 <meta property="og:image:type" content="image/jpeg">
@@ -32,7 +32,7 @@
 
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Galerie der Meister — begehbares 3D-Museum">
-<meta name="twitter:description" content="Sechs Säle, neunundvierzig Werke von der Höhlenmalerei aus Lascaux und Chauvet bis Kandinsky und ein Mandelbrot-Fraktal, dazu Michelangelos David, die Venus von Willendorf und die Maske des Tutanchamun in 3D. Ziehen zum Umsehen, klicken zum Gehen — direkt im Browser.">
+<meta name="twitter:description" content="Sechs Säle, neunundvierzig Werke von der Höhlenmalerei aus Lascaux und Chauvet bis Kandinsky und ein Mandelbrot-Fraktal, dazu Michelangelos David, die Venus von Willendorf, Nofretete und die Maske des Tutanchamun in 3D. Ziehen zum Umsehen, klicken zum Gehen — direkt im Browser.">
 <meta name="twitter:image" content="https://helmutqualtinger.github.io/Museum3d/docs/og-image.jpg">
 <meta name="twitter:image:alt" content="Blick durch den Saal Porträt mit Rembrandts Selbstbildnis, durch einen breiten Durchgang in den Saal Landschaft.">
 
@@ -58,6 +58,41 @@
     border: 1px solid #6b5f4f; border-radius: 2px; padding: 9px 18px; cursor: pointer;
   }
   #backBtn:hover { background: rgba(44,35,26,0.92); border-color: #d8b978; }
+  #infoBtn {
+    position: fixed; top: 64px; right: 22px; z-index: 6; display: none;
+    font-family: 'Georgia', serif; font-size: 12px; letter-spacing: 0.08em; color: #e8dfd0;
+    background: rgba(12,10,8,0.78); border: 1px solid #6b5f4f; border-radius: 2px; padding: 8px 14px; cursor: pointer;
+  }
+  #infoBtn:hover { border-color: #d8b978; }
+  /* Infofeld zu Werk und Künstler — rechts, auf schmalen Bildschirmen unten */
+  #info {
+    position: fixed; top: 108px; right: 22px; width: min(380px, calc(100vw - 44px)); max-height: calc(100vh - 170px);
+    overflow-y: auto; z-index: 7; display: none; box-sizing: border-box; padding: 18px 20px 20px;
+    background: rgba(14,12,10,0.93); border: 1px solid #4a4136; border-radius: 3px;
+    color: #d9cfbf; font-family: 'Georgia', serif; font-size: 14px; line-height: 1.6;
+  }
+  #info h2 { font-weight: 400; font-size: 19px; color: #f0e7d8; margin: 0 28px 2px 0; line-height: 1.3; }
+  #info .by { color: #a2957d; font-style: italic; font-size: 13px; margin: 0 0 12px; }
+  #info h3 { font-weight: 400; font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; color: #d8b978; margin: 16px 0 4px; }
+  #info p { margin: 0; }
+  #info button { font: inherit; font-size: 12px; letter-spacing: 0.06em; color: #e8dfd0; background: none;
+    border: 1px solid #6b5f4f; border-radius: 2px; padding: 6px 12px; cursor: pointer; }
+  #info button:hover { border-color: #d8b978; }
+  #info #infoClose { position: absolute; top: 12px; right: 12px; border: none; font-size: 16px; padding: 2px 6px; }
+  @media (max-width: 600px) {
+    #info { top: auto; bottom: 56px; right: 10px; left: 10px; width: auto; max-height: 52vh; }
+  }
+  /* Jazz im Hintergrund: antippen schaltet ein/aus */
+  #music {
+    position: fixed; right: 18px; bottom: 14px; z-index: 6; display: none;
+    font-family: 'Georgia', serif; font-size: 12px; letter-spacing: 0.04em; color: #e8dfd0;
+  }
+  #music button {
+    font: inherit; color: inherit; background: rgba(12,10,8,0.7); border: 1px solid #4a4136;
+    border-radius: 2px; padding: 6px 12px; cursor: pointer;
+  }
+  #music button:hover { border-color: #d8b978; }
+  #music.off #musicToggle { color: #8a7c65; }
   #hud {
     position: fixed; left: 20px; bottom: 18px; color: rgba(255,255,255,0.75);
     font-family: 'Georgia', serif; font-size: 13px; letter-spacing: 0.03em;
@@ -107,7 +142,7 @@
     <div class="start" id="startBtn">Klicken zum Betreten</div>
     <div id="loadbar"><div id="loadfill"></div></div>
     <div id="loadtext">Lade hochauflösende Gemälde …</div>
-    <p class="credits">3D-Modelle: David &mdash; Scan the World (CC BY-SA 4.0) &nbsp;·&nbsp; Maske des Tutanchamun &mdash; vmmaniac (CC BY 4.0) &nbsp;·&nbsp; Venus von Willendorf &mdash; Scan the World (CC BY-SA 4.0)<br>Fotos Höhlenmalerei: Thomas T. (CC BY-SA 2.0), Céréales Killer, Christelle Molinié (CC BY-SA 4.0)</p>
+    <p class="credits">3D-Modelle: David &mdash; Scan the World (CC BY-SA 4.0) &nbsp;·&nbsp; Maske des Tutanchamun &mdash; vmmaniac (CC BY 4.0) &nbsp;·&nbsp; Venus von Willendorf &mdash; Scan the World (CC BY-SA 4.0) &nbsp;·&nbsp; Nofretete &mdash; Scan the World (CC0)<br>Fotos Höhlenmalerei: Thomas T. (CC BY-SA 2.0), Céréales Killer, Christelle Molinié (CC BY-SA 4.0)</p>
     <button id="installBtn" type="button">Als App installieren</button>
     <div id="installHint">Tippe auf das Teilen-Symbol <svg width="14" height="17" viewBox="0 0 14 17" fill="none" stroke="currentColor" stroke-width="1.4" style="vertical-align:-3px"><path d="M7 1v10M3.5 4.5 7 1l3.5 3.5M4.5 7H1.5v9h11V7h-3"/></svg> und dann auf <b>„Zum Home-Bildschirm“</b>.</div>
   </div>
@@ -156,7 +191,19 @@
 <div id="roomLabel"></div>
 <div id="tooltip"></div>
 <div id="backBtn">← Zurück</div>
-<div id="hud">Ziehen: umsehen · Klick auf den Boden: dorthin gehen · Klick auf ein Bild: Nahansicht · WASD / Scrollrad: bewegen</div>
+<div id="infoBtn">ⓘ Über das Werk</div>
+<div id="info" role="dialog" aria-label="Über das Werk">
+  <button id="infoClose" type="button" title="Schließen">✕</button>
+  <h2 id="infoTitle"></h2>
+  <p class="by" id="infoBy"></p>
+  <button id="infoRead" type="button">▶ Vorlesen</button>
+  <h3>Das Werk</h3>
+  <p id="infoWork"></p>
+  <h3 id="infoArtistHead"></h3>
+  <p id="infoArtist"></p>
+</div>
+<div id="music"><button id="musicToggle" type="button"></button></div>
+<div id="hud">Ziehen: umsehen · Klick auf den Boden: dorthin gehen · Klick auf ein Bild: Nahansicht · Klick auf eine Skulptur: Erläuterung · WASD / Scrollrad: bewegen</div>
 
 <script type="importmap">
 {
@@ -175,7 +222,7 @@ import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
 
 /* ---------------------------------------------------------------
-   Sammlung: sechs Säle, fünfzig Bilder, drei Skulpturen
+   Sammlung: sechs Säle, fünfzig Bilder, vier Skulpturen
 --------------------------------------------------------------- */
 const ROOM_W = 16;   // Breite (X) je Saal
 const ROOM_D = 14;   // Tiefe (Z)
@@ -266,7 +313,7 @@ const ROOMS = [
     ],
   },
   {
-    // hinter Saal II; in der Mitte stehen die Skulpturen (SCULPTURES), daher keine Bank
+    // hinter Saal II; in der Mitte steht David (SCULPTURES), daher keine Bank
     name: 'Saal IV — Skulptur',
     cell: [1, 1],
     accent: 0x33363c,      // Schiefergrau — der weiße Marmor hebt sich davon ab
@@ -360,7 +407,7 @@ const DIVIDER_PAINTINGS = {
   ],
 };
 
-// Skulpturen in der Mitte von Saal IV und VI. Position in Saalkoordinaten (x, z);
+// Skulpturen in Saal I, IV und VI. Position in Saalkoordinaten (x, z);
 // height = Höhe der Figur in Metern, plinth = Sockel [Breite, Höhe, Tiefe],
 // turnSecs = Dauer einer Umdrehung auf dem Drehteller. flip dreht Schild und
 // Strahler zur Rückwand, wenn man den Saal von dort betritt; stone färbt den Scan als Stein.
@@ -368,12 +415,200 @@ const DIVIDER_PAINTINGS = {
 const SCULPTURES = [
   { room: 3, x: 5.4, z: 7.6, title: 'David', artist: 'Michelangelo Buonarroti, 1501–1504',
     url: 'models/david.glb', height: 4.2, plinth: [1.9, 0.9, 1.9], marble: true, rotY: Math.PI, light: 60, turnSecs: 60 },
-  { room: 3, x: 10.6, z: 7.6, title: 'Goldmaske des Tutanchamun', artist: 'Ägypten, 18. Dynastie, um 1323 v. Chr.',
-    url: 'models/tutanchamun.glb', height: 0.54, plinth: [0.8, 1.15, 0.8], vitrine: 0.8, rotY: Math.PI, light: 25, turnSecs: 40 },
-  // Original 11 cm hoch — hier vierfach vergrößert, also 44 cm
-  { room: 5, x: 8, z: 7, title: 'Venus von Willendorf · vierfach vergrößert', artist: 'Gravettien, Niederösterreich, um 27 500 v. Chr.',
-    url: 'models/venus.glb', height: 0.444, plinth: [0.9, 1.1, 0.9], marble: true, stone: 0xc9a77e, rotY: 0, flip: true, light: 25, turnSecs: 45 },
+  // Die beiden ägyptischen Porträts stehen links und rechts der Bank in Saal I, dreifach vergrößert
+  { room: 0, x: 3.6, z: 7, title: 'Goldmaske des Tutanchamun · dreifach vergrößert', artist: 'Ägypten, 18. Dynastie, um 1323 v. Chr.',
+    url: 'models/tutanchamun.glb', height: 1.62, plinth: [1.4, 0.8, 1.4], rotY: Math.PI, light: 35, turnSecs: 40,
+    // Zigarette im linken Mundwinkel, in Metern im Halter (Gesicht nach +Z), wie die Maske dreifach groß
+    cigarette: { x: 0.04, y: 0.94, z: 0.47, dir: [0.35, -0.22, 0.9], len: 0.25, r: 0.012 } },
+  // Scan ohne Farbe — painted: Kragen, Haut, Diadem und Krone sind als Vertexfarben eingefärbt
+  { room: 0, x: 12.4, z: 7, title: 'Büste der Nofretete · dreifach vergrößert', artist: 'Thutmosis, Amarna, um 1345 v. Chr.',
+    url: 'models/nofretete.glb', height: 1.47, plinth: [1.4, 0.8, 1.4], painted: true, rotY: Math.PI, light: 35, turnSecs: 50,
+    // Sonnenbrille in Einheiten des Scans (Gesicht schaut nach +Z, Höhe 130):
+    // Gläsermitte, Abstand und Größe der Gläser, Biegung ums Gesicht, Scharnier außen an der Schläfe
+    // y vor den Augen, z so knapp wie möglich: Nase und Wangen begrenzen die unteren Glasecken
+    sunglasses: { x: 31.5, y: 74.5, z: -6.1, sep: 23, w: 16, h: 12, wrap: 0.2, taper: 0.3, armX: 21.9,
+      // Bügel als Abstand von der Mitte, Höhe, Tiefe: über den Ohransatz (Ohr bei z ≈ −30…−37,
+      // Oberkante y ≈ 73) und dahinter nach unten gebogen
+      arm: [[22.1, 79, -16], [22.5, 77, -28], [23.1, 75.5, -34], [22, 72, -39], [20, 66, -41], [18, 62, -40.5]] } },
+  // Original 11 cm hoch — hier zwölffach vergrößert, also 1,33 m
+  { room: 5, x: 8, z: 7, title: 'Venus von Willendorf · zwölffach vergrößert', artist: 'Gravettien, Niederösterreich, um 27 500 v. Chr.',
+    url: 'models/venus.glb', height: 1.332, plinth: [1.3, 0.7, 1.3], marble: true, stone: 0xc9a77e, rotY: 0, flip: true, light: 35, turnSecs: 45 },
 ];
+
+// Erläuterungen für das Infofeld: zum Werk (Schlüssel „Titel|Künstlerzeile“, genau wie oben)
+// und zum Künstler bzw. zur Herkunft (Schlüssel = Künstlerzeile bis zum ersten Komma oder „ · “)
+const ABOUT_ARTISTS = {
+  "Leonardo da Vinci":
+    "Leonardo da Vinci (1452–1519) war Maler, Bildhauer, Ingenieur und Naturforscher der italienischen Hochrenaissance. Er lernte in Florenz in der Werkstatt Verrocchios, arbeitete lange am Mailänder Hof der Sforza und starb in Frankreich im Dienst König Franz’ I. Von ihm sind nur rund fünfzehn Gemälde erhalten, dazu Tausende Notizbuchseiten über Anatomie, Optik, Wasser und Maschinen.",
+  "Johannes Vermeer":
+    "Johannes Vermeer (1632–1675) lebte und arbeitete in Delft. Er malte langsam und hinterließ nur etwa 35 Bilder, meist stille Innenräume mit einer oder zwei Figuren im Licht eines Fensters. Nach seinem Tod geriet er fast in Vergessenheit; erst im 19. Jahrhundert wurde er wiederentdeckt.",
+  "Rembrandt van Rijn":
+    "Rembrandt Harmenszoon van Rijn (1606–1669) war der bedeutendste Maler des niederländischen Goldenen Zeitalters. In Amsterdam wurde er mit Porträts und Historienbildern berühmt und wohlhabend, ging aber 1656 bankrott. Kein Maler vor ihm hat sich selbst so oft dargestellt: Rund 80 Selbstbildnisse in Öl, Radierung und Zeichnung zeigen ihn vom jungen Mann bis ins Alter.",
+  "Vincent van Gogh":
+    "Vincent van Gogh (1853–1890) begann erst mit 27 Jahren zu malen und schuf in nur zehn Jahren rund 860 Gemälde. In Paris lernte er die Impressionisten kennen, in Südfrankreich fand er seine leuchtenden Farben und den kraftvollen Pinselstrich. Zu Lebzeiten kaum beachtet, gilt er heute als einer der Begründer der modernen Malerei.",
+  "Jan van Eyck":
+    "Jan van Eyck (um 1390–1441) war Hofmaler Herzog Philipps des Guten von Burgund und arbeitete vor allem in Brügge. Er verfeinerte die Ölmalerei in dünnen, lasierenden Schichten so weit, dass Stoffe, Metall und Licht fast greifbar wirken. Mit dem Genter Altar schuf er gemeinsam mit seinem Bruder Hubert eines der Hauptwerke der frühen niederländischen Malerei.",
+  "Gustav Klimt":
+    "Gustav Klimt (1862–1918) war Mitbegründer und erster Präsident der Wiener Secession, die 1897 mit der akademischen Kunst brach. Seine Bilder verbinden Ornament, Symbolik und erotische Motive; in seiner „Goldenen Periode“ verwendete er echtes Blattgold, angeregt von byzantinischen Mosaiken in Ravenna. Er gilt als wichtigster Maler des Wiener Jugendstils.",
+  "Albrecht Dürer":
+    "Albrecht Dürer (1471–1528) aus Nürnberg war Maler, Kupferstecher und Theoretiker. Zwei Reisen nach Italien machten ihn mit der Kunst der Renaissance vertraut, die er nach Deutschland brachte. Seine Holzschnitte und Kupferstiche verbreiteten sich in ganz Europa und machten ihn schon zu Lebzeiten berühmt.",
+  "Caspar David Friedrich":
+    "Caspar David Friedrich (1774–1840) war der bedeutendste Maler der deutschen Romantik. Er lebte in Dresden und malte Landschaften als Ausdruck innerer Empfindung: Nebel, Mondlicht, Ruinen und Menschen, die man von hinten sieht. Nach seinem Tod lange vergessen, wurde er im 20. Jahrhundert wiederentdeckt.",
+  "Katsushika Hokusai":
+    "Katsushika Hokusai (1760–1849) war ein japanischer Maler und Holzschnittkünstler der Edo-Zeit. In seinem langen Leben benutzte er über dreißig Künstlernamen und schuf Zehntausende Bilder, Holzschnitte und Skizzen, darunter die „Manga“-Skizzenbücher. Seine Drucke beeinflussten im 19. Jahrhundert die europäischen Impressionisten stark.",
+  "William Turner":
+    "Joseph Mallord William Turner (1775–1851) war ein englischer Maler, der schon mit 14 Jahren an der Royal Academy studierte. Er malte Licht, Wetter, Dampf und Meer immer freier, bis sich die Formen in Farbe auflösten. Seinen Nachlass von fast 300 Gemälden und Tausenden Zeichnungen vermachte er der britischen Nation.",
+  "Edvard Munch":
+    "Edvard Munch (1863–1944) war ein norwegischer Maler und Grafiker. Krankheit und Tod in seiner Familie prägten seine Kunst, die Angst, Liebe, Eifersucht und Einsamkeit darstellt. Mit seinem „Lebensfries“ wurde er zu einem Wegbereiter des Expressionismus.",
+  "Franz Marc":
+    "Franz Marc (1880–1916) war ein Münchner Maler und gründete 1911 mit Wassily Kandinsky die Künstlergruppe „Der Blaue Reiter“. Er malte vor allem Tiere, in denen er eine reinere, unverdorbene Natur sah, und gab den Farben eine eigene Bedeutung. Er fiel 1916 im Ersten Weltkrieg bei Verdun.",
+  "Wassily Kandinsky":
+    "Wassily Kandinsky (1866–1944) wurde in Moskau geboren und gab eine Laufbahn als Jurist auf, um in München Maler zu werden. Er gilt als einer der Begründer der abstrakten Malerei und verglich Farben und Formen mit Tönen und Klängen der Musik. Von 1922 bis 1933 lehrte er am Bauhaus.",
+  "Piet Mondrian":
+    "Piet Mondrian (1872–1944) war ein niederländischer Maler, der von naturalistischen Landschaften über den Kubismus zur reinen Abstraktion fand. Mit der Gruppe De Stijl entwickelte er den „Neoplastizismus“: nur waagrechte und senkrechte Linien, die drei Grundfarben sowie Schwarz, Weiß und Grau. Seine Bildsprache prägte Architektur, Design und Mode bis heute.",
+  "Henri Matisse":
+    "Henri Matisse (1869–1954) war der führende Kopf der Fauves, der „Wilden“, die um 1905 Farbe frei und unabhängig von der Natur einsetzten. Neben Picasso gilt er als wichtigster Künstler der klassischen Moderne. Im Alter, als er kaum noch malen konnte, schuf er mit der Schere farbige Scherenschnitte.",
+  "Paul Klee":
+    "Paul Klee (1879–1940) wurde bei Bern geboren und war Maler, Grafiker und Musiker. Er lehrte von 1921 bis 1931 am Bauhaus und schuf rund 10 000 Werke, oft kleinformatig, poetisch und voller Humor. Die Nationalsozialisten diffamierten seine Kunst als „entartet“; er kehrte 1933 in die Schweiz zurück.",
+  "Michelangelo Buonarroti":
+    "Michelangelo Buonarroti (1475–1564) war Bildhauer, Maler, Architekt und Dichter der italienischen Renaissance. Er arbeitete für die Medici in Florenz und für mehrere Päpste in Rom, wo er die Decke und die Altarwand der Sixtinischen Kapelle ausmalte und die Kuppel des Petersdoms entwarf. Schon zu Lebzeiten nannte man ihn „il Divino“, den Göttlichen.",
+  "Paul Gauguin":
+    "Paul Gauguin (1848–1903) war zunächst Börsenmakler und malte als Sonntagsmaler, bevor er 1883 ganz zur Kunst wechselte. In der Bretagne entwickelte er mit flächigen Farben und dunklen Umrissen den „Synthetismus“; 1891 zog er nach Tahiti, später auf die Marquesas-Inseln, wo er starb. Seine Suche nach dem „Ursprünglichen“ beeinflusste die Moderne stark — sein Bild der Südsee und sein Umgang mit sehr jungen einheimischen Frauen werden heute kritisch gesehen.",
+  "Grotte du Pech Merle":
+    "Die Höhle Pech Merle bei Cabrerets im Département Lot wurde 1922 von zwei Jugendlichen entdeckt. Sie enthält Malereien und Gravuren aus mehreren Epochen der Altsteinzeit, darunter Handnegative, Mammuts und Fußspuren in Lehm. Anders als Lascaux und Chauvet kann man das Original bis heute in kleinen Gruppen besuchen.",
+  "Höhle von Lascaux":
+    "Die Höhle von Lascaux im Tal der Vézère (Dordogne) wurde 1940 von vier Jugendlichen entdeckt. Ihre rund 600 Malereien und 1500 Gravuren sind etwa 17 000 Jahre alt. Weil Atemluft und Licht der Besucher Algen und Schimmel wachsen ließen, ist das Original seit 1963 geschlossen; zu sehen sind originalgetreue Nachbildungen wie Lascaux II und Lascaux IV.",
+  "Grotte Chauvet":
+    "Die Grotte Chauvet in der Ardèche wurde im Dezember 1994 von Jean-Marie Chauvet, Éliette Brunel und Christian Hillaire entdeckt. Ihre Bilder sind rund 36 000 Jahre alt und damit mehr als doppelt so alt wie die von Lascaux. Die Höhle ist UNESCO-Welterbe und für die Öffentlichkeit gesperrt; seit 2015 zeigt eine Nachbildung, die „Grotte Chauvet 2“, ihre Bilder.",
+  "Grotte de Niaux":
+    "Die Grotte de Niaux liegt in den Pyrenäen im Département Ariège. Ihr „Salon noir“, tief im Berg, enthält Bisons, Pferde, Steinböcke und Hirsche, mit Holzkohle und Manganoxid gezeichnet, etwa 14 000 Jahre alt. Niaux gehört zu den wenigen Bilderhöhlen, deren Original man noch besuchen kann, mit Taschenlampen in kleinen Gruppen.",
+  "James McNeill Whistler":
+    "James Abbott McNeill Whistler (1834–1903) war ein amerikanischer Maler, der vor allem in Paris und London lebte. Er vertrat die Idee „l’art pour l’art“ — Kunst um ihrer selbst willen — und gab seinen Bildern musikalische Titel wie „Arrangement“, „Nocturne“ oder „Symphonie“. Berühmt wurde auch sein Prozess gegen den Kritiker John Ruskin.",
+  "Claude Monet":
+    "Claude Monet (1840–1926) war der Mittelpunkt der Impressionisten, die im Freien malten, um das wechselnde Licht einzufangen. Er malte dasselbe Motiv oft in ganzen Serien zu verschiedenen Tageszeiten, etwa Heuhaufen oder die Kathedrale von Rouen. Ab 1883 lebte er in Giverny, wo sein Garten mit dem Seerosenteich zum Hauptmotiv seiner späten Jahre wurde.",
+  "John Constable":
+    "John Constable (1776–1837) war ein englischer Landschaftsmaler aus Suffolk. Er malte immer wieder die Gegend seiner Kindheit am Fluss Stour und studierte Wolken und Himmel in zahlreichen Ölskizzen unter freiem Himmel. In Frankreich, wo er 1824 eine Goldmedaille gewann, beeinflusste er die Maler von Barbizon und später die Impressionisten.",
+  "Fraktal nach Benoît Mandelbrot":
+    "Benoît Mandelbrot (1924–2010) war ein französisch-amerikanischer Mathematiker, der lange bei IBM forschte. Er prägte 1975 den Begriff „Fraktal“ für Formen, die sich in immer kleineren Maßstäben selbst ähneln, wie Küstenlinien, Wolken oder Farne. Die nach ihm benannte Menge wurde um 1980 erstmals mit Computern sichtbar gemacht und zu einem Symbol der Chaosforschung.",
+  "Henri Rousseau":
+    "Henri Rousseau (1844–1910) war Zollbeamter in Paris — daher sein Spitzname „le Douanier“, der Zöllner — und brachte sich das Malen selbst bei. Seine Dschungelbilder entstanden nach Besuchen im Botanischen Garten und im Zoo; Frankreich hat er nie verlassen. Zunächst belächelt, wurde er von Picasso und den Avantgardisten verehrt und gilt als Hauptvertreter der naiven Malerei.",
+  "Ägypten":
+    "Tutanchamun bestieg um 1332 v. Chr. als etwa neunjähriges Kind den Thron und starb um 1323 v. Chr. mit rund 19 Jahren. Unter ihm kehrte Ägypten nach der Amarna-Zeit Echnatons zum alten Götterglauben zurück. Politisch war er ein unbedeutender Herrscher; berühmt wurde er erst durch sein fast unberührtes Grab im Tal der Könige, das Howard Carter 1922 fand.",
+  "Thutmosis":
+    "Thutmosis war Oberbildhauer am Hof des Pharaos Echnaton in der neu gegründeten Hauptstadt Amarna. Sein Name ist durch eine Inschrift auf einer Scheuklappe aus Elfenbein bekannt, die in seinem Haus gefunden wurde. Seine Werkstatt enthielt zahlreiche Bildnisse der Königsfamilie, viele davon unvollendet — sie zeigen, wie die Bildhauer der Amarna-Zeit arbeiteten.",
+  "Gravettien":
+    "Das Gravettien ist eine Kultur der jüngeren Altsteinzeit vor etwa 33 000 bis 22 000 Jahren, benannt nach dem Fundort La Gravette in der Dordogne. Die Menschen jagten Mammut, Rentier und Pferd und lebten teils in großen Lagern. Aus dieser Zeit stammen zahlreiche kleine Frauenfiguren aus Stein, Elfenbein und Ton, die zwischen Frankreich und Sibirien gefunden wurden.",
+};
+const ABOUT_WORKS = {
+  "Mona Lisa|Leonardo da Vinci, um 1503":
+    "Das Bildnis zeigt sehr wahrscheinlich Lisa Gherardini, die Frau des Florentiner Seidenhändlers Francesco del Giocondo. Leonardo begann es um 1503 und arbeitete bis zu seinem Lebensende daran. Mit dem „Sfumato“, weichen Übergängen ohne harte Umrisse, wirken Gesicht und Lächeln lebendig und schwer zu fassen. 1911 wurde das Bild aus dem Louvre gestohlen und erst zwei Jahre später in Florenz wiedergefunden — seitdem ist es das berühmteste Gemälde der Welt.",
+  "Mädchen mit dem Perlenohrring|Johannes Vermeer, 1665":
+    "Das Bild ist kein Porträt einer bestimmten Person, sondern eine „Tronie“ — eine Studie von Kopf, Ausdruck und Kostüm. Das Mädchen trägt einen exotischen Turban und eine übergroße Perle; der dunkle Hintergrund lässt Gesicht und Licht hervortreten. Für das Blau verwendete Vermeer kostbares Ultramarin aus Lapislazuli. Das kleine Bild hängt im Mauritshuis in Den Haag.",
+  "Selbstbildnis|Rembrandt van Rijn, 1659":
+    "Rembrandt malte dieses Selbstbildnis drei Jahre nach seinem Bankrott, mit 53 Jahren. Er zeigt sich ohne Beschönigung: müde Augen, Falten, eine schwere, gealterte Haut, aufgebaut aus dicken, kräftigen Farbschichten. Das Licht fällt nur auf das Gesicht, alles andere versinkt im Dunkel. Das Bild gehört der National Gallery of Art in Washington.",
+  "Selbstbildnis|Vincent van Gogh, 1889":
+    "Van Gogh malte dieses Selbstbildnis im September 1889 in der Heilanstalt von Saint-Rémy-de-Provence, in die er sich nach seinen Krisen selbst begeben hatte. Hintergrund und Anzug sind in dasselbe kühle Blau getaucht und von wirbelnden Pinselstrichen durchzogen, aus denen das orangerote Haar hervorleuchtet. Es ist eines seiner letzten Selbstbildnisse; heute hängt es im Musée d’Orsay in Paris.",
+  "Die Arnolfini-Hochzeit|Jan van Eyck, 1434":
+    "Das Doppelbildnis zeigt den Kaufmann Giovanni Arnolfini aus Lucca und seine Frau in ihrem Haus in Brügge. Jedes Detail — Hündchen, Kronleuchter, Orangen, Holzschuhe — ist mit größter Genauigkeit in Öl gemalt. Im gewölbten Spiegel an der Rückwand erscheinen zwei weitere Personen, darüber steht die Inschrift „Johannes de eyck fuit hic 1434“ — „Jan van Eyck war hier“. Ob tatsächlich eine Hochzeit dargestellt ist, ist bis heute umstritten.",
+  "Bildnis Adele Bloch-Bauer I|Gustav Klimt, 1907":
+    "Adele Bloch-Bauer war die Frau eines Wiener Zuckerindustriellen und eine Gönnerin Klimts. Ihr Gesicht und ihre Hände sind fein gemalt, Kleid und Hintergrund dagegen lösen sich in Ornamenten aus Blattgold auf. 1938 raubten die Nationalsozialisten das Bild; erst 2006 erhielt die Erbin Maria Altmann es nach einem langen Rechtsstreit zurück. Heute hängt es in der Neuen Galerie in New York.",
+  "Selbstbildnis im Pelzrock|Albrecht Dürer, 1500":
+    "Dürer zeigt sich mit 28 Jahren streng von vorn, symmetrisch und mit langem, gelocktem Haar — eine Haltung, die bis dahin Christusbildern vorbehalten war. Er verstand die Fähigkeit des Künstlers, zu erschaffen, als göttliche Gabe. Jedes Haar und jedes Härchen des Pelzes ist einzeln gemalt. Das Bild hängt in der Alten Pinakothek in München.",
+  "Sternennacht|Vincent van Gogh, 1889":
+    "Van Gogh malte die „Sternennacht“ im Juni 1889 in der Heilanstalt von Saint-Rémy, nach dem Blick aus seinem Fenster vor Sonnenaufgang — das Dorf fügte er aus der Erinnerung hinzu. Über den Himmel ziehen Wirbel, elf Sterne und ein leuchtender Mond, im Vordergrund ragt eine dunkle Zypresse wie eine Flamme auf. Er selbst hielt das Bild nicht für gelungen. Heute ist es eines der bekanntesten Gemälde überhaupt und hängt im Museum of Modern Art in New York.",
+  "Der Wanderer über dem Nebelmeer|Caspar David Friedrich, 1818":
+    "Ein Mann steht auf einem Felsen und blickt über ein Meer aus Nebel, aus dem Gipfel ragen. Wir sehen ihn nur von hinten, als „Rückenfigur“ — so schauen wir mit ihm in die Landschaft. Das Bild verbindet die Erhabenheit der Natur mit der Frage nach dem Platz des Menschen darin und gilt als Sinnbild der Romantik. Es gehört der Hamburger Kunsthalle.",
+  "Die große Welle vor Kanagawa|Katsushika Hokusai, um 1831":
+    "Der Farbholzschnitt stammt aus der Serie „36 Ansichten des Berges Fuji“. Eine riesige Welle mit krallenartiger Gischt droht drei Boote zu verschlingen, während der Fuji klein und ruhig im Hintergrund steht. Hokusai verwendete das neue, aus Europa eingeführte Preußischblau. Von dem Druck existieren Hunderte Abzüge; er ist eines der bekanntesten Bilder der Welt.",
+  "Die letzte Fahrt der Temeraire|William Turner, 1839":
+    "Die „Temeraire“ war ein Kriegsschiff mit 98 Kanonen, das 1805 in der Schlacht von Trafalgar gekämpft hatte. 1838 wurde es von einem kleinen, dunklen Dampfschlepper die Themse hinauf zum Abwracken gezogen. Turner stellt den Abschied des Segelzeitalters vor einem glühenden Sonnenuntergang dar. Er nannte das Bild „mein Liebling“ und verkaufte es nie; heute hängt es in der National Gallery in London.",
+  "Der Kuss|Gustav Klimt, 1908":
+    "Ein Liebespaar kniet am Rand einer Blumenwiese, eingehüllt in einen gemeinsamen goldenen Mantel. Das Gewand des Mannes trägt eckige, das der Frau runde und blumige Ornamente. Das Bild entstand auf dem Höhepunkt von Klimts „Goldener Periode“ und wurde noch während seiner ersten Ausstellung 1908 vom österreichischen Staat gekauft. Es hängt im Oberen Belvedere in Wien.",
+  "Der Schrei|Edvard Munch, 1893":
+    "Eine Gestalt mit totenkopfartigem Gesicht hält sich auf einer Brücke die Ohren zu, während der Himmel in Rot und Orange zu wogen scheint. Munch beschrieb ein Erlebnis bei Sonnenuntergang in Kristiania, dem heutigen Oslo: Er habe einen „unendlichen Schrei durch die Natur“ gespürt. Es gibt mehrere Fassungen; diese von 1893 in Tempera und Kreide auf Karton hängt im Nationalmuseum in Oslo.",
+  "Blaues Pferd I|Franz Marc, 1911":
+    "Ein junges blaues Pferd steht vor einer bunten, hügeligen Landschaft. Für Marc hatten Farben eine eigene Bedeutung: Blau stand für das Männliche, Herbe und Geistige. Das Bild entstand im Gründungsjahr des „Blauen Reiters“ und zeigt seinen Weg von der Naturbeobachtung zur symbolischen Farbe. Es gehört der Städtischen Galerie im Lenbachhaus in München.",
+  "Komposition VIII|Wassily Kandinsky, 1923":
+    "Das Bild entstand während Kandinskys Zeit am Bauhaus in Weimar. Kreise, Dreiecke, Linien und Gitter schweben frei auf hellem Grund — klar gezeichnet statt der stürmischen Farbflecken seiner früheren Werke. Kandinsky hielt es für einen Höhepunkt seines Schaffens nach dem Ersten Weltkrieg. Es gehört dem Solomon R. Guggenheim Museum in New York.",
+  "Komposition II in Rot, Blau und Gelb|Piet Mondrian, 1930":
+    "Schwarze waagrechte und senkrechte Linien teilen die weiße Fläche; ein großes rotes Feld beherrscht das Bild, ein kleines blaues und ein gelbes halten es im Gleichgewicht. Mondrian suchte damit eine universelle Harmonie jenseits der sichtbaren Welt. Gerade die scheinbare Einfachheit ist Ergebnis langen, genauen Abwägens. Das Bild gehört dem Kunsthaus Zürich.",
+  "Der Tanz|Henri Matisse, 1910":
+    "Fünf rote Gestalten tanzen im Kreis auf einem grünen Hügel vor tiefblauem Himmel — mehr Farben braucht das Bild nicht. Der russische Sammler Sergei Schtschukin bestellte es zusammen mit dem Gegenstück „Die Musik“ für das Treppenhaus seines Moskauer Palais. Der Kreis ist an einer Stelle offen, als würde der Tanz weiterdrängen. Heute hängt das Bild in der Eremitage in Sankt Petersburg.",
+  "Senecio|Paul Klee, 1922":
+    "Ein runder Kopf aus geometrischen Feldern in Orange, Gelb und Rot, mit zwei ungleichen Augen. Der Titel spielt auf „senex“, lateinisch für Greis, und auf die Pflanze Greiskraut an; das Bild ist zugleich Maske, Gesicht und Farbstudie. Klee malte es während seiner Zeit am Bauhaus mit Öl auf Gaze. Es gehört dem Kunstmuseum Basel.",
+  "Dame mit dem Hermelin|Leonardo da Vinci, um 1490":
+    "Das Bild zeigt Cecilia Gallerani, die junge Geliebte des Mailänder Herzogs Ludovico Sforza. Das Hermelin war ein Sinnbild der Reinheit und zugleich ein Zeichen Ludovicos; der griechische Name des Tiers, „galē“, spielt auf ihren Familiennamen an. Die Drehung von Kopf und Körper war für Porträts der Zeit ungewöhnlich lebendig. Das Bild hängt im Czartoryski-Museum in Krakau.",
+  "Das Abendmahl|Leonardo da Vinci, 1495–1498":
+    "Leonardo malte das Wandbild im Speisesaal des Klosters Santa Maria delle Grazie in Mailand. Es zeigt den Augenblick nach Jesu Worten „Einer von euch wird mich verraten“ — die Apostel reagieren in Dreiergruppen mit Erschrecken und Fragen. Statt in echter Freskotechnik malte Leonardo auf trockenen Putz, weshalb das Bild schon zu seinen Lebzeiten zu zerfallen begann. Eine Restaurierung von 1978 bis 1999 legte die erhaltenen Reste frei.",
+  "Johannes der Täufer|Leonardo da Vinci, 1513–1516":
+    "Johannes tritt aus dem Dunkel hervor, lächelt geheimnisvoll und weist mit dem Finger nach oben — auf Christus, dessen Kommen er ankündigt. Das Kreuz aus Schilfrohr und das Fell sind kaum zu erkennen. Es ist vermutlich Leonardos letztes Gemälde. Er nahm es mit nach Frankreich; heute hängt es im Louvre.",
+  "Die Erschaffung Adams|Michelangelo Buonarroti, um 1511":
+    "Das Fresko ist Teil der Decke der Sixtinischen Kapelle im Vatikan, die Michelangelo von 1508 bis 1512 ausmalte. Gott, getragen von Engeln, streckt die Hand nach Adam aus; zwischen den Fingern bleibt ein schmaler Spalt, durch den gleich das Leben überspringt. Die beiden Hände gehören zu den meistzitierten Bildern der Kunstgeschichte.",
+  "Die Verkündigung|Leonardo da Vinci, um 1472":
+    "Der Engel Gabriel kniet vor Maria in einem Garten und verkündet ihr die Geburt Jesu. Leonardo malte das Bild als junger Mann in der Werkstatt seines Lehrers Andrea del Verrocchio in Florenz; es gilt als eines seiner frühesten Werke. Schon hier zeigt sich sein Interesse an Natur: Die Flügel des Engels sind nach Vogelflügeln gemalt, die Landschaft verschwimmt im Dunst. Das Bild hängt in den Uffizien.",
+  "Tondo Doni|Michelangelo Buonarroti, um 1506":
+    "Das runde Bild zeigt die Heilige Familie und entstand vermutlich zur Hochzeit des Florentiner Kaufmanns Agnolo Doni mit Maddalena Strozzi. Die Figuren sind kräftig wie Skulpturen modelliert und in einer kühnen Drehbewegung verschränkt; im Hintergrund stehen nackte Jünglinge. Es ist das einzige vollendete und sicher Michelangelo zugeschriebene Tafelbild und hängt noch im originalen Rahmen in den Uffizien.",
+  "Die Delphische Sibylle|Michelangelo Buonarroti, um 1509":
+    "Die Sibylle von Delphi war in der Antike eine Seherin; das Christentum sah in ihr eine heidnische Prophetin der Ankunft Christi. Michelangelo malte sie an der Decke der Sixtinischen Kapelle mit einer Schriftrolle in der Hand, den Kopf überrascht zur Seite gewandt. Sie ist eine von fünf Sibyllen, die dort neben sieben Propheten thronen.",
+  "Das Jüngste Gericht|Michelangelo Buonarroti, 1536–1541":
+    "Mehr als zwanzig Jahre nach der Decke malte Michelangelo die ganze Altarwand der Sixtinischen Kapelle aus. Um Christus als Weltenrichter wirbeln über 300 Gestalten: Die Seligen steigen auf, die Verdammten stürzen in die Hölle. Die vielen nackten Körper sorgten für Empörung; nach Michelangelos Tod ließ man sie teilweise übermalen. In der Haut, die der heilige Bartholomäus hält, sieht man ein Selbstbildnis des Künstlers.",
+  "Felsgrottenmadonna|Leonardo da Vinci, 1483–1486":
+    "Maria kniet mit dem Jesuskind, dem kleinen Johannes und einem Engel vor einer dunklen Felsgrotte. Leonardo verbindet die Figuren durch Blicke und Gesten zu einer Pyramide und taucht sie in weiches Licht. Es gibt zwei Fassungen: diese frühere hängt im Louvre, eine spätere in der National Gallery in London.",
+  "Vision nach der Predigt|Paul Gauguin, 1888":
+    "Bretonische Frauen in weißen Hauben haben nach der Sonntagspredigt eine Vision: Jakob ringt mit dem Engel, wie es die Bibel erzählt. Ein Baumstamm teilt das Bild in die wirkliche und die geträumte Welt, beide auf einem leuchtend roten Grund. Mit flachen Farbflächen und klaren Umrissen löste sich Gauguin hier endgültig vom Impressionismus. Das Bild hängt in der Scottish National Gallery in Edinburgh.",
+  "Ia Orana Maria|Paul Gauguin, 1891":
+    "Der Titel heißt auf Tahitianisch „Gegrüßet seist du, Maria“. Gauguin übertrug die christliche Verkündigung in die Südsee: Maria und das Jesuskind sind Tahitianer mit Heiligenschein, ein Engel mit gelben Flügeln steht zwischen Blüten. Die Haltung der beiden betenden Frauen übernahm er von einem Relief des javanischen Tempels Borobudur. Das Bild gehört dem Metropolitan Museum of Art in New York.",
+  "Woher kommen wir? Wer sind wir? Wohin gehen wir?|Paul Gauguin, 1897":
+    "Das fast vier Meter breite Bild malte Gauguin auf Tahiti in einer Zeit von Krankheit, Armut und Verzweiflung; danach unternahm er einen Selbstmordversuch. Es wird von rechts nach links gelesen: vom Säugling über die Lebensmitte, in der eine Gestalt eine Frucht pflückt, bis zur alten Frau, die den Tod erwartet. Gauguin selbst sah darin sein künstlerisches Testament. Es hängt im Museum of Fine Arts in Boston.",
+  "Arearea|Paul Gauguin, 1892":
+    "Der tahitianische Titel bedeutet „Vergnügen“ oder „Belustigung“. Zwei Frauen sitzen im Vordergrund, eine spielt Flöte; dahinter tanzen Gestalten vor einer Götterstatue. Der rote Hund, damals verspottet, zeigt Gauguins freien Umgang mit der Farbe. Das Bild hängt im Musée d’Orsay in Paris.",
+  "Der gelbe Christus|Paul Gauguin, 1889":
+    "Gekreuzigt in einer bretonischen Herbstlandschaft bei Pont-Aven, umgeben von Bäuerinnen in Tracht. Vorbild war ein bemaltes hölzernes Kruzifix in der Kapelle von Trémalo. Das kräftige Gelb, die dunklen Umrisse und die flachen Farbfelder sind typisch für Gauguins „Synthetismus“. Das Bild gehört dem Buffalo AKG Art Museum in den USA.",
+  "Selbstbildnis|Paul Gauguin, 1885":
+    "Gauguin malte sich vor der Staffelei in einer engen Dachkammer in Kopenhagen, wo er mit der Familie seiner dänischen Frau lebte. Er hatte gerade den Beruf als Börsenmakler aufgegeben, verkaufte kaum ein Bild und fühlte sich dort fremd. Der schräge Blick und die gedrängte Enge spiegeln diese Krise. Es ist sein erstes bedeutendes Selbstbildnis.",
+  "Manaò tupapaú|Paul Gauguin, 1892":
+    "Der Titel bedeutet etwa „Der Geist der Toten wacht“. Eine junge Tahitianerin liegt auf einem Bett, voller Angst vor dem Totengeist, der hinter ihr sitzt. Modell war Teha’amana, Gauguins damals etwa 13-jährige einheimische Ehefrau — ein Umstand, der heute kritisch betrachtet wird. Das Bild gehört dem Buffalo AKG Art Museum.",
+  "Zwei Tahitianerinnen|Paul Gauguin, 1899":
+    "Zwei Frauen stehen eng beieinander, eine trägt Mangoblüten in einer Schale. Die ruhigen, fast monumentalen Körper vor dem flachen grünen Hintergrund erinnern an Skulpturen. Das Bild entstand während Gauguins zweitem Aufenthalt auf Tahiti, als er bereits krank und verschuldet war. Es gehört dem Metropolitan Museum of Art in New York.",
+  "Gefleckte Pferde|Grotte du Pech Merle, Lot · um 23 000 v. Chr.":
+    "Zwei Pferde stehen Rücken an Rücken, ihre Körper und ihre Umgebung sind mit schwarzen Punkten übersät, ringsum Handnegative — Abdrücke von Händen, um die Farbe gesprüht wurde. Die Malerei ist rund 25 000 Jahre alt. Lange hielt man die Punkte für ein Symbol; genetische Untersuchungen haben gezeigt, dass es damals tatsächlich Pferde mit Leopardenmuster gab.",
+  "Saal der Stiere: Auerochsen und Pferde|Höhle von Lascaux, Dordogne · um 15 000 v. Chr. · Nachbildung":
+    "Der „Saal der Stiere“ ist der erste große Raum der Höhle von Lascaux. Riesige Auerochsen, bis zu fünf Meter lang, ziehen in schwarzen Umrissen über die Felsdecke, dazwischen Pferde und Hirsche. Die Maler nutzten die Wölbungen des Gesteins, um den Tieren Körper zu geben. Dieses Foto zeigt eine originalgetreue Nachbildung.",
+  "Saal der Stiere: Rote Kuh und Pferde|Höhle von Lascaux, Dordogne · um 15 000 v. Chr. · Nachbildung":
+    "Eine rote Kuh mit schwarzem Kopf, darunter eine Reihe kleiner, dunkler Pferde. Für Rot und Gelb verwendeten die Maler Ocker, für Schwarz Holzkohle und Manganoxid; die Farbe wurde aufgetupft, mit Pinseln aus Haar oder Moos aufgetragen oder durch Röhrchen gesprüht. Das Foto zeigt eine originalgetreue Nachbildung.",
+  "Pferdefries|Grotte Chauvet, Ardèche · um 34 000 v. Chr.":
+    "Vier Pferdeköpfe, gestaffelt hintereinander, darunter Auerochsen und zwei Nashörner, die mit den Hörnern kämpfen. Die Umrisse wurden mit Holzkohle gezeichnet und mit den Fingern verwischt, um Schatten und Rundung zu erzeugen. Diese Sicherheit in Perspektive und Bewegung überraschte die Forschung, denn die Bilder sind rund 36 000 Jahre alt.",
+  "Löwenfries|Grotte Chauvet, Ardèche · um 34 000 v. Chr. · Nachbildung":
+    "Im hintersten Saal der Grotte Chauvet jagt ein Rudel Höhlenlöwen eine Herde Bisons. Die Köpfe der Löwen überlagern sich, als bewegten sie sich gemeinsam vorwärts — fast wie Einzelbilder eines Films. Höhlenlöwen hatten keine Mähne; die Maler kannten die Tiere genau. Das Foto zeigt eine Nachbildung.",
+  "Das „Chinesische Pferd“|Höhle von Lascaux, Dordogne · um 15 000 v. Chr. · Nachbildung":
+    "Das gelbe Pferd mit schwarzer Mähne im „Axialgang“ von Lascaux erhielt seinen Spitznamen, weil seine leichte, schwungvolle Darstellung an chinesische Tuschmalerei erinnerte. Um das Pferd stehen pfeil- oder pflanzenartige Zeichen und ein gitterartiges Viereck, deren Bedeutung unbekannt ist. Das Foto zeigt eine Nachbildung.",
+  "Saal der Stiere: Großer Auerochse|Höhle von Lascaux, Dordogne · um 15 000 v. Chr. · Nachbildung":
+    "Der Kopf eines großen schwarzen Auerochsen, eines wilden Rindes, das 1627 ausgestorben ist. Kräftige Umrisse, Hörner in leicht gedrehter Perspektive und die Nüstern sind mit wenigen Linien erfasst. Daneben laufen kleinere rote Hirsche. Das Foto zeigt eine originalgetreue Nachbildung.",
+  "Bisons im Salon noir|Grotte de Niaux, Ariège · um 12 000 v. Chr. · Nachbildung":
+    "Im „Salon noir“, weit im Inneren der Höhle, sind die Tiere nur mit schwarzen Linien gezeichnet. Die Bisons zeigen in wenigen, sicheren Strichen Buckel, Bart und Fell. Einige Tiere sind mit Pfeilen markiert, was man als Jagdzauber gedeutet hat — sicher weiß man es nicht. Das Foto zeigt eine Nachbildung.",
+  "Zwei Bisons|Grotte de Niaux, Ariège · um 12 000 v. Chr. · Nachbildung":
+    "Zwei Bisons stehen einander gegenüber, Kopf an Kopf. Die Zeichnung ist sparsam: ein Umriss, ein paar Linien für Fell und Hörner — und doch sind Masse und Spannung der Tiere spürbar. Das Foto zeigt eine Nachbildung aus dem Prähistorischen Park von Tarascon-sur-Ariège.",
+  "Whistlers Mutter|James McNeill Whistler, 1871":
+    "Der eigentliche Titel lautet „Arrangement in Grau und Schwarz Nr. 1“: Whistler verstand das Bild vor allem als Farbkomposition. Es zeigt seine Mutter Anna McNeill Whistler im Profil, streng und ruhig auf einem Stuhl. In den USA wurde es zum Sinnbild der Mutterschaft und erschien sogar auf einer Briefmarke. Es hängt im Musée d’Orsay in Paris.",
+  "Der Seerosenteich|Claude Monet, 1899":
+    "Eine japanische Holzbrücke spannt sich über Monets Seerosenteich in Giverny, umgeben von dichtem Grün. Den Garten hatte er selbst angelegt und einen Bach umgeleitet, um den Teich zu speisen. In den folgenden Jahrzehnten malte er den Teich und seine Seerosen rund 250-mal, zuletzt so frei, dass Wasser, Himmel und Ufer zu Farbflächen verschmolzen. Diese Fassung hängt in der National Gallery in London.",
+  "Impression, Sonnenaufgang|Claude Monet, 1872":
+    "Monet malte den Hafen von Le Havre im Morgendunst, mit einer orangeroten Sonne und wenigen schnellen Strichen. Bei der ersten Gruppenausstellung 1874 spottete der Kritiker Louis Leroy über den Titel und nannte die ganze Gruppe „Impressionisten“ — der Name blieb. Das Bild hängt im Musée Marmottan Monet in Paris.",
+  "Der Heuwagen|John Constable, 1821":
+    "Ein leerer Heuwagen fährt durch eine Furt des Flusses Stour in Suffolk; links steht das Häuschen des Bauern Willy Lott, das noch heute existiert. Constable malte die Landschaft seiner Kindheit nach zahlreichen Skizzen vor Ort. In England zunächst wenig beachtet, gewann das Bild 1824 in Paris eine Goldmedaille. Es hängt in der National Gallery in London.",
+  "Mandelbrot-Spirale (Relief)|Fraktal nach Benoît Mandelbrot · in Echtzeit berechnet":
+    "Für jeden Punkt c der Zahlenebene wird z → z² + c immer wieder berechnet: Bleibt z begrenzt, gehört c zur Mandelbrot-Menge, sonst bestimmt die Geschwindigkeit des Entweichens die Farbe. Dieses Bild wird nicht geladen, sondern von der Grafikkarte live gerechnet, mit Licht und Schatten wie ein Relief. In der Nahansicht kann man rund 10²³-fach hineinzoomen — immer neue Spiralen und kleine Kopien der ganzen Menge tauchen auf.",
+  "Der Traum|Henri Rousseau, 1910":
+    "Eine nackte Frau liegt auf einem roten Sofa mitten in einem dichten Dschungel, zwischen Löwen, Vögeln, einem Elefanten und einem Flöte spielenden Schlangenbeschwörer. Rousseau erklärte, die Frau träume, sie sei in den Urwald versetzt worden. Es ist sein letztes großes Bild, gemalt im Jahr seines Todes, und hängt im Museum of Modern Art in New York.",
+  "David|Michelangelo Buonarroti, 1501–1504":
+    "Michelangelo schlug den David als 26-Jähriger aus einem riesigen Marmorblock, den andere Bildhauer schon angehauen und aufgegeben hatten. Er zeigt den biblischen Helden nicht nach dem Sieg, sondern vor dem Kampf gegen Goliath: angespannt, wachsam, die Schleuder über der Schulter. Die Figur ist mit Sockel 5,17 Meter hoch und wurde zum Symbol der freien Republik Florenz. Seit 1873 steht sie in der Galleria dell’Accademia; vor dem Palazzo Vecchio steht eine Kopie.",
+  "Goldmaske des Tutanchamun · dreifach vergrößert|Ägypten, 18. Dynastie, um 1323 v. Chr.":
+    "Die Maske lag direkt auf dem Gesicht der Mumie und sollte dem König im Jenseits ein ewiges, vollkommenes Antlitz geben. Sie besteht aus rund zehn Kilogramm Gold, eingelegt mit Lapislazuli, Quarz, Obsidian und farbigem Glas; das Original ist 54 Zentimeter hoch. Auf der Stirn sitzen Geier und Kobra, die Schutzgöttinnen von Ober- und Unterägypten. Howard Carter fand sie 1925 im Grab; sie befindet sich heute in Kairo.",
+  "Büste der Nofretete · dreifach vergrößert|Thutmosis, Amarna, um 1345 v. Chr.":
+    "Nofretete war die Hauptgemahlin des Pharaos Echnaton; ihr Name bedeutet „Die Schöne ist gekommen“. Die Büste aus Kalkstein mit bemalter Stuckschicht diente vermutlich als Modell in der Werkstatt des Bildhauers Thutmosis — deshalb fehlt im linken Auge die Einlage. Eine deutsche Grabung unter Ludwig Borchardt fand sie 1912 in Amarna. Sie steht im Neuen Museum in Berlin; Ägypten fordert ihre Rückgabe.",
+  "Venus von Willendorf · zwölffach vergrößert|Gravettien, Niederösterreich, um 27 500 v. Chr.":
+    "Die kleine Figur wurde 1908 bei Ausgrabungen in Willendorf in der Wachau gefunden, ausgelöst durch den Bau der Wachaubahn. Sie ist nur elf Zentimeter hoch, aus Kalkstein geschnitzt und trug Spuren von rotem Ocker; ihr Gesicht ist unter einer Frisur oder Kopfbedeckung verborgen. Mit rund 29 500 Jahren gehört sie zu den ältesten Menschendarstellungen. Ob sie Fruchtbarkeit, eine Göttin oder ein Schönheitsideal verkörpert, ist unbekannt. Das Original liegt im Naturhistorischen Museum in Wien.",
+};
 
 // Saal an Rasterposition bzw. an einem Weltpunkt; -1, wenn dort keiner liegt
 const roomAt = (col, row) => ROOMS.findIndex((r) => r.cell[0] === col && r.cell[1] === row);
@@ -1040,6 +1275,8 @@ function addCollider(x, z, w, d) {
 
 // Anklickbare Gemälde für die Nahansicht
 const paintingHotspots = [];
+// Skulpturen: ein Klick öffnet das Infofeld (eine Nahansicht gibt es für sie nicht)
+const sculptureSpots = [];
 // Böden aller Säle — Klick darauf lässt den Besucher dorthin gehen
 const floorMeshes = [];
 // Wände verdecken Gemälde: sie begrenzen sowohl Sicht als auch Klick
@@ -1316,13 +1553,179 @@ function updateTurntables(dt) {
   for (const t of turntables) {
     if (!_frustum.intersectsSphere(t.sphere)) continue;
     t.group.rotation.y += dt * Math.PI * 2 / t.turnSecs;
+    if (t.smoke) updateSmoke(t.smoke, dt);
     needsRender = true;
+  }
+}
+
+/* ---------------------------------------------------------------
+   Brennende Zigarette: Papier, Filter, Asche, glimmende Glut — und
+   Rauch aus Sprites, die in Weltkoordinaten aufsteigen, auch wenn sich
+   der Kopf auf dem Drehteller weiterdreht
+--------------------------------------------------------------- */
+const SMOKE_COUNT = 70;
+const SMOKE_LIFE = 5; // Sekunden je Rauchwölkchen
+
+function makeSmokeTexture() {
+  const c = document.createElement('canvas');
+  c.width = c.height = 64;
+  const g = c.getContext('2d');
+  const grad = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+  grad.addColorStop(0, 'rgba(255,255,255,0.9)');
+  grad.addColorStop(0.45, 'rgba(255,255,255,0.35)');
+  grad.addColorStop(1, 'rgba(255,255,255,0)');
+  g.fillStyle = grad;
+  g.fillRect(0, 0, 64, 64);
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  return tex;
+}
+
+// x/y/z: Mundwinkel im Halter (Meter, Gesicht nach +Z), dir: Richtung zur Glut, len/r: Maße
+function makeCigarette({ x, y, z, dir, len, r }) {
+  const g = new THREE.Group();
+  g.position.set(x, y, z);
+  g.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), new THREE.Vector3(...dir).normalize());
+  const part = (from, to, color, mat = THREE.MeshStandardMaterial, opts = { roughness: 0.8, metalness: 0 }) => {
+    const m = new THREE.Mesh(new THREE.CylinderGeometry(r, r, (to - from) * len, 20), new mat({ color, ...opts }));
+    m.position.y = (from + to) / 2 * len;
+    g.add(m);
+    return m;
+  };
+  part(0, 0.27, 0xc9893f);            // Filter, korkfarben
+  part(0.27, 0.9, 0xf2efe8);          // Papier
+  part(0.9, 0.97, 0x8d8a85);          // Asche
+  const ember = part(0.97, 1, 0xff4a10, THREE.MeshBasicMaterial, {});
+  return { group: g, ember, tipLocal: new THREE.Vector3(0, len, 0) };
+}
+
+function makeSmoke(cig) {
+  const tex = makeSmokeTexture();
+  const puffs = [];
+  for (let i = 0; i < SMOKE_COUNT; i++) {
+    const sprite = new THREE.Sprite(new THREE.SpriteMaterial({
+      map: tex, color: 0xd6d6d6, transparent: true, opacity: 0, depthWrite: false,
+    }));
+    sprite.visible = false;
+    scene.add(sprite);
+    // gestaffelt starten, damit nicht alle Wölkchen gleichzeitig entstehen
+    puffs.push({ sprite, age: -i * SMOKE_LIFE / SMOKE_COUNT, vel: new THREE.Vector3(), seed: Math.random() * 10 });
+  }
+  // Lichthof um die Glut — additiv, damit sie auch im hellen Saal leuchtet
+  const glow = new THREE.Sprite(new THREE.SpriteMaterial({
+    map: tex, color: 0xff6a20, transparent: true, opacity: 0.8, depthWrite: false, blending: THREE.AdditiveBlending,
+  }));
+  glow.scale.set(0.05, 0.05, 1);
+  cig.group.add(glow);
+  glow.position.copy(cig.tipLocal);
+  return { cig, puffs, glow, time: 0, tip: new THREE.Vector3() };
+}
+
+function updateSmoke(smoke, dt) {
+  smoke.time += dt;
+  // Glut glimmt unregelmäßig
+  const glow = 0.75 + 0.25 * Math.sin(smoke.time * 7.1) * Math.sin(smoke.time * 2.3 + 1);
+  smoke.cig.ember.material.color.setRGB(1, 0.18 + 0.2 * glow, 0.03 * glow);
+  smoke.glow.material.opacity = 0.45 + 0.4 * glow;
+  smoke.cig.group.localToWorld(smoke.tip.copy(smoke.cig.tipLocal));
+  for (const p of smoke.puffs) {
+    p.age += dt;
+    if (p.age < 0) continue;
+    if (p.age >= SMOKE_LIFE || !p.sprite.visible) {
+      // neu an der Glut beginnen
+      p.age = p.age >= SMOKE_LIFE ? 0 : p.age;
+      p.sprite.position.copy(smoke.tip);
+      p.vel.set((Math.random() - 0.5) * 0.01, 0.16 + Math.random() * 0.05, (Math.random() - 0.5) * 0.01);
+      p.sprite.visible = true;
+    }
+    const k = p.age / SMOKE_LIFE;
+    // steigt, wird langsamer und kräuselt sich seitlich
+    p.sprite.position.addScaledVector(p.vel, dt);
+    // erst ein dünner Faden, oben kräuselt und verbreitert er sich
+    p.sprite.position.x += Math.sin(smoke.time * 1.3 + p.seed + p.sprite.position.y * 6) * 0.05 * k * k * dt;
+    p.sprite.position.z += Math.cos(smoke.time * 1.1 + p.seed + p.sprite.position.y * 5) * 0.05 * k * k * dt;
+    p.vel.y *= Math.exp(-dt * 0.25);
+    const size = 0.012 + k * k * 0.3;
+    p.sprite.scale.set(size, size, 1);
+    p.sprite.material.opacity = Math.min(1, k * 10) * (1 - k) * 0.22;
   }
 }
 
 const glassMat = new THREE.MeshStandardMaterial({
   color: 0xffffff, roughness: 0.05, metalness: 0, transparent: true, opacity: 0.1, depthWrite: false,
 });
+
+// Sonnenbrille im Stil von Ray Charles: große, dunkle Gläser in einem dicken,
+// glänzend schwarzen Gestell, leicht ums Gesicht gebogen. In den Einheiten des
+// Modells, an das sie gehängt wird (Gesicht schaut nach +Z).
+const sunglassLensMat = new THREE.MeshStandardMaterial({ color: 0x14161b, roughness: 0.05, metalness: 0.35 });
+const sunglassFrameMat = new THREE.MeshStandardMaterial({ color: 0x0b0a0a, roughness: 0.22, metalness: 0.1 });
+const sunglassStudMat = new THREE.MeshStandardMaterial({ color: 0xd8d8d8, roughness: 0.25, metalness: 1 });
+
+// Abgerundetes Trapez: oben breiter als unten, wie bei klassischen Wayfarer-Gläsern
+// taper = halbe Breite der Unterkante im Verhältnis zur Glasbreite
+function lensShape(w, h, r, taper, path = new THREE.Shape()) {
+  const t = w / 2, b = w * taper, y = h / 2;
+  path.moveTo(-t + r, y);
+  path.lineTo(t - r, y);
+  path.quadraticCurveTo(t, y, t - r * 0.1, y - r);
+  path.lineTo(b, -y + r);
+  path.quadraticCurveTo(b - r * 0.2, -y, b - r, -y);
+  path.lineTo(-b + r, -y);
+  path.quadraticCurveTo(-b + r * 0.2, -y, -b, -y + r);
+  path.lineTo(-t + r * 0.1, y - r);
+  path.quadraticCurveTo(-t, y, -t + r, y);
+  return path;
+}
+
+function makeSunglasses({ x, y, z, sep, w, h, wrap, taper, armX, arm }) {
+  const g = new THREE.Group();
+  const f = h * 0.13;       // Breite des Rahmens um das Glas
+  const d = h * 0.12;       // Tiefe des Gestells
+  for (const side of [-1, 1]) {
+    // Jede Seite dreht sich um die Glasmitte, die Außenkante weicht nach hinten
+    const eye = new THREE.Group();
+    eye.position.set(x + side * sep / 2, y, z);
+    eye.rotation.y = side * wrap;
+
+    const frameShape = lensShape(w + f * 2, h + f * 2, h * 0.45, taper + f / (w + f * 2) * 0.6);
+    frameShape.holes.push(lensShape(w, h, h * 0.36, taper, new THREE.Path()));
+    const frame = new THREE.Mesh(new THREE.ExtrudeGeometry(frameShape, {
+      depth: d, bevelEnabled: true, bevelThickness: d * 0.25, bevelSize: f * 0.2, bevelSegments: 3, curveSegments: 16,
+    }), sunglassFrameMat);
+    frame.position.z = -d / 2;
+    // Das Glas sitzt in der Mitte des Rahmens
+    const lens = new THREE.Mesh(new THREE.ExtrudeGeometry(lensShape(w, h, h * 0.36, taper), {
+      depth: d * 0.25, bevelEnabled: false, curveSegments: 16,
+    }), sunglassLensMat);
+    lens.position.z = -d * 0.12;
+    // Zierniete oben außen
+    const stud = new THREE.Mesh(new THREE.CylinderGeometry(f * 0.28, f * 0.28, d * 0.3, 12), sunglassStudMat);
+    stud.rotation.x = Math.PI / 2;
+    stud.position.set(side * (w / 2 + f * 0.35), h / 2 + f * 0.2, d / 2 + d * 0.2);
+    eye.add(frame, lens, stud);
+    g.add(eye);
+
+    // Scharnier von der Außenkante zur Schläfe, dann der Bügel über das Ohr und dahinter hinab
+    const ex = x + side * (sep / 2 + (w / 2 + f) * Math.cos(wrap));
+    const ez = z - (w / 2 + f) * Math.sin(wrap);
+    const outer = x + side * armX;
+    const hingeY = y + h / 2 - f * 0.6;
+    const hinge = new THREE.Mesh(new THREE.BoxGeometry(Math.abs(outer - ex) + d, f * 1.3, d), sunglassFrameMat);
+    hinge.position.set((ex + outer) / 2, hingeY, ez);
+    const path = new THREE.CatmullRomCurve3([
+      new THREE.Vector3(outer, hingeY, ez),
+      ...arm.map(([dx, py, pz]) => new THREE.Vector3(x + side * dx, py, pz)),
+    ]);
+    const temple = new THREE.Mesh(new THREE.TubeGeometry(path, 48, f * 0.55, 8), sunglassFrameMat);
+    g.add(hinge, temple);
+  }
+  // Steg: kräftig, in Höhe der Oberkante
+  const bridge = new THREE.Mesh(new THREE.BoxGeometry(sep - w + f * 1.5, f * 1.2, d), sunglassFrameMat);
+  bridge.position.set(x, y + h * 0.22, z + (w / 2) * Math.sin(wrap) * 0.9);
+  g.add(bridge);
+  return g;
+}
 
 function buildSculpture(def) {
   const [col, row] = ROOMS[def.room].cell;
@@ -1363,10 +1766,11 @@ function buildSculpture(def) {
   disc.position.y = TURNTABLE_H / 2;
   turntable.add(disc);
   group.add(turntable);
-  turntables.push({
-    group: turntable, turnSecs: def.turnSecs,
+  const turntableEntry = {
+    group: turntable, turnSecs: def.turnSecs, smoke: null,
     sphere: new THREE.Sphere(new THREE.Vector3(x, ph + def.height / 2, z), def.height / 2 + Math.max(pw, pd) / 2),
-  });
+  };
+  turntables.push(turntableEntry);
 
   // Unsichtbarer Ersatzkörper für den Klick-Raycast: verdeckt Gemälde hinter
   // der Figur, ohne dass jede Mausbewegung 100 000 Dreiecke testen muss
@@ -1375,6 +1779,7 @@ function buildSculpture(def) {
   proxy.visible = false;
   group.add(proxy);
   occluders.push(proxy);
+  sculptureSpots.push({ mesh: proxy, title: def.title, artist: def.artist, sculpture: true });
 
   // Ein Strahler schräg von vorn oben
   const spot = new THREE.SpotLight(0xfff4e0, def.light, 14, THREE.MathUtils.degToRad(26), 0.8, 1.25);
@@ -1388,10 +1793,13 @@ function buildSculpture(def) {
     const model = gltf.scene;
     model.traverse((o) => {
       if (!o.isMesh) return;
-      // Die Scans (David, Venus) bringen weder brauchbare Normalen noch Material mit
+      // Die Scans (David, Venus, Nofretete) bringen weder brauchbare Normalen noch Material mit
       if (def.marble) {
         o.geometry.computeVertexNormals();
         o.material = def.stone ? new THREE.MeshStandardMaterial({ color: def.stone, roughness: 0.85, metalness: 0 }) : marbleMat;
+      } else if (def.painted) {
+        o.geometry.computeVertexNormals();
+        o.material = new THREE.MeshStandardMaterial({ vertexColors: true, roughness: 0.6, metalness: 0 });
       } else if (o.material.map) {
         // Gold wirkt ohne Umgebungsspiegelung fast schwarz — wie bei den
         // Gemälden trägt die Farbtextur einen Teil selbst (emissiv)
@@ -1408,7 +1816,13 @@ function buildSculpture(def) {
     const holder = new THREE.Group();
     holder.position.y = TURNTABLE_H;
     holder.rotation.y = def.rotY;
+    if (def.sunglasses) model.add(makeSunglasses(def.sunglasses));
     holder.add(model);
+    if (def.cigarette) {
+      const cig = makeCigarette(def.cigarette);
+      holder.add(cig.group);
+      turntableEntry.smoke = makeSmoke(cig);
+    }
     turntable.add(holder);
     assignRoomLights(holder);
     needsRender = true;
@@ -1489,7 +1903,7 @@ document.addEventListener('keydown', (e) => {
     case 'KeyA': case 'ArrowLeft': move.left = true; break;
     case 'KeyD': case 'ArrowRight': move.right = true; break;
     // Esc verlässt zuerst die Nahansicht, erst danach öffnet es das Menü
-    case 'Escape': if (focusState.active) exitFocus(); else openMenu(); break;
+    case 'Escape': if (infoOpen()) closeInfo(); else if (focusState.active) exitFocus(); else openMenu(); break;
   }
 });
 document.addEventListener('keyup', (e) => {
@@ -1563,6 +1977,8 @@ let navActive = false;
 function closeMenu() {
   overlay.style.display = 'none';
   hud.style.display = 'block';
+  musicBox.style.display = 'block';
+  startMusic(); // erst nach einem Klick erlaubt der Browser Ton
   navActive = true;
   needsRender = true; // unter dem Overlay verdeckter Canvas kann leer sein
 }
@@ -1582,16 +1998,236 @@ function openMenu() {
   dropHiRes();
   resetMandelView();
   backBtn.style.display = 'none';
+  infoBtn.style.display = 'none';
+  closeInfo();
   hud.textContent = HUD_DEFAULT;
 }
 startBtn.addEventListener('click', closeMenu);
+
+/* ---------------------------------------------------------------
+   Cool Jazz im Hintergrund — ohne Aufnahmen und ohne Gesang: Web Audio
+   spielt ihn live. Achttaktige II-V-I-Folge in C, Rhodes-artiges
+   E-Piano (FM) mit wechselnden Comping-Rhythmen, Walking Bass, Becken
+   mit Besen im Swing und ein sparsames Vibraphon. Leise, mit etwas Hall.
+--------------------------------------------------------------- */
+const JAZZ_BPM = 92;
+const BEAT = 60 / JAZZ_BPM;
+// Grundton des Basses und Voicing ohne Grundton (Terz/Septime oben) je Takt
+const JAZZ_BARS = [
+  { root: 38, chord: [53, 57, 60, 64], scale: [62, 64, 65, 67, 69, 71, 72] }, // Dm9
+  { root: 43, chord: [53, 59, 64, 69], scale: [62, 64, 65, 67, 69, 71, 72] }, // G13
+  { root: 36, chord: [52, 55, 59, 62], scale: [60, 62, 64, 67, 69, 71, 72] }, // Cmaj9
+  { root: 45, chord: [55, 61, 65, 70], scale: [61, 64, 65, 67, 69, 70, 73] }, // A7(b9, b13)
+  { root: 38, chord: [53, 57, 60, 64], scale: [62, 64, 65, 67, 69, 72, 74] }, // Dm9
+  { root: 43, chord: [53, 59, 63, 68], scale: [63, 65, 67, 68, 70, 71, 74] }, // G7alt
+  { root: 40, chord: [55, 59, 62, 66], scale: [62, 64, 66, 67, 69, 71, 74] }, // Em9
+  { root: 45, chord: [55, 61, 65, 70], scale: [61, 64, 65, 67, 69, 70, 73] }, // A7(b9, b13)
+];
+// Comping: Achtelpositionen 0–7 im Takt (ungerade = Swing-Achtel)
+const COMP_PATTERNS = [[0, 3], [1, 5], [3, 6], [0, 5], [2, 7], [1, 4, 6], [3]];
+
+const musicBox = document.getElementById('music');
+const musicToggle = document.getElementById('musicToggle');
+let musicOn = true;
+try { musicOn = localStorage.getItem('musik') !== 'aus'; } catch {}
+let jazz = null; // Audio-Graph, erst nach einem Klick erlaubt
+
+const mtof = (m) => 440 * 2 ** ((m - 69) / 12);
+const swingTime = (barT, eighth) => barT + BEAT * (Math.floor(eighth / 2) + (eighth % 2 ? 2 / 3 : 0));
+const pick = (a) => a[Math.floor(Math.random() * a.length)];
+
+function makeJazz() {
+  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+  const master = ctx.createGain();
+  master.gain.value = 0;
+  const comp = ctx.createDynamicsCompressor();
+  master.connect(comp).connect(ctx.destination);
+  // Hall: selbst erzeugte Impulsantwort aus abklingendem Rauschen
+  const len = ctx.sampleRate * 2.4;
+  const ir = ctx.createBuffer(2, len, ctx.sampleRate);
+  for (let ch = 0; ch < 2; ch++) {
+    const d = ir.getChannelData(ch);
+    for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / len) ** 3;
+  }
+  const reverb = ctx.createConvolver();
+  reverb.buffer = ir;
+  const wet = ctx.createGain();
+  wet.gain.value = 0.22;
+  reverb.connect(wet).connect(master);
+  const bus = ctx.createGain(); // alle Instrumente: trocken und in den Hall
+  bus.connect(master);
+  bus.connect(reverb);
+  // Rauschen für Becken und Besen
+  const noise = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
+  const nd = noise.getChannelData(0);
+  for (let i = 0; i < nd.length; i++) nd[i] = Math.random() * 2 - 1;
+  return { ctx, master, bus, noise, nextBar: 0, bar: 0, melody: 72, timer: 0 };
+}
+
+// E-Piano: Sinus, frequenzmoduliert im Verhältnis 1:1 — der Anschlag klingt hell, dann weich
+function epiano(j, t, midi, vel, dur) {
+  const { ctx } = j, f = mtof(midi);
+  const car = ctx.createOscillator(), mod = ctx.createOscillator();
+  car.frequency.value = f;
+  mod.frequency.value = f;
+  const depth = ctx.createGain();
+  depth.gain.setValueAtTime(f * 1.4 * vel, t);
+  depth.gain.exponentialRampToValueAtTime(f * 0.04, t + 0.5);
+  mod.connect(depth).connect(car.frequency);
+  const amp = ctx.createGain();
+  amp.gain.setValueAtTime(0, t);
+  amp.gain.linearRampToValueAtTime(0.07 * vel, t + 0.008);
+  amp.gain.exponentialRampToValueAtTime(0.0005, t + dur);
+  car.connect(amp).connect(j.bus);
+  car.start(t); mod.start(t);
+  car.stop(t + dur + 0.05); mod.stop(t + dur + 0.05);
+}
+
+// Kontrabass: Sinus plus gedämpftes Dreieck, gezupft
+function bass(j, t, midi, dur) {
+  const { ctx } = j, f = mtof(midi);
+  const lp = ctx.createBiquadFilter();
+  lp.type = 'lowpass';
+  lp.frequency.value = 420;
+  const amp = ctx.createGain();
+  amp.gain.setValueAtTime(0, t);
+  amp.gain.linearRampToValueAtTime(0.32, t + 0.012);
+  amp.gain.exponentialRampToValueAtTime(0.12, t + 0.25);
+  amp.gain.exponentialRampToValueAtTime(0.001, t + dur);
+  lp.connect(amp).connect(j.bus);
+  for (const type of ['sine', 'triangle']) {
+    const o = ctx.createOscillator();
+    o.type = type;
+    o.frequency.value = f;
+    o.connect(lp);
+    o.start(t);
+    o.stop(t + dur + 0.05);
+  }
+}
+
+// Vibraphon: Grundton und der typische vierfache Oberton, leichtes Tremolo
+function vibes(j, t, midi, vel) {
+  const { ctx } = j, f = mtof(midi), dur = 1.6;
+  const amp = ctx.createGain();
+  amp.gain.setValueAtTime(0, t);
+  amp.gain.linearRampToValueAtTime(0.05 * vel, t + 0.01);
+  amp.gain.exponentialRampToValueAtTime(0.0005, t + dur);
+  const trem = ctx.createGain();
+  const lfo = ctx.createOscillator(), lfoAmt = ctx.createGain();
+  lfo.frequency.value = 5.5;
+  lfoAmt.gain.value = 0.25;
+  lfo.connect(lfoAmt).connect(trem.gain);
+  amp.connect(trem).connect(j.bus);
+  [[1, 1], [4, 0.12]].forEach(([ratio, g]) => {
+    const o = ctx.createOscillator(), og = ctx.createGain();
+    o.frequency.value = f * ratio;
+    og.gain.value = g;
+    o.connect(og).connect(amp);
+    o.start(t);
+    o.stop(t + dur + 0.05);
+  });
+  lfo.start(t);
+  lfo.stop(t + dur + 0.05);
+}
+
+// Becken und Besen: gefiltertes Rauschen mit kurzer Hüllkurve
+function hit(j, t, type, freq, gain, decay) {
+  const { ctx } = j;
+  const src = ctx.createBufferSource();
+  src.buffer = j.noise;
+  src.playbackRate.value = 0.8 + Math.random() * 0.4;
+  const filt = ctx.createBiquadFilter();
+  filt.type = type;
+  filt.frequency.value = freq;
+  const amp = ctx.createGain();
+  amp.gain.setValueAtTime(gain, t);
+  amp.gain.exponentialRampToValueAtTime(0.0003, t + decay);
+  src.connect(filt).connect(amp).connect(j.bus);
+  src.start(t, Math.random() * 0.5);
+  src.stop(t + decay + 0.05);
+}
+
+function scheduleBar(j, t) {
+  const cur = JAZZ_BARS[j.bar % JAZZ_BARS.length];
+  const next = JAZZ_BARS[(j.bar + 1) % JAZZ_BARS.length];
+  // Walking Bass: Grundton, zwei Akkordtöne, chromatische Annäherung an den nächsten Grundton
+  const tones = [cur.root, cur.root + 7, cur.root + 12, cur.chord[0] - 12, cur.chord[1] - 12];
+  const line = [cur.root, pick(tones), pick(tones), next.root + pick([-1, 1, 7 - 12])];
+  line.forEach((m, beat) => bass(j, t + beat * BEAT, m, BEAT * 0.95));
+  // Ride im Swing (1, 2, 2+, 3, 4, 4+), Besen auf 2 und 4
+  [0, 2, 3, 4, 6, 7].forEach((e) => hit(j, swingTime(t, e), 'highpass', 7000, e % 2 ? 0.025 : 0.04, 0.35));
+  [1, 3].forEach((beat) => hit(j, t + beat * BEAT, 'bandpass', 2400, 0.05, 0.16));
+  // E-Piano: jedes Mal ein anderes Comping-Muster
+  for (const e of pick(COMP_PATTERNS)) {
+    const vel = 0.55 + Math.random() * 0.3;
+    cur.chord.forEach((m, i) => epiano(j, swingTime(t, e) + i * 0.006, m, vel, 1.4));
+  }
+  // Vibraphon: ab und zu eine kurze Phrase, schrittweise aus der Skala des Akkords
+  if (j.bar % 8 >= 2 && Math.random() < 0.55) {
+    const starts = [0, 1, 2, 3, 4, 5, 6].filter(() => Math.random() < 0.45);
+    for (const e of starts) {
+      const cand = cur.scale.map((m) => m + 12).filter((m) => Math.abs(m - j.melody) <= 4);
+      j.melody = cand.length ? pick(cand) : cur.scale[3] + 12;
+      vibes(j, swingTime(t, e), j.melody, 0.6 + Math.random() * 0.4);
+    }
+  }
+  j.bar++;
+}
+
+function startJazz() {
+  if (!jazz) {
+    jazz = makeJazz();
+    jazz.nextBar = jazz.ctx.currentTime + 0.15;
+    // vorausplanen: ein Takt, sobald er weniger als 0,6 s entfernt ist
+    jazz.timer = setInterval(() => {
+      while (jazz.nextBar < jazz.ctx.currentTime + 0.6) {
+        scheduleBar(jazz, jazz.nextBar);
+        jazz.nextBar += BEAT * 4;
+      }
+    }, 120);
+  }
+  jazz.ctx.resume();
+  jazz.master.gain.cancelScheduledValues(jazz.ctx.currentTime);
+  jazz.master.gain.setTargetAtTime(0.25, jazz.ctx.currentTime, 0.8); // leise einblenden
+}
+function stopJazz() {
+  if (!jazz) return;
+  jazz.master.gain.setTargetAtTime(0, jazz.ctx.currentTime, 0.15);
+  setTimeout(() => { if (!musicOn) jazz.ctx.suspend(); }, 600);
+}
+function startMusic() { if (musicOn) startJazz(); }
+// Beim Vorlesen die Musik fast ausblenden
+function duckMusic(on) {
+  if (!jazz || !musicOn) return;
+  jazz.master.gain.setTargetAtTime(on ? 0.05 : 0.25, jazz.ctx.currentTime, 0.3);
+}
+
+// Im Hintergrund drosselt der Browser die Zeitgeber — dann lieber pausieren als stottern
+document.addEventListener('visibilitychange', () => {
+  if (!jazz || !musicOn) return;
+  if (document.hidden) jazz.ctx.suspend();
+  else jazz.ctx.resume();
+});
+
+function showMusic() {
+  musicToggle.textContent = musicOn ? '♪ Cool Jazz' : '♪ Musik aus';
+  musicToggle.title = musicOn ? 'Musik ausschalten' : 'Musik einschalten';
+  musicBox.classList.toggle('off', !musicOn);
+}
+musicToggle.addEventListener('click', () => {
+  musicOn = !musicOn;
+  try { localStorage.setItem('musik', musicOn ? 'an' : 'aus'); } catch {}
+  if (musicOn) startJazz(); else stopJazz();
+  showMusic();
+});
+showMusic();
 overlay.addEventListener('click', (e) => { if (e.target === overlay) closeMenu(); });
 
 /* ---------------------------------------------------------------
    Nahansicht: Doppelklick auf ein Gemälde zoomt frontal heran
 --------------------------------------------------------------- */
-const HUD_DEFAULT = 'Ziehen: umsehen · Klick auf den Boden: dorthin gehen · Klick auf ein Bild: Nahansicht · WASD / Scrollrad: bewegen';
-const HUD_FOCUS = 'Scrollrad, W / S oder zwei Finger: zoomen · Ziehen: verschieben · Klick daneben oder Esc: zurück in den Saal';
+const HUD_DEFAULT = 'Ziehen: umsehen · Klick auf den Boden: dorthin gehen · Klick auf ein Bild: Nahansicht · Klick auf eine Skulptur: Erläuterung · WASD / Scrollrad: bewegen';
+const HUD_FOCUS = 'Scrollrad, W / S oder zwei Finger: zoomen · Ziehen: verschieben · ⓘ: Erläuterung · Klick daneben oder Esc: zurück in den Saal';
 const raycaster = new THREE.Raycaster();
 const focusState = {
   active: false, animating: false, t: 0, duration: 0.55,
@@ -1749,6 +2385,8 @@ function enterFocus(spot, keepSavedPos) {
   focusState.currentSpot = spot;
   hud.textContent = HUD_FOCUS;
   backBtn.style.display = 'block';
+  infoBtn.style.display = ABOUT_WORKS[aboutKey(spot)] ? 'block' : 'none';
+  if (infoOpen()) openInfo(spot); // beim Wechsel zum nächsten Bild gleich dessen Text
   setHover(null);
 }
 
@@ -1765,6 +2403,8 @@ function exitFocus() {
   focusState.currentSpot = null;
   hud.textContent = HUD_DEFAULT;
   backBtn.style.display = 'none';
+  infoBtn.style.display = 'none';
+  closeInfo();
 }
 
 // Klick auf den Boden: sanft zum angeklickten Punkt gehen, Blickrichtung bleibt erhalten
@@ -1814,7 +2454,8 @@ function raycastPaintingAt(event) {
   const targets = paintingHotspots.map(h => h.mesh).concat(occluders);
   const hits = raycaster.intersectObjects(targets, false);
   if (hits.length === 0) return null;
-  return paintingHotspots.find(h => h.mesh === hits[0].object) || null;
+  return paintingHotspots.find(h => h.mesh === hits[0].object)
+    || sculptureSpots.find(h => h.mesh === hits[0].object) || null;
 }
 
 function raycastFloorAt(event) {
@@ -1828,6 +2469,12 @@ function handleSelect(event) {
   // Während einer laufenden Fahrt ignorieren — so löst ein Doppelklick nicht Hin und Zurück aus
   if (!navActive || focusState.animating) return;
   const spot = raycastPaintingAt(event);
+
+  if (spot && spot.sculpture) {
+    if (focusState.active) exitFocus();
+    openInfo(spot);
+    return;
+  }
 
   if (focusState.active) {
     // Anderes Bild in der Nahansicht: direkt hinüberwechseln, sonst zurück in den Saal
@@ -1854,6 +2501,97 @@ function setHover(spot, x, y) {
 }
 
 backBtn.addEventListener('click', () => { if (focusState.active) exitFocus(); });
+
+/* ---------------------------------------------------------------
+   Infofeld zu Werk und Künstler, auf Wunsch vorgelesen (Sprachausgabe
+   des Browsers). Gemälde: Knopf „Über das Werk“ in der Nahansicht;
+   Skulpturen: Klick auf die Figur.
+--------------------------------------------------------------- */
+const infoBtn = document.getElementById('infoBtn');
+const infoBox = document.getElementById('info');
+const infoRead = document.getElementById('infoRead');
+const canSpeak = 'speechSynthesis' in window;
+let infoSpot = null;
+let reading = false;
+
+const aboutKey = (spot) => `${spot.title}|${spot.artist}`;
+const artistKey = (artist) => artist.split(/,| · /)[0].trim();
+const infoOpen = () => infoBox.style.display === 'block';
+
+function openInfo(spot) {
+  const work = ABOUT_WORKS[aboutKey(spot)];
+  if (!work) return;
+  stopReading();
+  infoSpot = spot;
+  const key = artistKey(spot.artist);
+  document.getElementById('infoTitle').textContent = spot.title;
+  document.getElementById('infoBy').textContent = spot.artist;
+  document.getElementById('infoWork').textContent = work;
+  document.getElementById('infoArtistHead').textContent =
+    /v\. Chr\./.test(spot.artist) ? 'Herkunft' : key.startsWith('Fraktal') ? 'Der Mathematiker' : 'Der Künstler';
+  document.getElementById('infoArtist').textContent = ABOUT_ARTISTS[key] || '';
+  infoBox.style.display = 'block';
+  infoBox.scrollTop = 0;
+}
+function closeInfo() {
+  stopReading();
+  infoBox.style.display = 'none';
+  infoSpot = null;
+}
+
+// Möglichst natürliche deutsche Stimme: neuronale Stimmen (Edge „… Online (Natural)“),
+// dann Apples Premium-/Enhanced-Stimmen, dann Googles Online-Stimme. Apples
+// Spaßstimmen (Eddy, Flo, Grandma …) klingen künstlich und fallen weg.
+const NOVELTY_VOICES = /\b(Eddy|Flo|Grandma|Grandpa|Oma|Opa|Reed|Rocko|Sandy|Shelley|Albert|Bad News|Bahh|Bells|Boing|Bubbles|Cellos|Good News|Jester|Organ|Superstar|Trinoids|Whisper|Wobble|Zarvox)\b/i;
+function voiceScore(v) {
+  return (/natural|neural/i.test(v.name) ? 8 : 0) + (/premium/i.test(v.name) ? 6 : /enhanced|erweitert|verbessert/i.test(v.name) ? 5 : 0)
+    + (/google/i.test(v.name) ? 4 : 0) + (/online/i.test(v.name) ? 2 : 0)
+    + (v.lang === 'de-DE' ? 1 : 0) - (NOVELTY_VOICES.test(v.name) ? 20 : 0);
+}
+function bestVoice() {
+  return speechSynthesis.getVoices().filter((v) => v.lang.startsWith('de'))
+    .sort((a, b) => voiceScore(b) - voiceScore(a))[0] || null;
+}
+if (canSpeak) speechSynthesis.getVoices(); // lädt die Stimmenliste vor — sie kommt in Chrome verzögert
+
+// Lokale Stimmen lesen absatzweise (bessere Satzmelodie); Online-Stimmen satzweise,
+// weil Chrome sie sonst nach etwa 15 Sekunden abbricht
+function startReading() {
+  if (!infoSpot) return;
+  const paragraphs = [
+    `${infoSpot.title}. ${infoSpot.artist.replace(/ · /g, ', ')}.`,
+    document.getElementById('infoWork').textContent,
+    `${document.getElementById('infoArtistHead').textContent}. ${document.getElementById('infoArtist').textContent}`,
+  ];
+  const voice = bestVoice();
+  const parts = voice && voice.localService ? paragraphs : paragraphs.flatMap((p) => p.split(/(?<=[.!?…])\s+/));
+  speechSynthesis.cancel();
+  parts.forEach((part, i) => {
+    const u = new SpeechSynthesisUtterance(part);
+    u.lang = 'de-DE';
+    if (voice) u.voice = voice;
+    u.rate = 0.98;
+    if (i === parts.length - 1) u.onend = () => { if (reading) stopReading(); };
+    speechSynthesis.speak(u);
+  });
+  reading = true;
+  infoRead.textContent = '■ Anhalten';
+  duckMusic(true);
+}
+function stopReading() {
+  if (canSpeak) speechSynthesis.cancel();
+  reading = false;
+  infoRead.textContent = '▶ Vorlesen';
+  duckMusic(false);
+}
+
+if (!canSpeak) infoRead.style.display = 'none';
+infoRead.addEventListener('click', () => (reading ? stopReading() : startReading()));
+document.getElementById('infoClose').addEventListener('click', closeInfo);
+infoBtn.addEventListener('click', () => {
+  if (infoOpen()) closeInfo();
+  else if (focusState.currentSpot) openInfo(focusState.currentSpot);
+});
 
 let currentRoomIdx = -1;
 let labelTimer = null;
