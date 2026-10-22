@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Galerie der Meister — begehbares 3D-Museum</title>
-<meta name="description" content="Ein begehbares 3D-Museum im Browser: sechs Säle, neunundvierzig Werke von der Höhlenmalerei aus Lascaux und Chauvet bis Kandinsky und ein Mandelbrot-Fraktal, dazu Michelangelos David, die Venus von Willendorf, Nofretete und die Goldmaske des Tutanchamun in 3D. Ziehen zum Umsehen, klicken zum Gehen — ohne Installation.">
+<meta name="description" content="Ein begehbares 3D-Museum im Browser: sechs Säle, neunundvierzig Werke von der Höhlenmalerei aus Lascaux und Chauvet bis Kandinsky und ein Mandelbrot-Fraktal, dazu Michelangelos David, die Venus von Willendorf, Nofretete, die Goldmaske des Tutanchamun und eine Kupfervase in 3D. Ziehen zum Umsehen, klicken zum Gehen — ohne Installation.">
 <link rel="canonical" href="https://helmutqualtinger.github.io/Museum3d/">
 <meta name="theme-color" content="#0a0806">
 
@@ -22,7 +22,7 @@
 <meta property="og:site_name" content="Galerie der Meister">
 <meta property="og:locale" content="de_DE">
 <meta property="og:title" content="Galerie der Meister — begehbares 3D-Museum">
-<meta property="og:description" content="Sechs Säle, neunundvierzig Werke von der Höhlenmalerei aus Lascaux und Chauvet bis Kandinsky und ein Mandelbrot-Fraktal, dazu Michelangelos David, die Venus von Willendorf, Nofretete und die Maske des Tutanchamun in 3D. Ziehen zum Umsehen, klicken zum Gehen — direkt im Browser, ohne Installation.">
+<meta property="og:description" content="Sechs Säle, neunundvierzig Werke von der Höhlenmalerei aus Lascaux und Chauvet bis Kandinsky und ein Mandelbrot-Fraktal, dazu Michelangelos David, die Venus von Willendorf, Nofretete, die Maske des Tutanchamun und eine Kupfervase in 3D. Ziehen zum Umsehen, klicken zum Gehen — direkt im Browser, ohne Installation.">
 <meta property="og:url" content="https://helmutqualtinger.github.io/Museum3d/">
 <meta property="og:image" content="https://helmutqualtinger.github.io/Museum3d/docs/og-image.jpg">
 <meta property="og:image:type" content="image/jpeg">
@@ -32,7 +32,7 @@
 
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Galerie der Meister — begehbares 3D-Museum">
-<meta name="twitter:description" content="Sechs Säle, neunundvierzig Werke von der Höhlenmalerei aus Lascaux und Chauvet bis Kandinsky und ein Mandelbrot-Fraktal, dazu Michelangelos David, die Venus von Willendorf, Nofretete und die Maske des Tutanchamun in 3D. Ziehen zum Umsehen, klicken zum Gehen — direkt im Browser.">
+<meta name="twitter:description" content="Sechs Säle, neunundvierzig Werke von der Höhlenmalerei aus Lascaux und Chauvet bis Kandinsky und ein Mandelbrot-Fraktal, dazu Michelangelos David, die Venus von Willendorf, Nofretete, die Maske des Tutanchamun und eine Kupfervase in 3D. Ziehen zum Umsehen, klicken zum Gehen — direkt im Browser.">
 <meta name="twitter:image" content="https://helmutqualtinger.github.io/Museum3d/docs/og-image.jpg">
 <meta name="twitter:image:alt" content="Blick durch den Saal Porträt mit Rembrandts Selbstbildnis, durch einen breiten Durchgang in den Saal Landschaft.">
 
@@ -222,7 +222,7 @@ import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
 
 /* ---------------------------------------------------------------
-   Sammlung: sechs Säle, fünfzig Bilder, vier Skulpturen
+   Sammlung: sechs Säle, fünfzig Bilder, fünf Skulpturen
 --------------------------------------------------------------- */
 const ROOM_W = 16;   // Breite (X) je Saal
 const ROOM_D = 14;   // Tiefe (Z)
@@ -407,10 +407,11 @@ const DIVIDER_PAINTINGS = {
   ],
 };
 
-// Skulpturen in Saal I, IV und VI. Position in Saalkoordinaten (x, z);
+// Skulpturen in Saal I, III, IV und VI. Position in Saalkoordinaten (x, z);
 // height = Höhe der Figur in Metern, plinth = Sockel [Breite, Höhe, Tiefe],
 // turnSecs = Dauer einer Umdrehung auf dem Drehteller. flip dreht Schild und
-// Strahler zur Rückwand, wenn man den Saal von dort betritt; stone färbt den Scan als Stein.
+// Strahler zur Rückwand, wenn man den Saal von dort betritt; stone färbt den Scan als Stein,
+// copper gibt dem Modell gebürstetes Kupfer.
 // Die Modelle sind Draco-komprimierte GLBs im Ordner models/ (Quellen siehe README).
 const SCULPTURES = [
   { room: 3, x: 5.4, z: 7.6, title: 'David', artist: 'Michelangelo Buonarroti, 1501–1504',
@@ -432,6 +433,10 @@ const SCULPTURES = [
   // Original 11 cm hoch — hier zwölffach vergrößert, also 1,33 m
   { room: 5, x: 8, z: 7, title: 'Venus von Willendorf · zwölffach vergrößert', artist: 'Gravettien, Niederösterreich, um 27 500 v. Chr.',
     url: 'models/venus.glb', height: 1.332, plinth: [1.3, 0.7, 1.3], marble: true, stone: 0xc9a77e, rotY: 0, flip: true, light: 35, turnSecs: 45 },
+  // Entwurf für den 3D-Druck, 20 cm hoch — hier 80 cm in gebürstetem Kupfer, rechts der Bank in Saal III,
+  // mit einer Sonnenblume (flower = wie weit sie über die Vase hinausragt, in Metern)
+  { room: 2, x: 12.4, z: 7, title: 'Vase „Evolution“ mit Sonnenblume · vierfach vergrößert', artist: 'Parametrischer Entwurf, Python, 2026',
+    url: 'models/vase-evolution.glb', height: 0.8, plinth: [0.9, 0.5, 0.9], copper: true, sunflower: true, flower: 0.85, rotY: 0, light: 30, turnSecs: 40 },
 ];
 
 // Erläuterungen für das Infofeld: zum Werk (Schlüssel „Titel|Künstlerzeile“, genau wie oben)
@@ -471,6 +476,8 @@ const ABOUT_ARTISTS = {
     "Paul Klee (1879–1940) wurde bei Bern geboren und war Maler, Grafiker und Musiker. Er lehrte von 1921 bis 1931 am Bauhaus und schuf rund 10 000 Werke, oft kleinformatig, poetisch und voller Humor. Die Nationalsozialisten diffamierten seine Kunst als „entartet“; er kehrte 1933 in die Schweiz zurück.",
   "Michelangelo Buonarroti":
     "Michelangelo Buonarroti (1475–1564) war Bildhauer, Maler, Architekt und Dichter der italienischen Renaissance. Er arbeitete für die Medici in Florenz und für mehrere Päpste in Rom, wo er die Decke und die Altarwand der Sixtinischen Kapelle ausmalte und die Kuppel des Petersdoms entwarf. Schon zu Lebzeiten nannte man ihn „il Divino“, den Göttlichen.",
+  "Parametrischer Entwurf":
+    "Die Form ist nicht von Hand modelliert, sondern berechnet: Ein Python-Programm legt fünf Querschnitte mit Eckenzahl, Größe und Verdrehung fest und verbindet sie über die Höhe mit kubischen Splines zu einer glatten Fläche. Die Ecken sind um 6 Millimeter gerundet, damit sie druckbar bleiben. Die Bibliothek manifold3d formt daraus einen geschlossenen Körper und legt den Schriftzug um die Wand. Heraus kommen eine STL-Datei für den Drucker, ein Vorschaumodell in Kupfer und eine technische Zeichnung.",
   "Paul Gauguin":
     "Paul Gauguin (1848–1903) war zunächst Börsenmakler und malte als Sonntagsmaler, bevor er 1883 ganz zur Kunst wechselte. In der Bretagne entwickelte er mit flächigen Farben und dunklen Umrissen den „Synthetismus“; 1891 zog er nach Tahiti, später auf die Marquesas-Inseln, wo er starb. Seine Suche nach dem „Ursprünglichen“ beeinflusste die Moderne stark — sein Bild der Südsee und sein Umgang mit sehr jungen einheimischen Frauen werden heute kritisch gesehen.",
   "Grotte du Pech Merle":
@@ -599,6 +606,8 @@ const ABOUT_WORKS = {
     "Für jeden Punkt c der Zahlenebene wird z → z² + c immer wieder berechnet: Bleibt z begrenzt, gehört c zur Mandelbrot-Menge, sonst bestimmt die Geschwindigkeit des Entweichens die Farbe. Dieses Bild wird nicht geladen, sondern von der Grafikkarte live gerechnet, mit Licht und Schatten wie ein Relief. In der Nahansicht kann man rund 10²³-fach hineinzoomen — immer neue Spiralen und kleine Kopien der ganzen Menge tauchen auf.",
   "Der Traum|Henri Rousseau, 1910":
     "Eine nackte Frau liegt auf einem roten Sofa mitten in einem dichten Dschungel, zwischen Löwen, Vögeln, einem Elefanten und einem Flöte spielenden Schlangenbeschwörer. Rousseau erklärte, die Frau träume, sie sei in den Urwald versetzt worden. Es ist sein letztes großes Bild, gemalt im Jahr seines Todes, und hängt im Museum of Modern Art in New York.",
+  "Vase „Evolution“ mit Sonnenblume · vierfach vergrößert|Parametrischer Entwurf, Python, 2026":
+    "Die Vase ist für den 3D-Druck entworfen und im Original 20 Zentimeter hoch; hier steht sie viermal so groß in gebürstetem Kupfer, mit einer Sonnenblume darin. Von unten nach oben geht ihr Querschnitt vom Dreieck über Viereck, Fünfeck und Sechseck in einen Kreis über und dreht sich dabei um 90 Grad — diese Entwicklung gibt ihr den Namen. Der Schriftzug „Evolution“ in Brush Script liegt erhaben und schräg ansteigend auf einer einzigen Fünfeckseite. Die Wand ist 2,5 Millimeter, der Boden 3 Millimeter stark, die Öffnung misst 76 Millimeter.",
   "David|Michelangelo Buonarroti, 1501–1504":
     "Michelangelo schlug den David als 26-Jähriger aus einem riesigen Marmorblock, den andere Bildhauer schon angehauen und aufgegeben hatten. Er zeigt den biblischen Helden nicht nach dem Sieg, sondern vor dem Kampf gegen Goliath: angespannt, wachsam, die Schleuder über der Schulter. Die Figur ist mit Sockel 5,17 Meter hoch und wurde zum Symbol der freien Republik Florenz. Seit 1873 steht sie in der Galleria dell’Accademia; vor dem Palazzo Vecchio steht eine Kopie.",
   "Goldmaske des Tutanchamun · dreifach vergrößert|Ägypten, 18. Dynastie, um 1323 v. Chr.":
@@ -1553,6 +1562,7 @@ function updateTurntables(dt) {
     if (!_frustum.intersectsSphere(t.sphere)) continue;
     t.group.rotation.y += dt * Math.PI * 2 / t.turnSecs;
     if (t.smoke) updateSmoke(t.smoke, dt);
+    if (t.wind) t.wind(dt);
     needsRender = true;
   }
 }
@@ -1650,6 +1660,338 @@ function updateSmoke(smoke, dt) {
   }
 }
 
+// Gebürstetes Kupfer: feine waagrechte Schleifspuren rund um den Körper, die
+// Farbe und Rauheit leicht ändern. Metall spiegelt nur seine Umgebung — ohne
+// sie wäre es fast schwarz —, deshalb bekommt es ein kleines gemaltes
+// Panorama des Saals: helle Decke, warme Wände, heller Marmorboden.
+let copperEnv = null, copperMaps = null;
+function makeCopper(geometry) {
+  if (!copperEnv) {
+    const c = document.createElement('canvas');
+    c.width = 256; c.height = 128;
+    const g = c.getContext('2d');
+    const grad = g.createLinearGradient(0, 0, 0, 128);
+    grad.addColorStop(0, '#fffaf0');
+    grad.addColorStop(0.3, '#c9bba4');
+    grad.addColorStop(0.5, '#6b5d48');
+    grad.addColorStop(0.62, '#3a3320');
+    grad.addColorStop(0.72, '#d8d0c2');
+    grad.addColorStop(1, '#efe9de');
+    g.fillStyle = grad;
+    g.fillRect(0, 0, 256, 128);
+    g.fillStyle = '#ffffff'; // Lichtfelder an der Decke
+    for (let i = 0; i < 6; i++) g.fillRect(i * 43 + 8, 8, 22, 10);
+    copperEnv = new THREE.CanvasTexture(c);
+    copperEnv.mapping = THREE.EquirectangularReflectionMapping;
+    copperEnv.colorSpace = THREE.SRGBColorSpace;
+
+    // Schleifspuren: jede Zeile eine eigene Helligkeit, nur in v veränderlich
+    const tex = (fn) => {
+      const t = document.createElement('canvas');
+      t.width = 4; t.height = 1024;
+      const tg = t.getContext('2d');
+      let w = 0;
+      for (let y = 0; y < 1024; y++) {
+        w = w * 0.6 + (Math.random() - 0.5) * 0.8; // etwas zusammenhängend, wie echte Riefen
+        tg.fillStyle = fn(w);
+        tg.fillRect(0, y, 4, 1);
+      }
+      const ct = new THREE.CanvasTexture(t);
+      ct.wrapT = THREE.RepeatWrapping;
+      ct.repeat.set(1, 3);
+      return ct;
+    };
+    const color = tex((w) => `rgb(${Math.round(235 + w * 20)},${Math.round(232 + w * 22)},${Math.round(228 + w * 24)})`);
+    color.colorSpace = THREE.SRGBColorSpace;
+    const rough = tex((w) => { const v = Math.round(255 * (0.7 + w * 0.3)); return `rgb(${v},${v},${v})`; });
+    copperMaps = { color, rough };
+  }
+  // UV aus der Form: u = Winkel um die Achse, v = Höhe — die Spuren laufen waagrecht herum
+  geometry.computeBoundingBox();
+  const { min, max } = geometry.boundingBox;
+  const pos = geometry.attributes.position, uv = new Float32Array(pos.count * 2);
+  const cx = (min.x + max.x) / 2, cz = (min.z + max.z) / 2;
+  for (let i = 0; i < pos.count; i++) {
+    uv[i * 2] = Math.atan2(pos.getZ(i) - cz, pos.getX(i) - cx) / (2 * Math.PI) + 0.5;
+    uv[i * 2 + 1] = (pos.getY(i) - min.y) / (max.y - min.y);
+  }
+  geometry.setAttribute('uv', new THREE.BufferAttribute(uv, 2));
+  return new THREE.MeshStandardMaterial({
+    color: 0xe0805a, metalness: 1, roughness: 0.42,
+    map: copperMaps.color, roughnessMap: copperMaps.rough,
+    envMap: copperEnv, envMapIntensity: 1.1,
+  });
+}
+
+// Sonnenblume, ganz aus Geometrie und gemalten Texturen, in Metern: der
+// Stängel steht im Vasenboden, ragt oben gebogen heraus, der Kopf nickt
+// nach vorn (−Z). Die Kerne sitzen wie in der Natur auf einer Spirale im
+// goldenen Winkel (137,5°), innen grünlich, dann Röhrenblüten mit Pollen,
+// außen dunkle reife Kerne; darum zwei Kränze Zungenblüten und grüne Hüllblätter.
+function canvasTex(w, h, draw, srgb = true) {
+  const c = document.createElement('canvas');
+  c.width = w; c.height = h;
+  draw(c.getContext('2d'), w, h);
+  const t = new THREE.CanvasTexture(c);
+  if (srgb) t.colorSpace = THREE.SRGBColorSpace;
+  t.anisotropy = 4;
+  return t;
+}
+
+// Blattform: Grund schmal, breiteste Stelle bei 'widest', Spitze bei 1
+function petalPath(g, w, h, widest, tip) {
+  g.beginPath();
+  g.moveTo(w * 0.5, h);
+  g.bezierCurveTo(w * 0.05, h * (1 - widest * 0.5), w * 0.02, h * (1 - widest), w * 0.18, h * 0.2);
+  g.quadraticCurveTo(w * 0.32, h * 0.03, w * 0.5 - tip, 0);
+  g.lineTo(w * 0.5, h * 0.025);
+  g.lineTo(w * 0.5 + tip, 0);
+  g.quadraticCurveTo(w * 0.68, h * 0.03, w * 0.82, h * 0.2);
+  g.bezierCurveTo(w * 0.98, h * (1 - widest), w * 0.95, h * (1 - widest * 0.5), w * 0.5, h);
+  g.closePath();
+}
+
+function makePetalTexture(base, mid, tipCol, vein) {
+  return canvasTex(128, 512, (g, w, h) => {
+    petalPath(g, w, h, 0.62, 6);
+    g.save();
+    g.clip();
+    const grad = g.createLinearGradient(0, h, 0, 0);
+    grad.addColorStop(0, base);
+    grad.addColorStop(0.35, mid);
+    grad.addColorStop(1, tipCol);
+    g.fillStyle = grad;
+    g.fillRect(0, 0, w, h);
+    // Längsadern und feine Fleckung
+    g.strokeStyle = vein;
+    for (let i = 0; i < 11; i++) {
+      const x = w * (0.12 + i * 0.076);
+      g.lineWidth = 0.8 + Math.random() * 1.2;
+      g.beginPath();
+      g.moveTo(w / 2 + (x - w / 2) * 0.2, h);
+      g.quadraticCurveTo(x, h * 0.55, w / 2 + (x - w / 2) * 0.8, h * 0.04);
+      g.stroke();
+    }
+    for (let i = 0; i < 900; i++) {
+      g.fillStyle = `rgba(${Math.random() < 0.5 ? '255,240,160' : '150,80,0'},${Math.random() * 0.08})`;
+      g.fillRect(Math.random() * w, Math.random() * h, 1 + Math.random() * 2, 2 + Math.random() * 6);
+    }
+    g.restore();
+  });
+}
+
+// Gebogenes Blütenblatt: Grund im Ursprung, Länge entlang +Y, biegt sich nach −Z zurück
+function petalGeometry(w, len, droop, cup) {
+  const geo = new THREE.PlaneGeometry(w, len, 6, 12);
+  const p = geo.attributes.position;
+  for (let i = 0; i < p.count; i++) {
+    const x = p.getX(i), t = p.getY(i) / len + 0.5;
+    p.setXYZ(i, x, t * len, -droop * t * t * len + cup * (x / w) ** 2 * len * Math.sin(Math.PI * t));
+  }
+  geo.computeVertexNormals();
+  return geo;
+}
+
+let sunflowerParts = null;
+function makeSunflower(vaseH) {
+  if (!sunflowerParts) {
+    const leafTex = canvasTex(512, 512, (g, w, h) => {
+      // herzförmiges, gesägtes Blatt mit Mittelrippe und Seitenadern
+      g.beginPath();
+      const n = 64;
+      for (let i = 0; i <= n; i++) {
+        const a = (i / n) * Math.PI * 2;
+        // Herzkurve umgedreht: Spitze oben, Einbuchtung am Stiel unten
+        const hx = Math.sin(a) ** 3, hy = (13 * Math.cos(a) - 5 * Math.cos(2 * a) - 2 * Math.cos(3 * a) - Math.cos(4 * a)) / 16;
+        const saw = 1 + (i % 2 ? 0.035 : -0.01);
+        g.lineTo(w / 2 + hx * w * 0.47 * saw, h * 0.62 + hy * h * 0.58 * saw);
+      }
+      g.closePath();
+      g.save();
+      g.clip();
+      const grad = g.createRadialGradient(w / 2, h * 0.75, 10, w / 2, h * 0.5, w * 0.6);
+      grad.addColorStop(0, '#5f8a2c');
+      grad.addColorStop(1, '#3d6420');
+      g.fillStyle = grad;
+      g.fillRect(0, 0, w, h);
+      g.strokeStyle = 'rgba(190,215,130,0.55)';
+      g.lineWidth = 5;
+      g.beginPath(); g.moveTo(w / 2, h); g.lineTo(w / 2, h * 0.02); g.stroke();
+      g.lineWidth = 2.5;
+      for (let i = 0; i < 7; i++) {
+        const y = h * (0.85 - i * 0.11);
+        for (const sgn of [-1, 1]) {
+          g.beginPath();
+          g.moveTo(w / 2, y);
+          g.quadraticCurveTo(w / 2 + sgn * w * 0.18, y - h * 0.06, w / 2 + sgn * w * (0.42 - i * 0.04), y - h * 0.16);
+          g.stroke();
+        }
+      }
+      for (let i = 0; i < 4000; i++) {
+        g.fillStyle = `rgba(${Math.random() < 0.5 ? '20,40,5' : '140,170,80'},${Math.random() * 0.12})`;
+        g.fillRect(Math.random() * w, Math.random() * h, 2, 2);
+      }
+      g.restore();
+    });
+    const stemTex = canvasTex(64, 512, (g, w, h) => {
+      g.fillStyle = '#4c7426';
+      g.fillRect(0, 0, w, h);
+      for (let i = 0; i < 60; i++) { // Längsriefen
+        g.fillStyle = `rgba(${Math.random() < 0.5 ? '25,50,10' : '120,160,60'},0.25)`;
+        g.fillRect(Math.random() * w, 0, 1 + Math.random() * 2, h);
+      }
+      for (let i = 0; i < 1500; i++) { // feine helle Härchen
+        g.fillStyle = `rgba(215,225,180,${0.2 + Math.random() * 0.3})`;
+        g.fillRect(Math.random() * w, Math.random() * h, 1, 2);
+      }
+    });
+    stemTex.wrapS = stemTex.wrapT = THREE.RepeatWrapping;
+    stemTex.repeat.set(4, 1);
+    // Blütenblätter und Laub sind dünn und lassen Licht durch — ein Teil der
+    // Farbe wirkt deshalb emissiv, sonst wären die abgewandten Seiten fast schwarz
+    const leafy = (map, glow, roughness = 0.65) => new THREE.MeshStandardMaterial({
+      map, emissiveMap: map, emissive: 0xffffff, emissiveIntensity: glow,
+      alphaTest: 0.5, side: THREE.DoubleSide, roughness, metalness: 0,
+    });
+    sunflowerParts = {
+      ray: leafy(makePetalTexture('#d47e04', '#f2b40e', '#f8cc2a', 'rgba(170,95,0,0.22)'), 0.32),
+      ray2: leafy(makePetalTexture('#c46c02', '#eba50a', '#f5c224', 'rgba(160,85,0,0.25)'), 0.28),
+      bract: leafy(makePetalTexture('#4a6a22', '#5b7d2a', '#6f8f34', 'rgba(30,50,10,0.3)'), 0.2),
+      leaf: leafy(leafTex, 0.2, 0.75),
+      stem: new THREE.MeshStandardMaterial({ map: stemTex, roughness: 0.8 }),
+      seed: new THREE.MeshStandardMaterial({ roughness: 0.75 }),
+      disc: new THREE.MeshStandardMaterial({ color: 0x1c1108, roughness: 0.9 }),
+      back: new THREE.MeshStandardMaterial({ color: 0x4d6b25, roughness: 0.8, side: THREE.DoubleSide }),
+    };
+  }
+  const P = sunflowerParts;
+  const flower = new THREE.Group();
+  const flutter = []; // Blütenblätter und Laubblätter, die im Wind zittern
+
+  // Stängel vom Vasenboden bis unter den Kopf, oben nach vorn gebogen
+  const top = vaseH + 0.62;
+  const curve = new THREE.CatmullRomCurve3([
+    new THREE.Vector3(0, 0.03, 0.02), new THREE.Vector3(0.01, vaseH * 0.6, 0.01), new THREE.Vector3(0.02, vaseH + 0.1, -0.01),
+    new THREE.Vector3(0.04, vaseH + 0.38, -0.05), new THREE.Vector3(0.05, top - 0.06, -0.12), new THREE.Vector3(0.05, top, -0.2),
+  ]);
+  flower.add(new THREE.Mesh(new THREE.TubeGeometry(curve, 80, 0.016, 12), P.stem));
+
+  // Zwei Laubblätter an kurzen Stielen, angesetzt in fester Höhe über dem Vasenrand —
+  // ein Ansatz nach Kurvenlänge lag sonst in der Vase, und das Blatt stach durch die Wand
+  const pointAtHeight = (y) => {
+    for (let u = 0; u <= 1; u += 0.005) if (curve.getPointAt(u).y >= y) return curve.getPointAt(u);
+    return curve.getPointAt(1);
+  };
+  [[0.14, 0.6, 0.32, 0.28], [0.32, 0.6 + Math.PI * 0.9, 0.27, 0.24]].forEach(([above, az, len, wid]) => {
+    const at = pointAtHeight(vaseH + above);
+    const pivot = new THREE.Group();
+    pivot.position.copy(at);
+    pivot.rotation.y = az;
+    const petiole = new THREE.Mesh(new THREE.CylinderGeometry(0.004, 0.006, 0.07, 6), P.stem);
+    petiole.rotation.x = -1.0;
+    petiole.position.set(0, 0.02, -0.03);
+    const leaf = new THREE.Mesh(petalGeometry(wid, len, 0.5, 0.3), P.leaf);
+    leaf.position.set(0, 0.04, -0.06);
+    leaf.rotation.x = -Math.PI / 2 + 0.55;
+    pivot.add(petiole, leaf);
+    // Stängelblätter schlagen auf und ab, verdrehen sich und schwenken um den Stängel
+    flutter.push({ obj: leaf, axis: 'x', base: leaf.rotation.x, amp: 0.4, freq: 3.2 + Math.random(), phase: Math.random() * 6.3 });
+    flutter.push({ obj: leaf, axis: 'z', base: 0, amp: 0.3, freq: 4.1 + Math.random(), phase: Math.random() * 6.3 });
+    flutter.push({ obj: pivot, axis: 'y', base: pivot.rotation.y, amp: 0.25, freq: 1.7 + Math.random() * 0.6, phase: Math.random() * 6.3 });
+    flower.add(pivot);
+  });
+
+  // Kopf: Gesicht (+Z der Kopfgruppe) schaut nach vorn und leicht nach unten
+  const R = 0.12; // Radius der Kernscheibe
+  const head = new THREE.Group();
+  const face = new THREE.Vector3(0, -0.35, -1).normalize();
+  head.position.copy(curve.getPointAt(1)).addScaledVector(face, 0.035);
+  head.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), face);
+  const headRest = head.quaternion.clone();
+  flower.add(head);
+
+  const back = new THREE.Mesh(new THREE.SphereGeometry(R * 1.1, 40, 12, 0, Math.PI * 2, 0, Math.PI / 2), P.back);
+  back.rotation.x = -Math.PI / 2;
+  back.scale.set(1, 0.4, 1);
+  back.position.z = -0.004;
+  head.add(back);
+  const disc = new THREE.Mesh(new THREE.CircleGeometry(R * 1.02, 64), P.disc);
+  head.add(disc);
+
+  // Kerne in der Fibonacci-Spirale
+  const N = 1500, seedGeo = new THREE.IcosahedronGeometry(1, 0);
+  const seeds = new THREE.InstancedMesh(seedGeo, P.seed, N);
+  const m = new THREE.Matrix4(), q = new THREE.Quaternion(), e = new THREE.Euler(), col = new THREE.Color();
+  const golden = Math.PI * (3 - Math.sqrt(5));
+  for (let i = 0; i < N; i++) {
+    const f = Math.sqrt((i + 0.5) / N), r = R * f, a = i * golden;
+    const s = 0.0026 + 0.0019 * f;
+    const dome = 0.018 * (1 - f * f);
+    e.set((Math.random() - 0.5) * 0.4, (Math.random() - 0.5) * 0.4, a);
+    q.setFromEuler(e);
+    m.compose(new THREE.Vector3(Math.cos(a) * r, Math.sin(a) * r, dome + s * 0.6), q, new THREE.Vector3(s * 1.15, s, s * (f < 0.5 ? 1.6 : 1.2)));
+    seeds.setMatrixAt(i, m);
+    const j = Math.random();
+    if (f < 0.2) col.set(j < 0.5 ? 0x6e6a26 : 0x5a5520);           // Mitte: junge, grünliche Knospen
+    else if (f < 0.32) col.set(j < 0.6 ? 0x7a4a14 : 0x8a6418);     // Übergang
+    else if (f < 0.5) col.set(j < 0.35 ? 0xc89324 : j < 0.7 ? 0x9a5a12 : 0x6a3a0e); // Röhrenblüten mit Pollen
+    else col.set(j < 0.5 ? 0x2a170a : j < 0.85 ? 0x3a2210 : 0x52331a); // reife Kerne
+    seeds.setColorAt(i, col);
+  }
+  head.add(seeds);
+
+  // Grüne Hüllblätter: dachziegelartig in drei Kränzen auf der gewölbten Rückseite
+  const Rd = R * 1.1;
+  [[0.55, 16, 0.045], [0.8, 20, 0.055], [1.0, 26, 0.065]].forEach(([k, count, len], ring) => {
+    const rho = Rd * k, zb = -0.4 * Math.sqrt(Math.max(Rd * Rd - rho * rho, 0)) - 0.002 - (k === 1 ? 0.012 : 0);
+    const geo = petalGeometry(0.03, len, 0.6, 0.3);
+    for (let i = 0; i < count; i++) {
+      const pivot = new THREE.Group();
+      pivot.rotation.z = (i + ring * 0.5) / count * Math.PI * 2;
+      const b = new THREE.Mesh(geo, P.bract);
+      b.position.set(0, rho, zb);
+      b.rotation.x = 0.25 - k * 0.6 + (Math.random() - 0.5) * 0.15; // außen nach hinten, hinter die Zungenblüten
+      pivot.add(b);
+      head.add(pivot);
+    }
+  });
+  // Zungenblüten: zwei Kränze, jede etwas anders lang, geneigt und gedreht
+  for (let ring = 0; ring < 2; ring++) {
+    const count = ring ? 21 : 34;
+    for (let i = 0; i < count; i++) {
+      const len = 0.105 + Math.random() * 0.03;
+      const geo = petalGeometry(0.036 + Math.random() * 0.008, len, 0.15 + Math.random() * 0.35, 0.12);
+      const pivot = new THREE.Group();
+      pivot.rotation.z = (i + ring * 0.5 + (Math.random() - 0.5) * 0.3) / count * Math.PI * 2;
+      const pm = new THREE.Mesh(geo, ring ? P.ray2 : P.ray);
+      pm.position.set(0, R * 0.96, ring ? -0.006 : 0.003);
+      pm.rotation.set(-0.1 + Math.random() * 0.25 + ring * 0.12, (Math.random() - 0.5) * 0.5, (Math.random() - 0.5) * 0.15);
+      pivot.add(pm);
+      flutter.push({ obj: pm, axis: 'x', base: pm.rotation.x, amp: 0.12 + Math.random() * 0.1, freq: 4 + Math.random() * 3, phase: Math.random() * 6.3 });
+      head.add(pivot);
+    }
+  }
+  // Wind: Böen aus überlagerten Sinuswellen. Die ganze Blume neigt sich um
+  // ihren Fuß im Vasenboden — wenig genug, dass der Stängel in der Öffnung
+  // bleibt —, der Kopf nickt nach, Blüten- und Laubblätter flattern stärker,
+  // je kräftiger die Böe ist. Läuft über updateTurntables, also nur im Blick.
+  let time = Math.random() * 100;
+  const _sway = new THREE.Quaternion(), _e = new THREE.Euler();
+  flower.userData.wind = (dt) => {
+    time += dt;
+    const gust = 0.6 * Math.sin(0.7 * time) + 0.3 * Math.sin(1.9 * time + 1.3) + 0.15 * Math.sin(4.3 * time + 0.4);
+    const strength = 0.7 + 0.3 * Math.sin(0.23 * time); // Wind frischt auf und legt sich wieder
+    // höchstens gut 5°: der Stängel wandert am Rand 7 cm aus, die Öffnung hat 14 cm Radius
+    flower.rotation.z = 0.085 * gust * strength;
+    flower.rotation.x = 0.04 * Math.sin(0.83 * time + 2.1) * strength;
+    head.quaternion.copy(headRest).multiply(_sway.setFromEuler(_e.set(0.22 * gust * strength, 0.1 * Math.sin(1.3 * time), 0.15 * Math.sin(1.1 * time) * strength)));
+    for (const f of flutter) {
+      f.obj.rotation[f.axis] = f.base + f.amp * strength * (1 + 0.5 * gust) * Math.sin(f.freq * time + f.phase);
+    }
+  };
+  return flower;
+}
+
 const glassMat = new THREE.MeshStandardMaterial({
   color: 0xffffff, roughness: 0.05, metalness: 0, transparent: true, opacity: 0.1, depthWrite: false,
 });
@@ -1730,6 +2072,7 @@ function buildSculpture(def) {
   const [col, row] = ROOMS[def.room].cell;
   const x = col * ROOM_W + def.x, z = row * ROOM_D + def.z;
   const [pw, ph, pd] = def.plinth;
+  const reach = def.height + (def.flower || 0); // Gesamthöhe über dem Sockel, mit Blume
   const group = new THREE.Group();
   group.position.set(x, 0, z);
   if (def.flip) group.rotation.y = Math.PI;
@@ -1766,8 +2109,8 @@ function buildSculpture(def) {
   turntable.add(disc);
   group.add(turntable);
   const turntableEntry = {
-    group: turntable, turnSecs: def.turnSecs, smoke: null,
-    sphere: new THREE.Sphere(new THREE.Vector3(x, ph + def.height / 2, z), def.height / 2 + Math.max(pw, pd) / 2),
+    group: turntable, turnSecs: def.turnSecs, smoke: null, wind: null,
+    sphere: new THREE.Sphere(new THREE.Vector3(x, ph + reach / 2, z), reach / 2 + Math.max(pw, pd) / 2),
   };
   turntables.push(turntableEntry);
 
@@ -1783,7 +2126,7 @@ function buildSculpture(def) {
   // Ein Strahler schräg von vorn oben
   const spot = new THREE.SpotLight(0xfff4e0, def.light, 14, THREE.MathUtils.degToRad(26), 0.8, 1.25);
   spot.position.set(0, ROOM_H - 0.4, -3.2);
-  spot.target.position.set(0, ph + def.height * 0.55, 0);
+  spot.target.position.set(0, ph + reach * 0.55, 0);
   group.add(spot, spot.target);
 
   scene.add(group);
@@ -1796,6 +2139,9 @@ function buildSculpture(def) {
       if (def.marble) {
         o.geometry.computeVertexNormals();
         o.material = def.stone ? new THREE.MeshStandardMaterial({ color: def.stone, roughness: 0.85, metalness: 0 }) : marbleMat;
+      } else if (def.copper) {
+        o.geometry.computeVertexNormals();
+        o.material = makeCopper(o.geometry);
       } else if (def.textured) {
         // Farbtextur und Normalen (über die UV-Nähte geglättet) bringt die Datei mit;
         // ein Teil der Farbe wirkt emissiv wie bei den Gemälden
@@ -1824,6 +2170,11 @@ function buildSculpture(def) {
       const cig = makeCigarette(def.cigarette);
       holder.add(cig.group);
       turntableEntry.smoke = makeSmoke(cig);
+    }
+    if (def.sunflower) {
+      const flower = makeSunflower(def.height);
+      holder.add(flower);
+      turntableEntry.wind = flower.userData.wind;
     }
     turntable.add(holder);
     assignRoomLights(holder);
