@@ -1,7 +1,7 @@
 // Service Worker: macht die Galerie installierbar und offline nutzbar.
 // Seite: zuerst Netz (Updates kommen sofort an), sonst Cache.
 // three.js vom CDN und Gemälde von Commons: zuerst Cache — die URLs sind versioniert bzw. unveränderlich.
-const CACHE = 'galerie-v2';
+const CACHE = 'galerie-v3';
 const SHELL = ['./', 'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png'];
 
 self.addEventListener('install', (e) => {
@@ -23,7 +23,9 @@ self.addEventListener('fetch', (e) => {
 
   if (req.mode === 'navigate') {
     e.respondWith(
-      fetch(req)
+      // no-cache: beim Server nachfragen — GitHub Pages erlaubt dem HTTP-Cache 10 Minuten,
+      // sonst käme eine neue Version erst so spät an, obwohl die Seite „zuerst Netz“ lädt
+      fetch(req, { cache: 'no-cache' })
         .then((res) => { caches.open(CACHE).then((c) => c.put('./', res.clone())); return res; })
         .catch(() => caches.match('./'))
     );
