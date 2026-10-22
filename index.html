@@ -2033,19 +2033,21 @@ const musicToggle = document.getElementById('musicToggle');
 let musicOn = true;
 try { musicOn = localStorage.getItem('musik') !== 'aus'; } catch {}
 let jazz = null; // Audio-Graph, erst nach einem Klick erlaubt
+const MOBILE_AUDIO = matchMedia('(pointer: coarse)').matches;
 
 const mtof = (m) => 440 * 2 ** ((m - 69) / 12);
 const swingTime = (barT, eighth) => barT + BEAT * (Math.floor(eighth / 2) + (eighth % 2 ? 2 / 3 : 0));
 const pick = (a) => a[Math.floor(Math.random() * a.length)];
 
 function makeJazz() {
-  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+  // 'playback': größere Audiopuffer — am Handy knackt es sonst, sobald die 3D-Grafik den Prozessor auslastet
+  const ctx = new (window.AudioContext || window.webkitAudioContext)({ latencyHint: 'playback' });
   const master = ctx.createGain();
   master.gain.value = 0;
   const comp = ctx.createDynamicsCompressor();
   master.connect(comp).connect(ctx.destination);
-  // Hall: selbst erzeugte Impulsantwort aus abklingendem Rauschen
-  const len = ctx.sampleRate * 2.4;
+  // Hall: selbst erzeugte Impulsantwort aus abklingendem Rauschen; am Handy kürzer, die Faltung ist teuer
+  const len = Math.round(ctx.sampleRate * (MOBILE_AUDIO ? 1.2 : 2.4));
   const ir = ctx.createBuffer(2, len, ctx.sampleRate);
   for (let ch = 0; ch < 2; ch++) {
     const d = ir.getChannelData(ch);
@@ -2180,9 +2182,9 @@ function startJazz() {
   if (!jazz) {
     jazz = makeJazz();
     jazz.nextBar = jazz.ctx.currentTime + 0.15;
-    // vorausplanen: ein Takt, sobald er weniger als 0,6 s entfernt ist
+    // vorausplanen: ein Takt, sobald er weniger als 1 s entfernt ist — reicht auch, wenn der Zeitgeber am Handy hängt
     jazz.timer = setInterval(() => {
-      while (jazz.nextBar < jazz.ctx.currentTime + 0.6) {
+      while (jazz.nextBar < jazz.ctx.currentTime + 1.0) {
         scheduleBar(jazz, jazz.nextBar);
         jazz.nextBar += BEAT * 4;
       }
