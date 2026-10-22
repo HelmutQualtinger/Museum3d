@@ -1,7 +1,7 @@
 // Service Worker: macht die Galerie installierbar und offline nutzbar.
 // Seite: zuerst Netz (Updates kommen sofort an), sonst Cache.
 // three.js vom CDN und Gemälde von Commons: zuerst Cache — die URLs sind versioniert bzw. unveränderlich.
-const CACHE = 'galerie-v1';
+const CACHE = 'galerie-v2';
 const SHELL = ['./', 'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png'];
 
 self.addEventListener('install', (e) => {
