@@ -873,6 +873,9 @@ const MANDEL_CENTER = [-0.74325, 0.13116];
 const MANDEL_SPAN = 0.0034;      // Breite des Ausschnitts in der komplexen Ebene
 const MANDEL_SPAN_MIN = 1e-26;   // darunter unterliefe δ in float32
 const MANDEL_ZOOM_MIN = Math.log(MANDEL_SPAN_MIN / MANDEL_SPAN) / Math.log(4);
+const MANDEL_SPAN_MAX = 4;       // ganz herausgezoomt: die ganze Mandelbrot-Menge
+const MANDEL_DIRECT_SPAN = 0.01; // darüber ohne Störungsrechnung (siehe prepareMandelView)
+const MANDEL_ZOOM_MAX = Math.log(MANDEL_SPAN_MAX / MANDEL_SPAN) / Math.log(4);
 const MANDEL_R2 = 100 * 100;     // großer Fluchtradius für glatte Farbübergänge
 const MANDEL_MAXIT_CAP = 20000;  // tief im Zoom brauchen randnahe Punkte zehntausende Schritte
 const MANDEL_MAXIT_LO = 8000;    // Vorschau beim Zoomen: schneller, Rest füllt die feine Fassung
@@ -900,10 +903,11 @@ function f2b(x) {
 }
 
 const mandelIterations = (span) =>
-  Math.min(MANDEL_MAXIT_CAP, Math.round(1000 + 400 * Math.log2(MANDEL_SPAN / span)));
+  THREE.MathUtils.clamp(Math.round(1000 + 400 * Math.log2(MANDEL_SPAN / span)), 400, MANDEL_MAXIT_CAP);
 
 const mandel = {
   cx: f2b(MANDEL_CENTER[0]), cy: f2b(MANDEL_CENTER[1]), span: MANDEL_SPAN,
+  zoom: 0,              // Fraktal-Anteil des Nahansicht-Zooms, für die Rückkehr gemerkt
   refX: null, refY: null, refLen: 0, refEscaped: false,
   mesh: null,           // Leinwand des Bildes, setzt buildPainting
   dirty: false,         // Ansicht geändert → grob neu zeichnen
@@ -917,9 +921,8 @@ const refTex = new THREE.DataTexture(refData, REF_W, REF_H, THREE.RGBAFormat, TH
 refTex.minFilter = refTex.magFilter = THREE.NearestFilter;
 
 // Referenzbahn am aktuellen Bildmittelpunkt
-function computeReference(maxit) {
+function computeReference(maxit, cx = mandel.cx, cy = mandel.cy) {
   const FP = MANDEL_FP;
-  const cx = mandel.cx, cy = mandel.cy;
   let zx = 0n, zy = 0n, n = 0;
   mandel.refEscaped = false;
   for (; n < maxit; n++) {
@@ -993,7 +996,9 @@ function makeMandelbrotQuad(ratio) {
     const dist = r.mul(log(r)).div(length(dzw));
     const sharp = smoothstep(0.05, 0.5, dist.div(pixel));
     const t = fract(log(nu.add(1)).mul(1.1).add(0.55));
-    return vec4(select(n.lessThan(0), float(-1), t), refl, sharp, 1); // −1: innen
+    // Innen: z = 0, außen 0,5…1 — negative Werte (früher −1 für innen) kamen als 0
+    // im Target an, das Innere bekam dann eine Palettenfarbe und wechselte sie mit
+    return vec4(t, refl, select(n.lessThan(0), float(0), sharp.mul(0.5).add(0.5)), 1);
   })();
 
   const mat = new THREE.MeshBasicNodeMaterial();
@@ -1022,8 +1027,8 @@ function makeMandelColorQuad() {
       col = mix(col, vec3(...rgb), clamp(t.sub(t0).div(t1 - t0), 0, 1));
     }
     const lit = col.mul(refl.mul(1.05).add(0.08)).add(pow(refl, 24).mul(0.35));
-    const exterior = mix(col.mul(0.75), lit, data.z);
-    const srgb = select(data.x.lessThan(0), vec3(0.015, 0.012, 0.02), exterior);
+    const exterior = mix(col.mul(0.75), lit, clamp(data.z.sub(0.5).mul(2), 0, 1));
+    const srgb = select(data.z.lessThan(0.25), vec3(0.015, 0.012, 0.02), exterior);
     return pow(clamp(srgb, 0, 1), vec3(2.2)); // Palette ist in sRGB gedacht, gerechnet wird linear
   })();
 
@@ -1087,10 +1092,29 @@ function setMandelView(cx, cy, span) {
   mandel.hiStrip = 0;
   mandel.changedAt = performance.now();
 }
-const mandelSpanFor = (zoom) => MANDEL_SPAN * Math.pow(4, Math.min(zoom, 0));
-function resetMandelView() {
-  setMandelView(f2b(MANDEL_CENTER[0]), f2b(MANDEL_CENTER[1]), MANDEL_SPAN);
+// zoom ist beim Mandelbrot-Bild zweigeteilt: bis MANDEL_ZOOM_MAX zoomt das
+// Fraktal (0 = Ausgangsausschnitt, negativ hinein, positiv heraus bis zur
+// ganzen Menge), darüber fährt die Kamera zurück bis zum Schild
+const mandelSpanFor = (zoom) => MANDEL_SPAN * Math.pow(4, Math.min(zoom, MANDEL_ZOOM_MAX));
+
+// Ausschnitt bleibt nach dem Verlassen der Nahansicht erhalten, auch über einen
+// Neuladen hinweg (localStorage; Mitte als BigInt-Text, sonst ginge die Tiefe verloren)
+function saveMandelView() {
+  try {
+    localStorage.setItem('mandelbrot', JSON.stringify({ cx: String(mandel.cx), cy: String(mandel.cy), zoom: mandel.zoom }));
+  } catch { /* privat/gesperrt: dann eben nur bis zum Neuladen */ }
 }
+function loadMandelView() {
+  try {
+    const v = JSON.parse(localStorage.getItem('mandelbrot'));
+    if (!v) return;
+    const zoom = THREE.MathUtils.clamp(Number(v.zoom) || 0, MANDEL_ZOOM_MIN, MANDEL_ZOOM_MAX);
+    mandel.zoom = zoom;
+    setMandelView(BigInt(v.cx), BigInt(v.cy), mandelSpanFor(zoom));
+  } catch { /* fehlt oder kaputt: Ausgangsausschnitt */ }
+}
+loadMandelView();
+addEventListener('pagehide', saveMandelView);
 // Bildmitte um (wx, wy) Bildbreiten verschieben, beim aktuellen Ausschnitt
 function shiftMandelView(wx, wy) {
   const s = mandel.span;
@@ -1103,10 +1127,19 @@ function shiftMandelView(wx, wy) {
 function prepareMandelView(maxit) {
   // Neue Referenz, wenn die alte zu weit vom Bild entfernt liegt (float32-Versatz)
   // oder zu kurz ist; sonst bleibt sie — die Rechnung kostet tief im Zoom einige ms
-  const offX = mandel.refX === null ? Infinity : b2f(mandel.cx - mandel.refX);
-  const offY = mandel.refX === null ? Infinity : b2f(mandel.cy - mandel.refY);
-  if (Math.hypot(offX, offY) > mandel.span * 4 || (!mandel.refEscaped && mandel.refLen < maxit - 1)) {
-    computeReference(maxit);
+  // Weit herausgezoomt rechnet float32 direkt genau genug. Dann dient der Ursprung
+  // als Referenz (seine Bahn bleibt 0, δ ist einfach z): eine entkommene Referenz
+  // wüchse hier auf Tausende, und die Auslöschung in 2Zδ + δ² ließe Punkte im
+  // Innern der Menge fälschlich entkommen
+  if (mandel.span > MANDEL_DIRECT_SPAN) {
+    if (mandel.refX !== 0n || mandel.refY !== 0n || mandel.refLen < maxit - 1) computeReference(maxit, 0n, 0n);
+  } else {
+    const offX = mandel.refX === null ? Infinity : b2f(mandel.cx - mandel.refX);
+    const offY = mandel.refX === null ? Infinity : b2f(mandel.cy - mandel.refY);
+    if (mandel.refX === 0n && mandel.refY === 0n || Math.hypot(offX, offY) > mandel.span * 4 ||
+        (!mandel.refEscaped && mandel.refLen < maxit - 1)) {
+      computeReference(maxit);
+    }
   }
   uOffset.value.set(b2f(mandel.cx - mandel.refX), b2f(mandel.cy - mandel.refY));
   uSpan.value = mandel.span;
@@ -2349,7 +2382,7 @@ function openMenu() {
   focusState.active = false;
   focusState.animating = false;
   dropHiRes();
-  resetMandelView();
+  saveMandelView();
   backBtn.style.display = 'none';
   infoBtn.style.display = 'none';
   closeInfo();
@@ -2657,10 +2690,11 @@ function dropHiRes() {
 const ZOOM_MIN = -1;
 // Beim Mandelbrot-Bild bleibt die Kamera bei zoom 0 stehen; tiefer zoomt das Fraktal selbst
 const zoomMinFor = (spot) => (spot.fractal ? MANDEL_ZOOM_MIN : ZOOM_MIN);
+const zoomMaxFor = (spot) => (spot.fractal ? MANDEL_ZOOM_MAX + 1 : 1);
 const focusDistScale = (zoom) => Math.pow(4, Math.min(zoom, 0));
 function focusPose(spot, zoom, pan, outPos, outLook) {
   if (spot.fractal) {
-    zoom = Math.max(zoom, 0);
+    zoom = Math.max(zoom - MANDEL_ZOOM_MAX, 0); // Kamera bewegt sich erst jenseits des Fraktal-Zooms
     pan.set(0, 0);
   }
   const halfV = Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2);
@@ -2692,7 +2726,7 @@ const _focusHit = new THREE.Vector3();
 function zoomFocusAt(newZoom, clientX, clientY) {
   const spot = focusState.currentSpot;
   const z0 = focusState.zoomTarget;
-  const z1 = THREE.MathUtils.clamp(newZoom, zoomMinFor(spot), 1);
+  const z1 = THREE.MathUtils.clamp(newZoom, zoomMinFor(spot), zoomMaxFor(spot));
   focusState.zoomTarget = z1;
   raycaster.setFromCamera(eventToNDC({ clientX, clientY }), camera);
   _focusPlane.setFromNormalAndCoplanarPoint(spot.normal, spot.worldPos);
@@ -2715,17 +2749,17 @@ function zoomFocusAt(newZoom, clientX, clientY) {
 
 function enterFocus(spot, keepSavedPos) {
   showHiRes(spot);
-  resetMandelView();
   if (!keepSavedPos) {
     focusState.savedPos.copy(camera.position);
     focusState.savedQuat.copy(camera.quaternion);
   }
 
-  focusState.zoom = focusState.zoomTarget = 0;
+  // Mandelbrot: dort weitermachen, wo man zuletzt war
+  focusState.zoom = focusState.zoomTarget = spot.fractal ? mandel.zoom : 0;
   focusState.pan.set(0, 0);
   focusState.panTarget.set(0, 0);
   const target = new THREE.Vector3();
-  focusPose(spot, 0, focusState.pan, target, _focusLook);
+  focusPose(spot, focusState.zoom, focusState.pan, target, _focusLook);
 
   focusState.fromPos.copy(camera.position);
   focusState.toPos.copy(target);
@@ -2746,7 +2780,7 @@ function enterFocus(spot, keepSavedPos) {
 }
 
 function exitFocus() {
-  resetMandelView();
+  saveMandelView();
   focusState.fromPos.copy(camera.position);
   focusState.toPos.copy(focusState.savedPos);
   focusState.fromQuat.copy(camera.quaternion);
@@ -3016,7 +3050,7 @@ function pointerMove(x, y) {
     if (focusState.currentSpot.fractal) {
       // Mandelbrot: Ziehen verschiebt den Ausschnitt im Fraktal (erst unterhalb des Ganzbilds)
       const w = focusState.currentSpot.width;
-      if (focusState.zoomTarget < 0) shiftMandelView(-dx * mpp / w, dy * mpp / w);
+      if (focusState.zoomTarget <= MANDEL_ZOOM_MAX) shiftMandelView(-dx * mpp / w, dy * mpp / w);
       return;
     }
     focusState.panTarget.x -= dx * mpp;
@@ -3129,16 +3163,19 @@ function animate() {
   if (focusState.active && !focusState.animating) {
     const spot = focusState.currentSpot;
     const kb = (move.back ? 1 : 0) - (move.forward ? 1 : 0);
-    if (kb) focusState.zoomTarget = THREE.MathUtils.clamp(focusState.zoomTarget + kb * dt * 1.5, zoomMinFor(spot), 1);
-    if (spot.fractal) setMandelView(mandel.cx, mandel.cy, mandelSpanFor(focusState.zoomTarget));
+    if (kb) focusState.zoomTarget = THREE.MathUtils.clamp(focusState.zoomTarget + kb * dt * 1.5, zoomMinFor(spot), zoomMaxFor(spot));
+    if (spot.fractal) {
+      mandel.zoom = Math.min(focusState.zoomTarget, MANDEL_ZOOM_MAX);
+      setMandelView(mandel.cx, mandel.cy, mandelSpanFor(focusState.zoomTarget));
+    }
     // ab etwa 1,5-facher Vergrößerung reicht die 1920er-Fassung nicht mehr
     if (focusState.zoomTarget < -0.3) showHiRes(spot, DETAIL_PX);
     focusPose(spot, focusState.zoomTarget, focusState.panTarget, _focusPos, _focusLook); // klemmt panTarget
     const k = Math.min(1, dt * 10);
     focusState.zoom += (focusState.zoomTarget - focusState.zoom) * k;
     if (Math.abs(focusState.zoomTarget - focusState.zoom) < 0.001) focusState.zoom = focusState.zoomTarget;
-    // Mandelbrot: die Kamera kennt nur 0…1, sonst hinkte sie beim Herauszoomen aus der Tiefe nach
-    if (spot.fractal) focusState.zoom = Math.max(focusState.zoom, 0);
+    // Mandelbrot: die Kamera folgt erst jenseits des Fraktal-Zooms, sonst hinkte sie beim Herauszoomen aus der Tiefe nach
+    if (spot.fractal) focusState.zoom = Math.max(focusState.zoom, MANDEL_ZOOM_MAX);
     focusState.pan.lerp(focusState.panTarget, k);
     if (focusState.pan.distanceTo(focusState.panTarget) < 0.0005) focusState.pan.copy(focusState.panTarget);
     focusPose(spot, focusState.zoom, focusState.pan, camera.position, _focusLook);
