@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Galerie der Meister — begehbares 3D-Museum</title>
-<meta name="description" content="Ein begehbares 3D-Museum im Browser: sechs Säle, neunundvierzig Werke von der Höhlenmalerei aus Lascaux und Chauvet bis Kandinsky und ein Mandelbrot-Fraktal, dazu Michelangelos David, die Venus von Willendorf, Nofretete, die Goldmaske des Tutanchamun und eine Kupfervase in 3D. Ziehen zum Umsehen, klicken zum Gehen — ohne Installation.">
+<meta name="description" content="Ein begehbares 3D-Museum im Browser: sechs Säle, fünfzig Werke von der Höhlenmalerei aus Lascaux und Chauvet bis Kandinsky und ein Mandelbrot-Fraktal, dazu Michelangelos David, die Venus von Willendorf, Nofretete, die Goldmaske des Tutanchamun, eine Kupfervase und ein Goldwürfel in 3D. Ziehen zum Umsehen, klicken zum Gehen — ohne Installation.">
 <link rel="canonical" href="https://helmutqualtinger.github.io/Museum3d/">
 <meta name="theme-color" content="#0a0806">
 
@@ -22,7 +22,7 @@
 <meta property="og:site_name" content="Galerie der Meister">
 <meta property="og:locale" content="de_DE">
 <meta property="og:title" content="Galerie der Meister — begehbares 3D-Museum">
-<meta property="og:description" content="Sechs Säle, neunundvierzig Werke von der Höhlenmalerei aus Lascaux und Chauvet bis Kandinsky und ein Mandelbrot-Fraktal, dazu Michelangelos David, die Venus von Willendorf, Nofretete, die Maske des Tutanchamun und eine Kupfervase in 3D. Ziehen zum Umsehen, klicken zum Gehen — direkt im Browser, ohne Installation.">
+<meta property="og:description" content="Sechs Säle, fünfzig Werke von der Höhlenmalerei aus Lascaux und Chauvet bis Kandinsky und ein Mandelbrot-Fraktal, dazu Michelangelos David, die Venus von Willendorf, Nofretete, die Maske des Tutanchamun, eine Kupfervase und ein Goldwürfel in 3D. Ziehen zum Umsehen, klicken zum Gehen — direkt im Browser, ohne Installation.">
 <meta property="og:url" content="https://helmutqualtinger.github.io/Museum3d/">
 <meta property="og:image" content="https://helmutqualtinger.github.io/Museum3d/docs/og-image.jpg">
 <meta property="og:image:type" content="image/jpeg">
@@ -32,7 +32,7 @@
 
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Galerie der Meister — begehbares 3D-Museum">
-<meta name="twitter:description" content="Sechs Säle, neunundvierzig Werke von der Höhlenmalerei aus Lascaux und Chauvet bis Kandinsky und ein Mandelbrot-Fraktal, dazu Michelangelos David, die Venus von Willendorf, Nofretete, die Maske des Tutanchamun und eine Kupfervase in 3D. Ziehen zum Umsehen, klicken zum Gehen — direkt im Browser.">
+<meta name="twitter:description" content="Sechs Säle, fünfzig Werke von der Höhlenmalerei aus Lascaux und Chauvet bis Kandinsky und ein Mandelbrot-Fraktal, dazu Michelangelos David, die Venus von Willendorf, Nofretete, die Maske des Tutanchamun, eine Kupfervase und ein Goldwürfel in 3D. Ziehen zum Umsehen, klicken zum Gehen — direkt im Browser.">
 <meta name="twitter:image" content="https://helmutqualtinger.github.io/Museum3d/docs/og-image.jpg">
 <meta name="twitter:image:alt" content="Blick durch den Saal Porträt mit Rembrandts Selbstbildnis, durch einen breiten Durchgang in den Saal Landschaft.">
 
@@ -222,7 +222,7 @@ import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
 
 /* ---------------------------------------------------------------
-   Sammlung: sechs Säle, fünfzig Bilder, fünf Skulpturen
+   Sammlung: sechs Säle, einundfünfzig Bilder, sechs Skulpturen
 --------------------------------------------------------------- */
 const ROOM_W = 16;   // Breite (X) je Saal
 const ROOM_D = 14;   // Tiefe (Z)
@@ -395,6 +395,11 @@ const ROOMS = [
 const DIVIDER_PAINTINGS = {
   16: [ // zwischen Saal I (Porträt) und Saal II (Landschaft)
     { segIndex: 0, face: -1, def: { title: 'Whistlers Mutter', artist: 'James McNeill Whistler, 1871', url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fb/James_Abbott_McNeill_Whistler_-_Portrait_of_the_Artist%27s_Mother_-_Google_Art_Project.jpg/1280px-James_Abbott_McNeill_Whistler_-_Portrait_of_the_Artist%27s_Mother_-_Google_Art_Project.jpg', ratio: 0.887 } },
+    // keine Bilddatei: entsteht laufend Schicht für Schicht aus dem Foto und den vier Schablonen (makeSprayTexture)
+    { segIndex: 1, face: -1, def: { title: 'Maria', artist: 'Vierfarb-Sprayschablone, 2026', ratio: 1020 / 840, photo: 'bilder/maria-foto.jpg', spray: [
+      { url: 'bilder/maria-s1.png', name: 'Sonnengelb' }, { url: 'bilder/maria-s2.png', name: 'Korallrosa' },
+      { url: 'bilder/maria-s3.png', name: 'Petrol' }, { url: 'bilder/maria-s4.png', name: 'Tiefschwarz' },
+    ] } },
     { segIndex: 1, face: 1, def: { title: 'Der Seerosenteich', artist: 'Claude Monet, 1899', url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/7e/Claude_Monet%2C_The_Water-Lily_Pond_%28National_Gallery%2C_London%29.jpg/1280px-Claude_Monet%2C_The_Water-Lily_Pond_%28National_Gallery%2C_London%29.jpg', ratio: 0.97 } },
     // musste der Tür zu Saal IV weichen und hängt nun auf der Rückseite der Whistler-Wand
     { segIndex: 0, face: 1, def: { title: 'Impression, Sonnenaufgang', artist: 'Claude Monet, 1872', url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/Monet_-_Impression%2C_Sunrise.jpg/1280px-Monet_-_Impression%2C_Sunrise.jpg', ratio: 0.776 } },
@@ -411,7 +416,8 @@ const DIVIDER_PAINTINGS = {
 // height = Höhe der Figur in Metern, plinth = Sockel [Breite, Höhe, Tiefe],
 // turnSecs = Dauer einer Umdrehung auf dem Drehteller. flip dreht Schild und
 // Strahler zur Rückwand, wenn man den Saal von dort betritt; stone färbt den Scan als Stein,
-// copper gibt dem Modell gebürstetes Kupfer.
+// copper gibt dem Modell gebürstetes Kupfer, gold poliertes Gold; cornerUp stellt einen
+// Würfel auf eine Ecke (Raumdiagonale senkrecht).
 // Die Modelle sind Draco-komprimierte GLBs im Ordner models/ (Quellen siehe README).
 const SCULPTURES = [
   { room: 3, x: 5.4, z: 7.6, title: 'David', artist: 'Michelangelo Buonarroti, 1501–1504',
@@ -437,6 +443,10 @@ const SCULPTURES = [
   // mit einer Sonnenblume (flower = wie weit sie über die Vase hinausragt, in Metern)
   { room: 2, x: 12.4, z: 7, title: 'Vase „Evolution“ mit Sonnenblume · vierfach vergrößert', artist: 'Parametrischer Entwurf, Python, 2026',
     url: 'models/vase-evolution.glb', height: 0.8, plinth: [0.9, 0.5, 0.9], copper: true, sunflower: true, flower: 0.85, rotY: 0, light: 30, turnSecs: 40 },
+  // Rechts der Saalmitte, David gegenüber. Entwurf 60 mm mit Kantenradius 2 mm, hier 80 cm Kantenlänge:
+  // height ist die Raumdiagonale ohne die gerundeten Ecken, (60 · √3 − 4 · (√3 − 1)) · 0,8 / 60
+  { room: 3, x: 10.6, z: 7.6, title: 'Durchbohrter Würfel · auf einer Ecke stehend', artist: 'CAD-Entwurf, build123d, 2026',
+    url: 'models/wuerfel-gold.glb', height: 1.3466, plinth: [1.4, 0.5, 1.4], gold: true, cornerUp: true, rotY: 0, light: 30, turnSecs: 45 },
 ];
 
 // Erläuterungen für das Infofeld: zum Werk (Schlüssel „Titel|Künstlerzeile“, genau wie oben)
@@ -476,6 +486,10 @@ const ABOUT_ARTISTS = {
     "Paul Klee (1879–1940) wurde bei Bern geboren und war Maler, Grafiker und Musiker. Er lehrte von 1921 bis 1931 am Bauhaus und schuf rund 10 000 Werke, oft kleinformatig, poetisch und voller Humor. Die Nationalsozialisten diffamierten seine Kunst als „entartet“; er kehrte 1933 in die Schweiz zurück.",
   "Michelangelo Buonarroti":
     "Michelangelo Buonarroti (1475–1564) war Bildhauer, Maler, Architekt und Dichter der italienischen Renaissance. Er arbeitete für die Medici in Florenz und für mehrere Päpste in Rom, wo er die Decke und die Altarwand der Sixtinischen Kapelle ausmalte und die Kuppel des Petersdoms entwarf. Schon zu Lebzeiten nannte man ihn „il Divino“, den Göttlichen.",
+  "Vierfarb-Sprayschablone":
+    "Das Verfahren stammt aus der Straßenkunst und dem Siebdruck der Pop-Art: Ein Foto wird auf wenige Tonwerte reduziert, jeder Tonwert wird zu einer eigenen Schablone. Hier berechnet ein Python-Programm die Trennung, setzt Stege, damit keine Insel aus der Platte fällt, und erzeugt die Schnittkonturen für vier Platten aus 1 Millimeter dickem PETG im Format 420 × 510 Millimeter.",
+  "CAD-Entwurf":
+    "Der Würfel ist ein parametrisches Modell, geschrieben in Python mit der CAD-Bibliothek build123d. Alle Maße hängen an wenigen Parametern im Programm; die Bohrtiefen ergeben sich aus einem einzigen Wert, der Stegdicke. Der Entwurf misst 60 Millimeter Kantenlänge und ist für die Fertigung als geschlossener, zusammenhängender Körper berechnet.",
   "Parametrischer Entwurf":
     "Die Form ist nicht von Hand modelliert, sondern berechnet: Ein Python-Programm legt fünf Querschnitte mit Eckenzahl, Größe und Verdrehung fest und verbindet sie über die Höhe mit kubischen Splines zu einer glatten Fläche. Die Ecken sind um 6 Millimeter gerundet, damit sie druckbar bleiben. Die Bibliothek manifold3d formt daraus einen geschlossenen Körper und legt den Schriftzug um die Wand. Heraus kommen eine STL-Datei für den Drucker, ein Vorschaumodell in Kupfer und eine technische Zeichnung.",
   "Paul Gauguin":
@@ -606,6 +620,10 @@ const ABOUT_WORKS = {
     "Für jeden Punkt c der Zahlenebene wird z → z² + c immer wieder berechnet: Bleibt z begrenzt, gehört c zur Mandelbrot-Menge, sonst bestimmt die Geschwindigkeit des Entweichens die Farbe. Dieses Bild wird nicht geladen, sondern von der Grafikkarte live gerechnet, mit Licht und Schatten wie ein Relief. In der Nahansicht kann man rund 10²³-fach hineinzoomen — immer neue Spiralen und kleine Kopien der ganzen Menge tauchen auf.",
   "Der Traum|Henri Rousseau, 1910":
     "Eine nackte Frau liegt auf einem roten Sofa mitten in einem dichten Dschungel, zwischen Löwen, Vögeln, einem Elefanten und einem Flöte spielenden Schlangenbeschwörer. Rousseau erklärte, die Frau träume, sie sei in den Urwald versetzt worden. Es ist sein letztes großes Bild, gemalt im Jahr seines Todes, und hängt im Museum of Modern Art in New York.",
+  "Maria|Vierfarb-Sprayschablone, 2026":
+    "Das Bildnis entsteht hier vor den Augen des Betrachters. Am Anfang steht das Foto, dann folgt das Spraybild von hell nach dunkel, Platte für Platte. Zuerst legt Sonnengelb Gesicht und Schultern an, Korallrosa setzt die Schatten, Petrol füllt Hintergrund und Tiefen, zuletzt zeichnet Tiefschwarz Haar, Augen und Brauen. Jede Schicht verdeckt einen Teil der vorigen; erst die letzte macht das Gesicht lesbar. Das Motivfeld misst 360 × 450 Millimeter.",
+  "Durchbohrter Würfel · auf einer Ecke stehend|CAD-Entwurf, build123d, 2026":
+    "In jede der sechs Flächen führt eine gestufte Bohrung, von 50 bis 20 Millimeter Durchmesser, dazu ein Durchgang von 10 Millimetern längs jeder Achse. Die Bohrungen sind so tief, dass die benachbarter Flächen einander anschneiden: Übrig bleiben vier ineinander geschachtelte Würfelrahmen um einen kleinen Kernwürfel, verbunden durch Stege entlang der Raumdiagonalen. So bleibt alles ein einziger Körper. Hier steht er in 80 Zentimetern Kantenlänge auf einer Ecke, die gegenüberliegende Ecke genau senkrecht darüber.",
   "Vase „Evolution“ mit Sonnenblume · vierfach vergrößert|Parametrischer Entwurf, Python, 2026":
     "Die Vase ist für den 3D-Druck entworfen und im Original 20 Zentimeter hoch; hier steht sie viermal so groß in gebürstetem Kupfer, mit einer Sonnenblume darin. Von unten nach oben geht ihr Querschnitt vom Dreieck über Viereck, Fünfeck und Sechseck in einen Kreis über und dreht sich dabei um 90 Grad — diese Entwicklung gibt ihr den Namen. Der Schriftzug „Evolution“ in Brush Script liegt erhaben und schräg ansteigend auf einer einzigen Fünfeckseite. Die Wand ist 2,5 Millimeter, der Boden 3 Millimeter stark, die Öffnung misst 76 Millimeter.",
   "David|Michelangelo Buonarroti, 1501–1504":
@@ -693,6 +711,98 @@ function preparePaintingTexture(tex) {
   tex.generateMipmaps = true;
   tex.minFilter = THREE.LinearMipmapLinearFilter;
   return tex;
+}
+
+// Spraybild, das sich vor den Augen des Betrachters aufbaut: erst das Foto, dann je
+// Schablone Platte auflegen, Farbe von oben nach unten sprühen, Platte abheben; zuletzt
+// bleibt das fertige Bild stehen, dann beginnt es auf frischem Papier von vorn.
+// Die Schichten sind einfarbige PNGs, ihr Alpha ist die Öffnung der Schablone.
+const SPRAY_W = 840, SPRAY_H = 1020, SPRAY_MARGIN = 60; // Platte 420 × 510 mm bei 2 px/mm
+const SPRAY_PAPER = '#f6f1e8', SPRAY_PLATE = '#b9c7c9';
+const SPRAY_PHOTO = 6, SPRAY_FADE = 1, SPRAY_LAY = 0.8, SPRAY_COAT = 2.8, SPRAY_LIFT = 0.8, SPRAY_HOLD = 9; // Sekunden
+const SPRAY_STEP = SPRAY_LAY + SPRAY_COAT + SPRAY_LIFT;
+const SPRAY_FPS = 20; // jedes Frame eine Textur hochzuladen wäre unnötig teuer
+const spray = { mesh: null, sphere: null, photo: null, layers: [], plates: [], ctx: null, tex: null, t: 0, wait: 0, still: false };
+
+function makeSprayTexture(def) {
+  const canvas = document.createElement('canvas');
+  canvas.width = SPRAY_W; canvas.height = SPRAY_H;
+  spray.ctx = canvas.getContext('2d');
+  spray.tex = preparePaintingTexture(new THREE.CanvasTexture(canvas));
+  const loader = new THREE.ImageLoader(loadingManager);
+  loader.load(def.photo, (img) => { spray.photo = img; });
+  def.spray.forEach((layer, k) => loader.load(layer.url, (img) => {
+    spray.layers[k] = { img, name: layer.name };
+    // Platte: Fläche, aus der die Öffnungen ausgeschnitten sind
+    const c = document.createElement('canvas');
+    c.width = SPRAY_W; c.height = SPRAY_H;
+    const g = c.getContext('2d');
+    g.fillStyle = SPRAY_PLATE;
+    g.fillRect(0, 0, SPRAY_W, SPRAY_H);
+    g.globalCompositeOperation = 'destination-out';
+    g.drawImage(img, SPRAY_MARGIN, SPRAY_MARGIN);
+    spray.plates[k] = c;
+  }));
+  spray.ctx.fillStyle = SPRAY_PAPER;
+  spray.ctx.fillRect(0, 0, SPRAY_W, SPRAY_H);
+  return spray.tex;
+}
+
+function drawSpray() {
+  const g = spray.ctx, n = spray.layers.length;
+  const t = spray.t - SPRAY_PHOTO; // negativ: Foto
+  const k = Math.floor(t / SPRAY_STEP), local = t - k * SPRAY_STEP;
+  g.fillStyle = SPRAY_PAPER;
+  g.fillRect(0, 0, SPRAY_W, SPRAY_H);
+  // Das Foto blendet über dem fertigen Bild des letzten Durchgangs ein und zum leeren Papier aus
+  const coats = k < 0 ? (spray.t < SPRAY_FADE ? n : 0) : Math.min(k, n);
+  for (let i = 0; i < coats; i++) g.drawImage(spray.layers[i].img, SPRAY_MARGIN, SPRAY_MARGIN);
+  let label = 'Fertiges Spraybild';
+  if (k < 0) {
+    g.globalAlpha = Math.min(1, spray.t / SPRAY_FADE, (SPRAY_PHOTO - spray.t) / SPRAY_FADE);
+    g.drawImage(spray.photo, SPRAY_MARGIN, SPRAY_MARGIN);
+    g.globalAlpha = 1;
+    label = 'Vorlage: Foto';
+  } else if (k < n) {
+    const { img, name } = spray.layers[k];
+    const front = Math.min(1, Math.max(0, (local - SPRAY_LAY) / SPRAY_COAT)) * (SPRAY_H + 240) - 120;
+    if (local > SPRAY_LAY) {
+      // Farbe nur oberhalb der Sprühkante, die nach unten wandert
+      g.save();
+      g.beginPath();
+      g.rect(0, 0, SPRAY_W, Math.max(0, front));
+      g.clip();
+      g.drawImage(img, SPRAY_MARGIN, SPRAY_MARGIN);
+      g.restore();
+    }
+    g.globalAlpha = Math.min(1, local / SPRAY_LAY, (SPRAY_STEP - local) / SPRAY_LIFT) * 0.9;
+    g.drawImage(spray.plates[k], 0, 0);
+    g.globalAlpha = 1;
+    label = `Schablone ${k + 1} von ${n} · ${name}`;
+  }
+  g.fillStyle = '#16181c';
+  g.font = '24px Georgia, serif';
+  g.textAlign = 'center';
+  g.fillText(label, SPRAY_W / 2, SPRAY_H - 20);
+  spray.tex.needsUpdate = true;
+  needsRender = true;
+}
+
+// Läuft wie die Drehteller nur, solange das Bild im Blickfeld liegt
+function updateSpray(dt) {
+  const n = spray.layers.filter(Boolean).length;
+  if (n < 4 || !spray.photo) return;
+  spray.t += dt;
+  const end = SPRAY_PHOTO + n * SPRAY_STEP;
+  if (spray.t >= end + SPRAY_HOLD) spray.t = 0;
+  // Stehendes Bild (Foto, fertiges Spraybild) nur einmal zeichnen
+  const still = spray.t >= end || (spray.t >= SPRAY_FADE && spray.t < SPRAY_PHOTO - SPRAY_FADE);
+  if (still && spray.still) return;
+  spray.wait -= dt;
+  if (spray.wait > 0) return;
+  spray.wait = 1 / SPRAY_FPS;
+  drawSpray();
+  spray.still = still;
 }
 
 function makePlacardTexture(title, artist) {
@@ -1198,6 +1308,7 @@ function buildPainting(def, maxW, maxH) {
 
   const tex = def.procedural
     ? def.procedural(def.ratio)
+    : def.spray ? makeSprayTexture(def)
     : preparePaintingTexture(texLoader.load(sizedUrl(def.url, LO_RES_PX)));
 
   // Ölfarbe auf Leinwand ist matt: hohe Rauheit, damit das Spotlicht keinen
@@ -1218,6 +1329,7 @@ function buildPainting(def, maxW, maxH) {
   group.add(canvasMesh);
   canvasMesh.userData.url = def.url;
   if (def.procedural) mandel.mesh = canvasMesh;
+  if (def.spray) spray.mesh = canvasMesh;
   canvasMesh.userData.loTex = tex;
   group.userData.canvasMesh = canvasMesh;
   group.userData.width = width;
@@ -1598,6 +1710,7 @@ function updateTurntables(dt) {
     if (t.wind) t.wind(dt);
     needsRender = true;
   }
+  if (_frustum.intersectsSphere(spray.sphere)) updateSpray(dt);
 }
 
 /* ---------------------------------------------------------------
@@ -1697,9 +1810,9 @@ function updateSmoke(smoke, dt) {
 // Farbe und Rauheit leicht ändern. Metall spiegelt nur seine Umgebung — ohne
 // sie wäre es fast schwarz —, deshalb bekommt es ein kleines gemaltes
 // Panorama des Saals: helle Decke, warme Wände, heller Marmorboden.
-let copperEnv = null, copperMaps = null;
-function makeCopper(geometry) {
-  if (!copperEnv) {
+let hallEnv = null, copperMaps = null;
+function getHallEnv() {
+  if (!hallEnv) {
     const c = document.createElement('canvas');
     c.width = 256; c.height = 128;
     const g = c.getContext('2d');
@@ -1714,10 +1827,15 @@ function makeCopper(geometry) {
     g.fillRect(0, 0, 256, 128);
     g.fillStyle = '#ffffff'; // Lichtfelder an der Decke
     for (let i = 0; i < 6; i++) g.fillRect(i * 43 + 8, 8, 22, 10);
-    copperEnv = new THREE.CanvasTexture(c);
-    copperEnv.mapping = THREE.EquirectangularReflectionMapping;
-    copperEnv.colorSpace = THREE.SRGBColorSpace;
+    hallEnv = new THREE.CanvasTexture(c);
+    hallEnv.mapping = THREE.EquirectangularReflectionMapping;
+    hallEnv.colorSpace = THREE.SRGBColorSpace;
+  }
+  return hallEnv;
+}
 
+function makeCopper(geometry) {
+  if (!copperMaps) {
     // Schleifspuren: jede Zeile eine eigene Helligkeit, nur in v veränderlich
     const tex = (fn) => {
       const t = document.createElement('canvas');
@@ -1752,7 +1870,7 @@ function makeCopper(geometry) {
   return new THREE.MeshStandardMaterial({
     color: 0xe0805a, metalness: 1, roughness: 0.42,
     map: copperMaps.color, roughnessMap: copperMaps.rough,
-    envMap: copperEnv, envMapIntensity: 1.1,
+    envMap: getHallEnv(), envMapIntensity: 1.1,
   });
 }
 
@@ -2175,6 +2293,11 @@ function buildSculpture(def) {
       } else if (def.copper) {
         o.geometry.computeVertexNormals();
         o.material = makeCopper(o.geometry);
+      } else if (def.gold) {
+        // Die Datei trägt gebürstetes Gold mit Anisotropie, die ohne UV nicht wirkt
+        o.material = new THREE.MeshStandardMaterial({
+          color: 0xffcf6b, metalness: 1, roughness: 0.22, envMap: getHallEnv(), envMapIntensity: 1.2,
+        });
       } else if (def.textured) {
         // Farbtextur und Normalen (über die UV-Nähte geglättet) bringt die Datei mit;
         // ein Teil der Farbe wirkt emissiv wie bei den Gemälden
@@ -2190,7 +2313,8 @@ function buildSculpture(def) {
       }
     });
     // Auf Zielhöhe skalieren, mittig auf den Sockel stellen
-    const box = new THREE.Box3().setFromObject(model);
+    if (def.cornerUp) model.quaternion.setFromUnitVectors(new THREE.Vector3(1, 1, 1).normalize(), new THREE.Vector3(0, 1, 0));
+    const box = new THREE.Box3().setFromObject(model, def.cornerUp); // genau: die Ecken sind gerundet
     const s = def.height / (box.max.y - box.min.y);
     model.scale.setScalar(s);
     model.position.set(-(box.min.x + box.max.x) / 2 * s, -box.min.y * s, -(box.min.z + box.max.z) / 2 * s);
@@ -2273,6 +2397,7 @@ function assignRoomLights(root) {
   });
 }
 assignRoomLights(scene);
+spray.sphere = new THREE.Sphere(spray.mesh.getWorldPosition(new THREE.Vector3()), 2.2);
 
 /* ---------------------------------------------------------------
    Bewegung & Kollision
@@ -2650,7 +2775,7 @@ function setPaintingTexture(mesh, tex) {
 // Jede Stufe wird angezeigt, sobald sie da ist und größer ist als die
 // gezeigte — so bleibt bei einem Ladefehler die vorige Stufe stehen.
 function showHiRes(spot, px = HI_RES_PX) {
-  if (spot.fractal) return; // wird ohnehin live berechnet
+  if (spot.fractal || !spot.mesh.userData.url) return; // wird ohnehin live berechnet
   if (hiResSpot === spot && hiResPx >= px) return;
   if (hiResSpot !== spot) dropHiRes();
   hiResSpot = spot;
