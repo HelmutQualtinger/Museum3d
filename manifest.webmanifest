@@ -1,7 +1,7 @@
 {
   "name": "Galerie der Meister",
   "short_name": "Galerie",
-  "description": "Ein begehbares 3D-Museum: drei Säle, dreiundzwanzig Meisterwerke von Leonardo bis Kandinsky.",
+  "description": "Ein begehbares 3D-Museum: sechs Säle und eine Dachterrasse, 51 Bilder und 7 Skulpturen von der Höhlenmalerei bis Kandinsky.",
   "lang": "de",
   "start_url": "./",
   "scope": "./",
