@@ -3188,6 +3188,128 @@ function resolveCollision(pos) {
 }
 
 /* ---------------------------------------------------------------
+   Wegsuche für Klick-zum-Gehen: A* auf einem Raster über dem aktuellen
+   Geschoss, danach geglättet (Ecken abschneiden, wo die Sicht frei ist).
+   So führt der Weg um Treppe, Sockel und Wände herum statt davor zu enden.
+--------------------------------------------------------------- */
+const NAV_CELL = 0.25;
+function navFree(x, z) {
+  if (!stair.level && roomIndexAt(x, z) < 0) return false;
+  return !isBlocked(x, z);
+}
+// Gerade Strecke ohne Hindernis? (abgetastet alle 10 cm)
+function navLineFree(ax, az, bx, bz) {
+  const n = Math.max(1, Math.ceil(Math.hypot(bx - ax, bz - az) / 0.1));
+  for (let i = 1; i <= n; i++) {
+    if (!navFree(ax + (bx - ax) * i / n, az + (bz - az) * i / n)) return false;
+  }
+  return true;
+}
+// Liefert Wegpunkte {x, z} vom Start zum Ziel bzw. zum nächstgelegenen
+// erreichbaren Punkt; null, wenn man sich nicht von der Stelle bewegen kann.
+function findPath(sx, sz, gx, gz) {
+  if (navLineFree(sx, sz, gx, gz)) return [{ x: sx, z: sz }, { x: gx, z: gz }];
+  const b = stair.level
+    ? { x0: ROOF.x0, x1: ROOF.x1, z0: ROOF.z0, z1: ROOF.z1 }
+    : ROOMS.reduce((r, { cell: [c, w] }) => ({
+        x0: Math.min(r.x0, c * ROOM_W), x1: Math.max(r.x1, (c + 1) * ROOM_W),
+        z0: Math.min(r.z0, w * ROOM_D), z1: Math.max(r.z1, (w + 1) * ROOM_D),
+      }), { x0: Infinity, x1: -Infinity, z0: Infinity, z1: -Infinity });
+  const W = Math.ceil((b.x1 - b.x0) / NAV_CELL), H = Math.ceil((b.z1 - b.z0) / NAV_CELL);
+  const cx = (i) => b.x0 + (i % W + 0.5) * NAV_CELL, cz = (i) => b.z0 + (Math.floor(i / W) + 0.5) * NAV_CELL;
+  const cellOf = (x, z) => {
+    const i = THREE.MathUtils.clamp(Math.floor((x - b.x0) / NAV_CELL), 0, W - 1);
+    const j = THREE.MathUtils.clamp(Math.floor((z - b.z0) / NAV_CELL), 0, H - 1);
+    return j * W + i;
+  };
+  const free = new Int8Array(W * H).fill(-1); // −1 = noch nicht geprüft
+  const isFree = (i) => (free[i] < 0 ? (free[i] = navFree(cx(i), cz(i)) ? 1 : 0) : free[i]);
+
+  // Start: eigene Zelle, sonst die nächste freie daneben
+  let start = cellOf(sx, sz);
+  if (!isFree(start)) {
+    let best = -1, bd = Infinity;
+    for (let dj = -3; dj <= 3; dj++) for (let di = -3; di <= 3; di++) {
+      const i = (start % W) + di, j = Math.floor(start / W) + dj;
+      if (i < 0 || j < 0 || i >= W || j >= H || !isFree(j * W + i)) continue;
+      if (di * di + dj * dj < bd) { bd = di * di + dj * dj; best = j * W + i; }
+    }
+    if (best < 0) return null;
+    start = best;
+  }
+  const goal = cellOf(gx, gz);
+  const gxC = goal % W, gzC = Math.floor(goal / W);
+  const h = (i) => Math.hypot(i % W - gxC, Math.floor(i / W) - gzC);
+
+  const g = new Float32Array(W * H).fill(Infinity);
+  const from = new Int32Array(W * H).fill(-1);
+  const closed = new Uint8Array(W * H);
+  const heap = []; // binärer Heap aus [f, Zelle]
+  const push = (f, i) => {
+    heap.push([f, i]);
+    for (let k = heap.length - 1; k > 0;) {
+      const p = (k - 1) >> 1;
+      if (heap[p][0] <= heap[k][0]) break;
+      [heap[p], heap[k]] = [heap[k], heap[p]]; k = p;
+    }
+  };
+  const pop = () => {
+    const top = heap[0], last = heap.pop();
+    if (heap.length) {
+      heap[0] = last;
+      for (let k = 0; ;) {
+        const l = 2 * k + 1, r = l + 1;
+        let m = k;
+        if (l < heap.length && heap[l][0] < heap[m][0]) m = l;
+        if (r < heap.length && heap[r][0] < heap[m][0]) m = r;
+        if (m === k) break;
+        [heap[m], heap[k]] = [heap[k], heap[m]]; k = m;
+      }
+    }
+    return top[1];
+  };
+  g[start] = 0;
+  push(h(start), start);
+  let best = start, bestH = h(start);
+  while (heap.length) {
+    const cur = pop();
+    if (closed[cur]) continue;
+    closed[cur] = 1;
+    const hc = h(cur);
+    if (hc < bestH) { bestH = hc; best = cur; }
+    if (cur === goal) break;
+    const ci = cur % W, cj = Math.floor(cur / W);
+    for (let dj = -1; dj <= 1; dj++) for (let di = -1; di <= 1; di++) {
+      if (!di && !dj) continue;
+      const i = ci + di, j = cj + dj;
+      if (i < 0 || j < 0 || i >= W || j >= H) continue;
+      const n = j * W + i;
+      if (closed[n] || !isFree(n)) continue;
+      if (di && dj && (!isFree(cj * W + i) || !isFree(j * W + ci))) continue; // keine Ecken schneiden
+      const ng = g[cur] + (di && dj ? Math.SQRT2 : 1);
+      if (ng < g[n]) { g[n] = ng; from[n] = cur; push(ng + h(n), n); }
+    }
+  }
+
+  // Zellenkette zurückverfolgen; Ziel selbst nur, wenn es erreicht wurde
+  const cells = [];
+  for (let c = best; c >= 0; c = from[c]) cells.push(c);
+  cells.reverse();
+  const pts = [{ x: sx, z: sz }, ...cells.slice(1).map((c) => ({ x: cx(c), z: cz(c) }))];
+  if (best === goal && navFree(gx, gz)) pts[pts.length - 1] = { x: gx, z: gz };
+  if (pts.length < 2) return null;
+  // Glätten: von jedem Punkt so weit wie möglich geradeaus springen
+  const out = [pts[0]];
+  for (let a = 0; a < pts.length - 1;) {
+    let k = pts.length - 1;
+    while (k > a + 1 && !navLineFree(pts[a].x, pts[a].z, pts[k].x, pts[k].z)) k--;
+    out.push(pts[k]);
+    a = k;
+  }
+  return out;
+}
+
+/* ---------------------------------------------------------------
    UI / Ladefortschritt
 --------------------------------------------------------------- */
 const overlay = document.getElementById('overlay');
@@ -3648,35 +3770,44 @@ function exitFocus() {
   closeInfo();
 }
 
-// Klick auf den Boden: sanft zum angeklickten Punkt gehen, Blickrichtung bleibt erhalten
+// Klick auf den Boden: zum angeklickten Punkt gehen, um Hindernisse herum.
+// Bei geradem Weg bleibt die Blickrichtung, bei einem Umweg dreht sich der
+// Blick in Laufrichtung (Neigung bleibt).
 function travelTo(point) {
   const target = point.clone();
-  target.y = EYE_H + stair.level * UPPER_Y + (onBench(target.x, target.z) ? BENCH_H : 0);
   resolveCollision(target);
-
-  // Der Weg ist eine Gerade auf Augenhöhe — seit es Trennwände gibt, muss er
-  // abgetastet werden, sonst gleitet die Kamera durch die Wand neben dem Durchgang
-  const steps = Math.max(2, Math.ceil(camera.position.distanceTo(target) / 0.3));
-  const probe = new THREE.Vector3();
-  const reachable = camera.position.clone();
-  for (let i = 1; i <= steps; i++) {
-    probe.lerpVectors(camera.position, target, i / steps);
-    if (isBlocked(probe.x, probe.z)) break;
-    reachable.copy(probe);
-  }
-  target.copy(reachable);
-
-  const dist = camera.position.distanceTo(target);
-  if (dist < 0.3) return;
+  const path = findPath(camera.position.x, camera.position.z, target.x, target.z);
+  if (!path) return false;
+  const end = path[path.length - 1];
+  const cum = [0];
+  for (let i = 1; i < path.length; i++) cum.push(cum[i - 1] + Math.hypot(path[i].x - path[i - 1].x, path[i].z - path[i - 1].z));
+  const len = cum[cum.length - 1];
+  if (len < 0.3) return false;
 
   focusState.fromPos.copy(camera.position);
-  focusState.toPos.copy(target);
+  focusState.toPos.set(end.x, EYE_H + stair.level * UPPER_Y + (onBench(end.x, end.z) ? BENCH_H : 0), end.z);
   focusState.fromQuat.copy(camera.quaternion);
   focusState.toQuat.copy(camera.quaternion);
+  focusState.path = path.length > 2 ? { pts: path, cum, len } : null;
   focusState.t = 0;
-  focusState.duration = THREE.MathUtils.clamp(dist * 0.09, 0.28, 1.0);
+  focusState.duration = THREE.MathUtils.clamp(len * 0.09, 0.28, focusState.path ? 3.0 : 1.0);
   focusState.animating = true;
   focusState.active = false;
+  return true;
+}
+
+// Position auf dem Umweg für Fortschritt k (0…1) samt Laufrichtung
+function pathPose(k, outPos) {
+  const { pts, cum, len } = focusState.path;
+  const s = k * len;
+  let i = 1;
+  while (i < pts.length - 1 && cum[i] < s) i++;
+  const a = pts[i - 1], b = pts[i];
+  const f = cum[i] > cum[i - 1] ? (s - cum[i - 1]) / (cum[i] - cum[i - 1]) : 1;
+  outPos.x = a.x + (b.x - a.x) * f;
+  outPos.z = a.z + (b.z - a.z) * f;
+  outPos.y = focusState.fromPos.y + (focusState.toPos.y - focusState.fromPos.y) * k;
+  return Math.atan2(-(b.x - a.x), -(b.z - a.z));
 }
 
 function eventToNDC(event) {
@@ -4017,10 +4148,24 @@ function animate() {
     focusState.t += dt / focusState.duration;
     const k = Math.min(focusState.t, 1);
     const ease = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
-    camera.position.lerpVectors(focusState.fromPos, focusState.toPos, ease);
-    camera.quaternion.slerpQuaternions(focusState.fromQuat, focusState.toQuat, ease);
+    if (focusState.path) { // Umweg: dem Pfad folgen, Blick dreht sanft in Laufrichtung
+      const heading = pathPose(ease, camera.position);
+      _rotEuler.setFromQuaternion(camera.quaternion);
+      const d = heading - _rotEuler.y;
+      _rotEuler.y += Math.atan2(Math.sin(d), Math.cos(d)) * Math.min(1, dt * 5);
+      camera.quaternion.setFromEuler(_rotEuler);
+    } else {
+      camera.position.lerpVectors(focusState.fromPos, focusState.toPos, ease);
+      camera.quaternion.slerpQuaternions(focusState.fromQuat, focusState.toQuat, ease);
+    }
     if (k >= 1) {
       focusState.animating = false;
+      focusState.path = null;
+      if (focusState.pendingSpot) { // Weg zum Bild zu Ende: jetzt heranzoomen
+        const spot = focusState.pendingSpot;
+        focusState.pendingSpot = null;
+        enterFocus(spot);
+      }
       if (stair.pending) { // nur wenn der Weg zur Treppe nicht vorher an einer Wand endete
         const p = stairStart();
         if (Math.hypot(camera.position.x - p.x, camera.position.z - p.z) < 0.8) enterStair(stair.pending);
