@@ -6671,6 +6671,8 @@ renderer.domElement.addEventListener('touchend', (e) => {
   const wasTap = dragging && !dragMoved;
   pointerUp();
   if (wasTap && e.changedTouches.length) {
+    // kein nachgereichter Klick: der träfe sonst das eben geöffnete Foto und schlösse es sofort
+    if (e.cancelable) e.preventDefault();
     const t = e.changedTouches[0];
     handleSelect({ clientX: t.clientX, clientY: t.clientY });
   }
