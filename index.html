@@ -6551,6 +6551,9 @@ renderer.domElement.addEventListener('touchmove', (e) => {
       const t = e.touches;
       zoomFocusAt(focusState.zoomTarget - (d - pinchDist) * 0.004,
         (t[0].clientX + t[1].clientX) / 2, (t[0].clientY + t[1].clientY) / 2);
+    } else if (canNavigate()) {
+      // beim Gehen wie das Scrollrad: auseinander = vorwärts, zusammen = zurück
+      wheelVel = THREE.MathUtils.clamp(wheelVel + (d - pinchDist) * 0.06, -14, 14);
     }
     pinchDist = d;
     return;
