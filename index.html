@@ -2556,7 +2556,9 @@ const ROOF = { x0: 12.9, x1: 35.1, z0: -3.1, z1: 17.1 };
 const ROOF_CX = (ROOF.x0 + ROOF.x1) / 2, ROOF_CZ = (ROOF.z0 + ROOF.z1) / 2;
 const LAND_R = 190;    // so weit geht man draußen, gemessen von der Mitte der Terrasse
 const LAND_DISC = 440; // Radius der Landschaftsscheibe; dahinter nur noch Dunst
-const landBlockers = []; // unsichtbare Klötze um Bauwerke draußen: ein Klick darauf trifft nicht den Boden dahinter
+const landBlockers = [];
+let climb = null;        // besteigbare Pyramide, siehe groundAt/climbBlocked
+const climbMeshes = [];  // ihre Treppe und oberste Stufe: Klickziele mit Höhe // unsichtbare Klötze um Bauwerke draußen: ein Klick darauf trifft nicht den Boden dahinter
 const outdoor = {};    // Himmel, Sonnenscheibe und Sonnenlicht wandern mit dem Besucher
 const ROOF_EDGE = 0.9; // Brüstung plus Hecke
 const ROOF_SHADOW_PX = matchMedia('(pointer: coarse)').matches ? 1024 : 2048; // 4096 lieferte unter WebGPU gar keine Schatten
@@ -2956,6 +2958,8 @@ function buildRoofTerrace() {
     const step = new THREE.Mesh(boxUVs(new THREE.BoxGeometry(w, STEP_H, w), 4), mayaMat);
     step.position.set(MAYA_X, STEP_H * (i + 0.5), MAYA_Z);
     roof.add(step);
+    landBlockers.push(step); // Klick auf die Stufenflanken: zum Fuß gehen; die oberste ist zugleich begehbar
+    if (i === STEPS - 1) climbMeshes.push(step);
   }
   const flightH = STEPS * STEP_H, flightRun = (BASE - TOP) / 2;
   // kürzer als die Flanke: darf nicht unter die Saaldecke reichen, sonst fehlt ihr das Tageslicht
@@ -2972,6 +2976,13 @@ function buildRoofTerrace() {
   const door = new THREE.Mesh(new THREE.BoxGeometry(1.5, 2.2, 0.1), new THREE.MeshStandardMaterial({ color: 0x26231f, roughness: 1 }));
   door.position.set(MAYA_X, flightH + 1.2, MAYA_Z - 3.53);
   roof.add(door);
+  landBlockers.push(temple);
+  climbMeshes.push(flight);
+  // begehbar: die Freitreppe hinauf und rund um den Tempel (Weltkoordinaten, siehe groundAt/climbBlocked)
+  // Rampe = Vorderfläche der gekippten Treppenplatte (0,4 m vor ihrer Mittellinie)
+  const fa = flight.rotation.x;
+  climb = { x: cx + MAYA_X, z: cz + MAYA_Z, half: BASE / 2, top: TOP / 2, h: flightH, stair: 2.5, temple: 3.5,
+    rampZ: cz + flight.position.z - 0.4 * Math.cos(fa), rampY: flight.position.y + 0.4 * Math.sin(fa), slope: flightH / flightRun };
 
   // Hinter dem Denker: links der Eiffelturm auf dem Marsfeld, rechts der Burj Khalifa in der Wüste,
   // beide 34 bzw. 85 m hoch (330 : 828 m), der Eiffelturm näher. Alles bleibt über y = −0,2 (über ROOM_H in Weltkoordinaten).
@@ -3684,7 +3695,6 @@ function buildRoofTerrace() {
 
   // Kollisionen und Klickblocker der fernen Bauwerke
   [[8, 4, 25], [-9, 1, 23.5], [-23, -5, 11.5]].forEach(([dx, dz, h2]) => solid(GIZA_X + dx, GIZA_Z + dz, h2 * 1.57, h2 * 1.57, h2 * 0.6));
-  solid(MAYA_X, MAYA_Z, 32, 32, 18);
   for (const sx of [-1, 1]) for (const sz of [-1, 1]) solid(EIFFEL_X + sx * 0.15 * EH, EIFFEL_Z + sz * 0.15 * EH, 2.6, 2.6, 6);
   solid(BURJ_X, BURJ_Z, 14, 14, 60);
   [[-14, 6, 16, 1.6, 8], [12, 8, 10, 1.2, 12], [0, -14, 20, 1, 7]].forEach(([x, z, w2, h2, d2]) => solid(BURJ_X + x, BURJ_Z + z, w2, d2, h2));
@@ -3899,7 +3909,28 @@ function stepStair(step, dt) {
 }
 
 // Steckt der Punkt in einer Wand (Spielerradius eingerechnet)?
+// Die Pyramide von Chichén Itzá ist besteigbar: Höhe über dem Gelände (Freitreppe als Rampe, oben die
+// Plattform) und welche Stellen ihres Grundrisses man nicht betreten kann (die Stufenflanken, der Tempel)
+function groundAt(x, z) {
+  if (!climb) return 0;
+  const dx = Math.abs(x - climb.x), dz = z - climb.z;
+  if (dx <= climb.top && Math.abs(dz) <= climb.top) return climb.h;
+  if (dx <= climb.stair && dz < -climb.top) {
+    return THREE.MathUtils.clamp(climb.rampY + climb.slope * (z - climb.rampZ), 0, climb.h);
+  }
+  return 0;
+}
+function climbBlocked(x, z) {
+  if (!climb) return false;
+  const R = PLAYER_R, dx = Math.abs(x - climb.x), dz = z - climb.z, adz = Math.abs(dz);
+  if (dx > climb.half + R || adz > climb.half + R) return false;
+  if (dx <= climb.stair - R && dz < -climb.top + R) return false; // auf der Treppe
+  if (dx <= climb.top - R && adz <= climb.top - R && !(dx < climb.temple + R && adz < climb.temple + R)) return false;
+  return true;
+}
+
 function isBlocked(x, z) {
+  if (stair.level && climbBlocked(x, z)) return true;
   if (Math.hypot(x - STAIR_X, z - STAIR_Z) < stairBlockR()) return true;
   if (stair.level && Math.hypot(x - ROOF_CX, z - ROOF_CZ) > LAND_R - PLAYER_R) return true;
   for (const c of stair.level ? roofColliders : colliders) {
@@ -4576,7 +4607,7 @@ function travelTo(point) {
   if (len < 0.3) return false;
 
   focusState.fromPos.copy(camera.position);
-  focusState.toPos.set(end.x, EYE_H + stair.level * UPPER_Y + (onBench(end.x, end.z) ? BENCH_H : 0), end.z);
+  focusState.toPos.set(end.x, EYE_H + stair.level * (UPPER_Y + groundAt(end.x, end.z)) + (onBench(end.x, end.z) ? BENCH_H : 0), end.z);
   focusState.fromQuat.copy(camera.quaternion);
   focusState.toQuat.copy(camera.quaternion);
   // draußen über weite Strecken: spazieren, mit Blick in Laufrichtung, statt hinzufliegen
@@ -4628,9 +4659,10 @@ function raycastPaintingAt(event) {
 
 function raycastFloorAt(event) {
   raycaster.setFromCamera(eventToNDC(event), camera);
-  const hits = raycaster.intersectObjects(stair.level ? floorMeshes.concat(landBlockers) : floorMeshes, false);
+  const hits = raycaster.intersectObjects(stair.level ? floorMeshes.concat(landBlockers, climbMeshes) : floorMeshes, false);
   for (const h of hits) {
     // ein Bauwerk draußen: zu seinem Fuß gehen, so nah es geht
+    if (climbMeshes.includes(h.object)) return new THREE.Vector3(h.point.x, UPPER_Y + groundAt(h.point.x, h.point.z), h.point.z);
     if (landBlockers.includes(h.object)) return new THREE.Vector3(h.point.x, UPPER_Y, h.point.z);
     // durch die Öffnung sichtbarer Boden des anderen Geschosses zählt nicht
     if (Math.abs(h.point.y - stair.level * UPPER_Y) < 0.1) return h.point;
@@ -4981,6 +5013,8 @@ function animate() {
       camera.position.lerpVectors(focusState.fromPos, focusState.toPos, ease);
       camera.quaternion.slerpQuaternions(focusState.fromQuat, focusState.toQuat, ease);
     }
+    // draußen dem Gelände folgen (Pyramidentreppe), statt geradewegs hindurch
+    if (stair.level && !focusState.active) camera.position.y = EYE_H + UPPER_Y + groundAt(camera.position.x, camera.position.z);
     if (k >= 1) {
       focusState.animating = false;
       focusState.path = null;
@@ -5052,19 +5086,31 @@ function animate() {
       stepStair(stepFwd, dt);
       updateRoomLabel();
     } else {
+    const px = camera.position.x, pz = camera.position.z;
     if (stepFwd !== 0 || stepSide !== 0) {
       _yawEuler.setFromQuaternion(camera.quaternion);
       const yaw = _yawEuler.y;
       const sinY = Math.sin(yaw), cosY = Math.cos(yaw);
-      camera.position.x += -sinY * stepFwd + cosY * stepSide;
-      camera.position.z += -cosY * stepFwd - sinY * stepSide;
+      // auf der steilen Pyramidentreppe langsamer
+      const g = stair.level ? groundAt(px, pz) : 0, slow = g > 0 && g < climb.h ? 0.45 : 1;
+      camera.position.x += (-sinY * stepFwd + cosY * stepSide) * slow;
+      camera.position.z += (-cosY * stepFwd - sinY * stepSide) * slow;
     }
 
     // Über eine Bank steigt man hinweg: die Augenhöhe hebt sich sanft um die Sitzhöhe
-    const eyeY = EYE_H + stair.level * UPPER_Y + (onBench(camera.position.x, camera.position.z) ? BENCH_H : 0);
+    const eyeY = EYE_H + stair.level * UPPER_Y + (onBench(camera.position.x, camera.position.z) ? BENCH_H : 0)
+      + (stair.level ? groundAt(camera.position.x, camera.position.z) : 0);
     camera.position.y += (eyeY - camera.position.y) * Math.min(1, dt * 10);
     if (atStairMouth(camera.position)) enterStair(0);
-    else resolveCollision(camera.position);
+    else {
+      resolveCollision(camera.position);
+      // Pyramidenflanken: entlanggleiten, sonst stehen bleiben
+      if (stair.level && climbBlocked(camera.position.x, camera.position.z)) {
+        if (!climbBlocked(camera.position.x, pz)) camera.position.z = pz;
+        else if (!climbBlocked(px, camera.position.z)) camera.position.x = px;
+        else { camera.position.x = px; camera.position.z = pz; }
+      }
+    }
     updateRoomLabel();
     }
   }
