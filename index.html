@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Galerie der Meister — begehbares 3D-Museum</title>
-<meta name="description" content="Ein begehbares 3D-Museum im Browser: sechs Säle, fünfzig Werke von der Höhlenmalerei aus Lascaux und Chauvet bis Kandinsky und ein Mandelbrot-Fraktal, dazu Michelangelos David und Pietà, die Venus von Willendorf, Nofretete, die Goldmaske des Tutanchamun, eine Kupfervase, ein Goldwürfel und auf der Dachterrasse die Venus von Milo und Rodins Denker in 3D. Ziehen zum Umsehen, klicken zum Gehen — ohne Installation.">
+<meta name="description" content="Ein begehbares 3D-Museum im Browser: sechs Säle, fünfzig Werke von der Höhlenmalerei aus Lascaux und Chauvet bis Kandinsky und ein Mandelbrot-Fraktal, dazu Michelangelos David und Pietà, die Venus von Willendorf, Nofretete, die Goldmaske des Tutanchamun, eine Kupfervase, ein Goldwürfel, ein goldener Osiris und auf der Dachterrasse die Venus von Milo und Rodins Denker in 3D, dazu im Tempel der Maya-Pyramide den Federkopfschmuck des Moctezuma. Ziehen zum Umsehen, klicken zum Gehen — ohne Installation.">
 <link rel="canonical" href="https://helmutqualtinger.github.io/Museum3d/">
 <meta name="theme-color" content="#0a0806">
 
@@ -22,7 +22,7 @@
 <meta property="og:site_name" content="Galerie der Meister">
 <meta property="og:locale" content="de_DE">
 <meta property="og:title" content="Galerie der Meister — begehbares 3D-Museum">
-<meta property="og:description" content="Sechs Säle, fünfzig Werke von der Höhlenmalerei aus Lascaux und Chauvet bis Kandinsky und ein Mandelbrot-Fraktal, dazu Michelangelos David und Pietà, die Venus von Willendorf, Nofretete, die Maske des Tutanchamun, eine Kupfervase, ein Goldwürfel und die Venus von Milo und Rodins Denker in 3D. Ziehen zum Umsehen, klicken zum Gehen — direkt im Browser, ohne Installation.">
+<meta property="og:description" content="Sechs Säle, fünfzig Werke von der Höhlenmalerei aus Lascaux und Chauvet bis Kandinsky und ein Mandelbrot-Fraktal, dazu Michelangelos David und Pietà, die Venus von Willendorf, Nofretete, die Maske des Tutanchamun, eine Kupfervase, ein Goldwürfel, ein goldener Osiris und die Venus von Milo und Rodins Denker in 3D, dazu im Tempel der Maya-Pyramide den Federkopfschmuck des Moctezuma. Ziehen zum Umsehen, klicken zum Gehen — direkt im Browser, ohne Installation.">
 <meta property="og:url" content="https://helmutqualtinger.github.io/Museum3d/">
 <meta property="og:image" content="https://helmutqualtinger.github.io/Museum3d/docs/og-image.jpg">
 <meta property="og:image:type" content="image/jpeg">
@@ -32,7 +32,7 @@
 
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Galerie der Meister — begehbares 3D-Museum">
-<meta name="twitter:description" content="Sechs Säle, fünfzig Werke von der Höhlenmalerei aus Lascaux und Chauvet bis Kandinsky und ein Mandelbrot-Fraktal, dazu Michelangelos David und Pietà, die Venus von Willendorf, Nofretete, die Maske des Tutanchamun, eine Kupfervase, ein Goldwürfel und die Venus von Milo und Rodins Denker in 3D. Ziehen zum Umsehen, klicken zum Gehen — direkt im Browser.">
+<meta name="twitter:description" content="Sechs Säle, fünfzig Werke von der Höhlenmalerei aus Lascaux und Chauvet bis Kandinsky und ein Mandelbrot-Fraktal, dazu Michelangelos David und Pietà, die Venus von Willendorf, Nofretete, die Maske des Tutanchamun, eine Kupfervase, ein Goldwürfel, ein goldener Osiris und die Venus von Milo und Rodins Denker in 3D, dazu im Tempel der Maya-Pyramide den Federkopfschmuck des Moctezuma. Ziehen zum Umsehen, klicken zum Gehen — direkt im Browser.">
 <meta name="twitter:image" content="https://helmutqualtinger.github.io/Museum3d/docs/og-image.jpg">
 <meta name="twitter:image:alt" content="Blick durch den Saal Porträt mit Rembrandts Selbstbildnis, durch einen breiten Durchgang in den Saal Landschaft.">
 
@@ -93,6 +93,17 @@
   }
   #music button:hover { border-color: #d8b978; }
   #music.off #musicToggle { color: #8a7c65; }
+  #music .aus { color: #8a7c65; }
+  #photo {
+    position: fixed; inset: 0; z-index: 20; display: none; align-items: center; justify-content: center;
+    background: rgba(4,6,12,0.88); cursor: zoom-out;
+  }
+  #photo figure { margin: 0; text-align: center; }
+  #photo img { max-width: 92vw; max-height: 82vh; display: block; margin: 0 auto; }
+  #photo figcaption { margin-top: 12px; font-family: 'Georgia', serif; color: #e8dfd0; }
+  #photo figcaption b { display: block; font-size: 17px; font-weight: normal; letter-spacing: 0.05em; }
+  #photo figcaption span { display: block; margin-top: 4px; font-size: 11px; color: #9a8f7c; }
+  #linesToggle, #artToggle { display: none; }
   #hud {
     position: fixed; left: 20px; bottom: 18px; color: rgba(255,255,255,0.75);
     font-family: 'Georgia', serif; font-size: 13px; letter-spacing: 0.03em;
@@ -142,7 +153,7 @@
     <div class="start" id="startBtn">Klicken zum Betreten</div>
     <div id="loadbar"><div id="loadfill"></div></div>
     <div id="loadtext">Lade hochauflösende Gemälde …</div>
-    <p class="credits">3D-Modelle: David &mdash; Scan the World (CC BY-SA 4.0) &nbsp;·&nbsp; Maske des Tutanchamun &mdash; vmmaniac (CC BY 4.0) &nbsp;·&nbsp; Venus von Willendorf, Venus von Milo, Der Denker &mdash; Scan the World (CC BY-SA 4.0) &nbsp;·&nbsp; Pietà &mdash; Statens Museum for Kunst (Public Domain) &nbsp;·&nbsp; Nofretete &mdash; Trigon Art 2008, © Ägyptisches Museum und Papyrussammlung, Staatliche Museen zu Berlin, via Cosmo Wenman (CC BY-NC-SA 4.0)<br>Fotos Höhlenmalerei: Thomas T. (CC BY-SA 2.0), Céréales Killer, Christelle Molinié (CC BY-SA 4.0)</p>
+    <p class="credits">3D-Modelle: David &mdash; Scan the World (CC BY-SA 4.0) &nbsp;·&nbsp; Maske des Tutanchamun &mdash; vmmaniac (CC BY 4.0) &nbsp;·&nbsp; Venus von Willendorf, Venus von Milo, Der Denker &mdash; Scan the World (CC BY-SA 4.0) &nbsp;·&nbsp; Pietà &mdash; Statens Museum for Kunst (Public Domain) &nbsp;·&nbsp; Osiris &mdash; Moacir Elias Santos / Casa Museu Eva Klabin (CC BY-SA 4.0) &nbsp;·&nbsp; Nofretete &mdash; Trigon Art 2008, © Ägyptisches Museum und Papyrussammlung, Staatliche Museen zu Berlin, via Cosmo Wenman (CC BY-NC-SA 4.0)<br>Fotos Höhlenmalerei: Thomas T. (CC BY-SA 2.0), Céréales Killer, Christelle Molinié (CC BY-SA 4.0)<br>Sternhimmel: d3-celestial, Olaf Frohn (BSD) &nbsp;·&nbsp; Sternbildlinien: Stellarium (CC BY-SA 4.0) &nbsp;·&nbsp; Sternbildfiguren: Johan Meuris / Stellarium (Free Art License) &nbsp;·&nbsp; Sternbild Assange nach einem Foto von David G Silvers, Cancillería del Ecuador (CC BY-SA 2.0, bearbeitet)</p>
     <button id="installBtn" type="button">Als App installieren</button>
     <div id="installHint">Tippe auf das Teilen-Symbol <svg width="14" height="17" viewBox="0 0 14 17" fill="none" stroke="currentColor" stroke-width="1.4" style="vertical-align:-3px"><path d="M7 1v10M3.5 4.5 7 1l3.5 3.5M4.5 7H1.5v9h11V7h-3"/></svg> und dann auf <b>„Zum Home-Bildschirm“</b>.</div>
   </div>
@@ -202,7 +213,8 @@
   <h3 id="infoArtistHead"></h3>
   <p id="infoArtist"></p>
 </div>
-<div id="music"><button id="musicToggle" type="button"></button></div>
+<div id="photo"><figure><img id="photoImg" alt=""><figcaption><b id="photoTitle"></b><span id="photoCredit"></span></figcaption></figure></div>
+<div id="music"><button id="linesToggle" type="button" title="Sternbildlinien und Namen ein-/ausblenden">✶ Linien</button> <button id="artToggle" type="button" title="Sternbildfiguren ein-/ausblenden">✶ Figuren</button> <button id="weatherToggle" type="button" title="Wetter draußen wechseln"></button> <button id="musicToggle" type="button"></button></div>
 <div id="hud">Ziehen: umsehen · Klick auf den Boden: dorthin gehen · Klick auf ein Bild: Nahansicht · Klick auf eine Skulptur: Erläuterung · WASD / Scrollrad: bewegen</div>
 
 <script type="importmap">
@@ -223,7 +235,7 @@ import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
 
 /* ---------------------------------------------------------------
-   Sammlung: sechs Säle, einundfünfzig Bilder, neun Skulpturen
+   Sammlung: sechs Säle, einundfünfzig Bilder, zehn Skulpturen
 --------------------------------------------------------------- */
 const ROOM_W = 16;   // Breite (X) je Saal
 const ROOM_D = 14;   // Tiefe (Z)
@@ -451,6 +463,16 @@ const SCULPTURES = [
   // Original 11 cm hoch — hier zwölffach vergrößert, also 1,33 m
   { room: 5, x: 8, z: 7, title: 'Venus von Willendorf · zwölffach vergrößert', artist: 'Gravettien, Niederösterreich, um 27 500 v. Chr.',
     url: 'models/venus.glb', height: 1.332, plinth: [1.3, 0.7, 1.3], marble: true, stone: 0xc9a77e, rotY: 0, flip: true, light: 35, turnSecs: 45 },
+  // in den Grabkammern der Giza-Pyramiden (Kammermitte in Weltkoordinaten: Cheops x −14, z 165; Chephren x −54, z 149;
+  // room 1 beginnt bei x 16), etwas zur Rückwand gerückt, zum Gang gewandt — ohne Zigarette und Sonnenbrille
+  { room: 1, x: -30, z: 166.5, title: 'Goldmaske des Tutanchamun · dreifach vergrößert', artist: 'Ägypten, 18. Dynastie, um 1323 v. Chr.',
+    url: 'models/tutanchamun.glb', height: 1.62, plinth: [1.4, 0.8, 1.4], rotY: Math.PI, roof: true },
+  { room: 1, x: -70, z: 150.5, title: 'Büste der Nofretete · dreifach vergrößert', artist: 'Thutmosis, Amarna, um 1345 v. Chr.',
+    url: 'models/nofretete-berlin.glb', height: 1.47, plinth: [1.4, 0.8, 1.4], textured: true, rotY: Math.PI, roof: true },
+  // In Mykerinos' Kammer (Mitte x −86, z 133) an der Ostseite, nach Westen zum Eingang gewandt
+  // (turn: Sockel samt Schild um 90° gedreht). Original eine 29 cm hohe Statuette, hier lebensgroß in Gold
+  { room: 1, x: -100.5, z: 133, title: 'Osiris · in Gold', artist: 'Ägypten, Casa Museu Eva Klabin, Rio de Janeiro',
+    url: 'models/osiris.glb', height: 1.75, plinth: [0.8, 0.5, 0.8], gold: true, rotY: Math.PI, turn: Math.PI / 2, roof: true },
   // auf der Dachterrasse, zwischen den Palmen: dreht sich nicht und braucht bei Tageslicht keinen Strahler
   { room: 1, x: 9.05, z: 13.4, title: 'Venus von Milo', artist: 'Alexandros von Antiochia, Melos, um 150–100 v. Chr.',
     url: 'models/venus-milo.glb', height: 2.02, plinth: [1.2, 0.5, 1.2], marble: true, rotY: Math.PI, roof: true },
@@ -471,6 +493,8 @@ const SCULPTURES = [
 // Erläuterungen für das Infofeld: zum Werk (Schlüssel „Titel|Künstlerzeile“, genau wie oben)
 // und zum Künstler bzw. zur Herkunft (Schlüssel = Künstlerzeile bis zum ersten Komma oder „ · “)
 const ABOUT_ARTISTS = {
+  "Azteken":
+    "Die Azteken, die sich selbst Mexica nannten, gründeten 1325 ihre Hauptstadt Tenochtitlan auf einer Insel im Texcoco-See, dort, wo heute Mexiko-Stadt liegt. Von dort beherrschten sie im 15. Jahrhundert ein Reich, das tributpflichtige Städte von der Golfküste bis zum Pazifik umfasste. Federarbeiten galten ihnen als kostbarer als Gold; eigene Kunsthandwerker, die amanteca, fertigten daraus Schilde, Gewänder und Kopfschmuck für Herrscher und Götterbilder. Moctezuma II. regierte ab 1502; 1519 landete Hernán Cortés an der Küste, 1521 fiel Tenochtitlan.",
   "Auguste Rodin":
     "Auguste Rodin (1840–1917) gilt als Begründer der modernen Bildhauerei. Dreimal wurde er an der Pariser Kunstakademie abgelehnt und arbeitete lange als Stuckateur, bevor er mit seinen rauen, bewegten Oberflächen berühmt und zugleich heftig angefeindet wurde. Ein Großteil seines Lebens galt dem nie vollendeten Höllentor; auch Der Kuss entstand aus dieser Arbeit.",
   "Alexandros von Antiochia":
@@ -543,6 +567,8 @@ const ABOUT_ARTISTS = {
     "Das Gravettien ist eine Kultur der jüngeren Altsteinzeit vor etwa 33 000 bis 22 000 Jahren, benannt nach dem Fundort La Gravette in der Dordogne. Die Menschen jagten Mammut, Rentier und Pferd und lebten teils in großen Lagern. Aus dieser Zeit stammen zahlreiche kleine Frauenfiguren aus Stein, Elfenbein und Ton, die zwischen Frankreich und Sibirien gefunden wurden.",
 };
 const ABOUT_WORKS = {
+  "Federkopfschmuck des Moctezuma|Azteken, Mexiko, um 1515":
+    "Der Kopfschmuck ist etwa 1,16 Meter hoch und 1,75 Meter breit. Er besteht aus rund 400 langen, grün schillernden Schwanzfedern des Quetzalvogels, dazu aus türkisblauen Kotinga-, rosa Rosalöffler- und braunen Federn, besetzt mit über tausend kleinen Goldplättchen. Ob Moctezuma II. ihn selbst getragen hat, ist nicht belegt; vermutlich kam er bald nach der Eroberung Mexikos nach Europa. 1596 ist er in der Sammlung Erzherzog Ferdinands II. auf Schloss Ambras verzeichnet, heute zeigt ihn das Weltmuseum Wien. Nach einer gemeinsamen österreichisch-mexikanischen Restaurierung liegt er in einer schwingungsgedämpften Vitrine; Mexiko wünscht seine Rückgabe, Fachleute halten einen Transport jedoch für zu gefährlich für die brüchigen Federn.",
   "Mona Lisa|Leonardo da Vinci, um 1503":
     "Das Bildnis zeigt sehr wahrscheinlich Lisa Gherardini, die Frau des Florentiner Seidenhändlers Francesco del Giocondo. Leonardo begann es um 1503 und arbeitete bis zu seinem Lebensende daran. Mit dem „Sfumato“, weichen Übergängen ohne harte Umrisse, wirken Gesicht und Lächeln lebendig und schwer zu fassen. 1911 wurde das Bild aus dem Louvre gestohlen und erst zwei Jahre später in Florenz wiedergefunden — seitdem ist es das berühmteste Gemälde der Welt.",
   "Mädchen mit dem Perlenohrring|Johannes Vermeer, 1665":
@@ -655,6 +681,8 @@ const ABOUT_WORKS = {
     "Michelangelo schlug den David als 26-Jähriger aus einem riesigen Marmorblock, den andere Bildhauer schon angehauen und aufgegeben hatten. Er zeigt den biblischen Helden nicht nach dem Sieg, sondern vor dem Kampf gegen Goliath: angespannt, wachsam, die Schleuder über der Schulter. Die Figur ist mit Sockel 5,17 Meter hoch und wurde zum Symbol der freien Republik Florenz. Seit 1873 steht sie in der Galleria dell’Accademia; vor dem Palazzo Vecchio steht eine Kopie.",
   "Goldmaske des Tutanchamun · dreifach vergrößert|Ägypten, 18. Dynastie, um 1323 v. Chr.":
     "Die Maske lag direkt auf dem Gesicht der Mumie und sollte dem König im Jenseits ein ewiges, vollkommenes Antlitz geben. Sie besteht aus rund zehn Kilogramm Gold, eingelegt mit Lapislazuli, Quarz, Obsidian und farbigem Glas; das Original ist 54 Zentimeter hoch. Auf der Stirn sitzen Geier und Kobra, die Schutzgöttinnen von Ober- und Unterägypten. Howard Carter fand sie 1925 im Grab; sie befindet sich heute in Kairo.",
+  "Osiris · in Gold|Ägypten, Casa Museu Eva Klabin, Rio de Janeiro":
+    "Osiris war der Herrscher des Jenseits und der Gott der Wiedergeburt. Nach dem Mythos ermordete ihn sein Bruder Seth; seine Schwester und Gemahlin Isis fügte den zerstückelten Leib wieder zusammen und empfing von ihm den Sohn Horus. Dargestellt wird er als Mumie mit grüner oder schwarzer Haut, mit der Atef-Krone – der weißen Krone Oberägyptens zwischen zwei Straußenfedern – und mit Krummstab und Geißel vor der Brust, den Zeichen des Königtums. Jeder verstorbene König, später jeder Verstorbene, wurde im Totengericht „zu einem Osiris“. Statuetten wie diese stifteten Gläubige vor allem in der Spätzeit in seine Heiligtümer, besonders nach Abydos. Das Original, etwa 29 Zentimeter hoch, gehört zur ägyptischen Sammlung der Casa Museu Eva Klabin in Rio de Janeiro; der Archäologe Moacir Elias Santos hat es aus Fotografien als 3D-Modell rekonstruiert.",
   "Büste der Nofretete · dreifach vergrößert|Thutmosis, Amarna, um 1345 v. Chr.":
     "Nofretete war die Hauptgemahlin des Pharaos Echnaton; ihr Name bedeutet „Die Schöne ist gekommen“. Die Büste aus Kalkstein mit bemalter Stuckschicht diente vermutlich als Modell in der Werkstatt des Bildhauers Thutmosis — deshalb fehlt im linken Auge die Einlage. Eine deutsche Grabung unter Ludwig Borchardt fand sie 1912 in Amarna. Sie steht im Neuen Museum in Berlin; Ägypten fordert ihre Rückgabe.",
   "Der Denker|Auguste Rodin, 1880–1904":
@@ -2319,7 +2347,7 @@ function buildSculpture(def) {
   const reach = def.height + (def.flower || 0); // Gesamthöhe über dem Sockel, mit Blume
   const group = new THREE.Group();
   group.position.set(x, def.roof ? UPPER_Y : 0, z);
-  if (def.flip) group.rotation.y = Math.PI;
+  group.rotation.y = def.turn ?? (def.flip ? Math.PI : 0);
 
   const plinth = new THREE.Mesh(new THREE.BoxGeometry(pw, ph, pd), plinthMat);
   plinth.position.y = ph / 2;
@@ -2391,7 +2419,8 @@ function buildSculpture(def) {
         o.geometry.computeVertexNormals();
         o.material = makeCopper(o.geometry);
       } else if (def.gold) {
-        // Die Datei trägt gebürstetes Gold mit Anisotropie, die ohne UV nicht wirkt
+        // Die Datei trägt gebürstetes Gold mit Anisotropie, die ohne UV nicht wirkt; Scans ohne Normalen bekommen welche
+        if (!o.geometry.attributes.normal) o.geometry.computeVertexNormals();
         o.material = new THREE.MeshStandardMaterial({
           color: 0xffcf6b, metalness: 1, roughness: 0.22, envMap: getHallEnv(), envMapIntensity: 1.2,
         });
@@ -2556,25 +2585,806 @@ const ROOF = { x0: 12.9, x1: 35.1, z0: -3.1, z1: 17.1 };
 const ROOF_CX = (ROOF.x0 + ROOF.x1) / 2, ROOF_CZ = (ROOF.z0 + ROOF.z1) / 2;
 const LAND_R = 190;    // so weit geht man draußen, gemessen von der Mitte der Terrasse
 const LAND_DISC = 440; // Radius der Landschaftsscheibe; dahinter nur noch Dunst
-const landBlockers = [];
+const landBlockers = []; // unsichtbare Klötze um Bauwerke draußen: ein Klick darauf trifft nicht den Boden dahinter
 let climb = null;        // besteigbare Pyramide, siehe groundAt/climbBlocked
-const climbMeshes = [];  // ihre Treppe und oberste Stufe: Klickziele mit Höhe // unsichtbare Klötze um Bauwerke draußen: ein Klick darauf trifft nicht den Boden dahinter
+const tombs = [];        // Gänge und Kammern der Giza-Pyramiden als Raster, siehe underStone
+const climbMeshes = [];  // ihre Treppe und oberste Stufe: Klickziele mit Höhe
 const outdoor = {};    // Himmel, Sonnenscheibe und Sonnenlicht wandern mit dem Besucher
 const ROOF_EDGE = 0.9; // Brüstung plus Hecke
 const ROOF_SHADOW_PX = matchMedia('(pointer: coarse)').matches ? 1024 : 2048; // 4096 lieferte unter WebGPU gar keine Schatten
 const SKY_R = 170;
 
+/* ---------------------------------------------------------------
+   Wetter draußen: Sonne, Mondnacht oder Regen. Himmel, Licht, Nebel,
+   Wolken, Leuchten und Regen werden nur umgestellt (Farben, Stärken,
+   Sichtbarkeit), nie Materialien getauscht — so muss WebGPU nichts neu
+   übersetzen. fog = Horizontfarbe des Himmels, damit beides ineinander übergeht.
+--------------------------------------------------------------- */
+const WEATHER = {
+  sonne: { label: '☀ Sonne', sky: ['#2f7fd0', '#6bb0ea', '#c4e0f2'], fog: '#e6eef0', near: 150, far: 400,
+    sun: [0xfff3dc, 2.6], hemi: [0xbfe0ff, 0x5a7a3c, 1.5], cloud: [0xffffff, 1], emissive: 1, glow: 0 },
+  nacht: { label: '☾ Mondnacht', sky: ['#03060f', '#0a1430', '#1c2a4a'], fog: '#1a2846', near: 70, far: 330,
+    sun: [0x9db4ff, 0.75], hemi: [0x3a4a78, 0x0c120c, 0.45], cloud: [0x2c3654, 0.55], emissive: 0.25, glow: 1 },
+  regen: { label: '☂ Regen', sky: ['#59616a', '#7c858d', '#9aa3aa'], fog: '#9aa3aa', near: 35, far: 230,
+    sun: [0xd0d8e0, 0.5], hemi: [0xb4bcc4, 0x4a5640, 1.05], cloud: [0x737b82, 1], emissive: 0.7, glow: 0.2 },
+};
+let weather = 'sonne';
+try { if (WEATHER[localStorage.getItem('wetter')]) weather = localStorage.getItem('wetter'); } catch {}
+
+// Himmelskuppel als Panorama (1024 × 512, Horizont in der Mitte); nachts mit Sternen und Milchstraße
+function drawSky(g, w, h, mode) {
+  const W = WEATHER[mode];
+  const grad = g.createLinearGradient(0, 0, 0, h);
+  grad.addColorStop(0, W.sky[0]);
+  grad.addColorStop(0.3, W.sky[1]);
+  grad.addColorStop(0.47, W.sky[2]);
+  grad.addColorStop(0.5, W.fog);
+  grad.addColorStop(1, W.fog);
+  g.globalAlpha = 1;
+  g.fillStyle = grad;
+  g.fillRect(0, 0, w, h);
+}
 function makeSkyTexture() {
-  return canvasTex(8, 512, (g, w, h) => {
-    const grad = g.createLinearGradient(0, 0, 0, h);
-    grad.addColorStop(0, '#2f7fd0');
-    grad.addColorStop(0.3, '#6bb0ea');
-    grad.addColorStop(0.47, '#c4e0f2');
-    grad.addColorStop(0.5, '#e6eef0');
-    grad.addColorStop(1, '#e6eef0');
+  return canvasTex(SKY_TEX_W, SKY_TEX_W / 2, (g, w, h) => drawSky(g, w, h, weather));
+}
+/* ---------------------------------------------------------------
+   Sternenhimmel der Mondnacht: der echte Himmel über Wien zur jetzigen
+   Sternzeit. himmel/sterne.json (aus d3-celestial, BSD; Linien und
+   Ankerpunkte aus Stellariums „modern“-Himmelskultur, CC BY-SA 4.0):
+   5044 Sterne bis 6. Größe mit Farbe aus B−V, die Milchstraße in fünf
+   Helligkeitsstufen, die 110 Messier-Objekte (Galaxien, Haufen, Nebel),
+   die 88 Sternbilder mit Linien. Die Sternbildfiguren (Stellarium,
+   Johan Meuris, Free Art License) sind graue Strichzeichnungen auf
+   Schwarz; je drei Ankerpunkte (Bildpixel ↔ Stern) legen sie fest.
+   Alles wird in das Panorama der Himmelskuppel gemalt, nach der
+   UV-Abbildung von THREE.SphereGeometry: Spalte = Azimut φ, Zeile = θ.
+--------------------------------------------------------------- */
+const OBS_LAT = 48.21 * Math.PI / 180, OBS_LON = 16.37; // Wien
+const SKY_TEX_W = matchMedia('(pointer: coarse)').matches ? 2048 : 4096;
+let skyData = null, skyDataLoading = null;
+const skyArt = new Map(); // Dateiname → geladenes Bild
+let skyArtLoading = null;
+const skyOpts = { lines: false, art: false };
+try {
+  const v = localStorage.getItem('sternbilder') || '';
+  skyOpts.lines = v.includes('linien');
+  skyOpts.art = v.includes('bilder');
+} catch {}
+
+function loadSkyData() {
+  if (!skyDataLoading) skyDataLoading = fetch('himmel/sterne.json').then((r) => r.json()).then((d) => { skyData = d; });
+  return skyDataLoading;
+}
+function loadSkyArt() {
+  if (!skyArtLoading) {
+    skyArtLoading = loadSkyData().then(() => Promise.all(skyData.cons.filter((c) => c.img).map((c) => new Promise((res) => {
+      const img = new Image();
+      img.onload = () => { skyArt.set(c.img, img); res(); };
+      img.onerror = res;
+      img.src = 'himmel/' + c.img;
+    }))));
+  }
+  return skyArtLoading;
+}
+
+// Zeitraffer: der Himmel dreht sich SKY_SPEED-mal so schnell wie echt, ab der jetzigen Sternzeit beim Laden
+const SKY_SPEED = 72, SKY_T0 = Date.now();
+const skyNow = () => new Date(SKY_T0 + (Date.now() - SKY_T0) * SKY_SPEED);
+function localSiderealDeg(date = skyNow()) {
+  const jd = date.getTime() / 86400000 + 2440587.5;
+  return ((280.46061837 + 360.98564736629 * (jd - 2451545) + OBS_LON) % 360 + 360) % 360;
+}
+// Rektaszension/Deklination → Richtung in der Welt: Westen +X, oben +Y, Süden −Z (Norden liegt bei den Pyramiden)
+function skyDir(ra, dec, lst, out = [0, 0, 0]) {
+  const H = (lst - ra) * Math.PI / 180, d = dec * Math.PI / 180;
+  const xh = Math.cos(d) * Math.cos(H), yh = Math.cos(d) * Math.sin(H), zh = Math.sin(d);
+  const up = Math.cos(OBS_LAT) * xh + Math.sin(OBS_LAT) * zh;
+  const south = Math.sin(OBS_LAT) * xh - Math.cos(OBS_LAT) * zh;
+  out[0] = yh; out[1] = up; out[2] = -south;
+  return out;
+}
+// Richtung → Pixel im Kuppelpanorama (wie SphereGeometry: x = −cos φ sin θ, y = cos θ, z = sin φ sin θ)
+function skyPx(dir, W, H, out = [0, 0, 0]) {
+  const th = Math.acos(Math.max(-1, Math.min(1, dir[1])));
+  let ph = Math.atan2(dir[2], -dir[0]);
+  if (ph < 0) ph += Math.PI * 2;
+  out[0] = ph / (Math.PI * 2) * W;
+  out[1] = th / Math.PI * H;
+  out[2] = Math.max(0.05, Math.sin(th)); // Querdehnung des Panoramas zum Zenit hin
+  return out;
+}
+function bvColor(bv) {
+  const stops = [[-0.4, [155, 176, 255]], [0, [202, 216, 255]], [0.4, [248, 247, 255]], [0.8, [255, 240, 225]],
+    [1.2, [255, 214, 170]], [1.6, [255, 190, 130]], [2.0, [255, 170, 110]]];
+  for (let i = 1; i < stops.length; i++) {
+    if (bv <= stops[i][0]) {
+      const [b0, c0] = stops[i - 1], [b1, c1] = stops[i], t = Math.max(0, (bv - b0) / (b1 - b0));
+      return c0.map((v, k) => Math.round(v + (c1[k] - v) * t));
+    }
+  }
+  return stops[stops.length - 1][1];
+}
+const norm3 = (v) => { const l = Math.hypot(v[0], v[1], v[2]) || 1; return [v[0] / l, v[1] / l, v[2] / l]; };
+const dot3 = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+
+// Pseudo-Sternbild „Assange“: erfundene Sterne in der leeren Gegend zwischen Luchs und Giraffe (zirkumpolar
+// über Wien, also jede Nacht zu sehen). Ein Porträt mit langem, glattem Haar, das auf die Schultern fällt,
+// schmalem Gesicht, Nase, Mund und Hemdkragen. Punkte in Grad auf der Tangentialebene um die Mitte
+// (x nach Osten, y nach Norden), m = Helligkeit; Linien als Folgen von Punktnamen.
+const PSEUDO_CONS = {
+  name: 'Assange', ra: 112, dec: 62,
+  pts: {
+    crown: [0, 10, 3.6], topL: [-4, 9.2, 4.2], topR: [4, 9.2, 4.2], sideL: [-6.2, 4, 4.4], sideR: [6.2, 4, 4.4],
+    lowL: [-6.8, -3, 4.5], lowR: [6.8, -3, 4.5], endL: [-7.4, -9.5, 3.9], endR: [7.4, -9.5, 3.9],
+    partL: [-1.6, 6.4, 4.6], partR: [1.8, 6.2, 4.7],
+    templeL: [-4.2, 4.6, 4.6], templeR: [4.2, 4.6, 4.6], cheekL: [-4.4, -1, 4.7], cheekR: [4.4, -1, 4.7],
+    jawL: [-3.1, -5.4, 4.6], jawR: [3.1, -5.4, 4.6], chin: [0, -7.2, 3.8],
+    eyeL: [-2, 1.8, 3.5], eyeR: [2, 1.8, 3.5], bridge: [0, 1.4, 4.8], tip: [0.5, -1.9, 4.2], base: [-0.7, -2.5, 4.8],
+    mouthL: [-1.6, -4.3, 4.8], mouthR: [1.6, -4.3, 4.8],
+    neckL: [-1.8, -8.3, 4.7], neckR: [1.8, -8.3, 4.7], collar: [0, -11, 4.3], shoulderL: [-9.5, -12, 3.9], shoulderR: [9.5, -12, 3.9],
+  },
+  lines: [
+    ['endL', 'lowL', 'sideL', 'topL', 'crown', 'topR', 'sideR', 'lowR', 'endR'],
+    ['templeL', 'partL', 'partR', 'templeR'], ['crown', 'partL'],
+    ['templeL', 'cheekL', 'jawL', 'chin', 'jawR', 'cheekR', 'templeR'],
+    ['bridge', 'tip', 'base'], ['mouthL', 'mouthR'],
+    ['shoulderL', 'neckL', 'collar', 'neckR', 'shoulderR'],
+  ],
+};
+// Tangentialebene → Rektaszension/Deklination (gnomonisch), einmal berechnet
+for (const pt of Object.values(PSEUDO_CONS.pts)) {
+  const a = PSEUDO_CONS.ra * Math.PI / 180, d = PSEUDO_CONS.dec * Math.PI / 180;
+  const c = [Math.cos(d) * Math.cos(a), Math.cos(d) * Math.sin(a), Math.sin(d)];
+  const east = [-Math.sin(a), Math.cos(a), 0], north = [-Math.sin(d) * Math.cos(a), -Math.sin(d) * Math.sin(a), Math.cos(d)];
+  const tx = Math.tan(pt[0] * Math.PI / 180), ty = Math.tan(pt[1] * Math.PI / 180);
+  const v = norm3([0, 1, 2].map((k) => c[k] + tx * east[k] + ty * north[k]));
+  pt.push(((Math.atan2(v[1], v[0]) * 180 / Math.PI) + 360) % 360, Math.asin(v[2]) * 180 / Math.PI);
+}
+// in der Form der Katalogdaten: Sterne [ra, dec, mag, B−V], Linien wie bei den echten Sternbildern
+const PSEUDO_STARS = Object.values(PSEUDO_CONS.pts).map(([, , m, ra, dec]) => [ra, dec, m, 0.6]);
+const PSEUDO_LINES = { name: PSEUDO_CONS.name, lines: PSEUDO_CONS.lines.map((l) => l.map((n) => PSEUDO_CONS.pts[n].slice(3))) };
+// Dazu als milchig durchscheinendes Bild sein Porträt (himmel/assange.webp: Foto von David G Silvers, Cancillería del
+// Ecuador, 2014, CC BY-SA 2.0 — freigestellt, grau, nach unten ausgeblendet, auf Schwarz). Wie die Stellarium-Figuren
+// über drei Anker gelegt: Augen und Kinn im Bild (Pixel) auf die Sterne des Linienbilds; das linke Auge im Bild
+// liegt am Himmel im Osten (x > 0), sonst wäre das Gesicht gespiegelt. Zu sehen nur mit den Figuren.
+const PSEUDO_ART = { img: 'assange.webp', size: [512, 695], alpha: 0.42, anchors: [
+  [193, 211, ...PSEUDO_CONS.pts.eyeR.slice(3)], [283, 196, ...PSEUDO_CONS.pts.eyeL.slice(3)], [251, 373, ...PSEUDO_CONS.pts.chin.slice(3)]] };
+let pseudoArtLoading = false;
+function loadPseudoArt() {
+  if (pseudoArtLoading) return;
+  pseudoArtLoading = true;
+  const img = new Image();
+  img.onload = () => { skyArt.set(PSEUDO_ART.img, img); if (weather === 'nacht') redrawSky(); };
+  img.src = 'himmel/' + PSEUDO_ART.img;
+}
+const cross3 = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+
+// Milchstraße: erst in äquatorialen Koordinaten rastern, dann Pixel für Pixel auf den Ortshimmel umrechnen
+let mwEq = null;
+function milkyWayLayer(lst) {
+  const EW = 1024, EH = 512;
+  if (!mwEq) {
+    const c = document.createElement('canvas');
+    c.width = EW; c.height = EH;
+    const g = c.getContext('2d');
+    for (const rings of skyData.mw) {
+      g.beginPath();
+      for (const r of rings) r.forEach(([ra, dec], i) => {
+        const x = (ra + 180) / 360 * EW, y = (90 - dec) / 180 * EH;
+        if (i) g.lineTo(x, y); else g.moveTo(x, y);
+      });
+      g.fillStyle = 'rgba(255,255,255,0.2)';
+      g.fill('evenodd');
+    }
+    mwEq = g.getImageData(0, 0, EW, EH).data;
+  }
+  const W = 1024, H = 512, out = document.createElement('canvas');
+  out.width = W; out.height = H; // ganze Kugel: sie dreht sich, was unten ist, geht später auf
+  const g = out.getContext('2d'), img = g.createImageData(W, H), px = img.data;
+  const sL = Math.sin(OBS_LAT), cL = Math.cos(OBS_LAT);
+  for (let j = 0; j < H; j++) {
+    const th = (j + 0.5) / H * Math.PI, st = Math.sin(th), up = Math.cos(th);
+    for (let i = 0; i < W; i++) {
+      const ph = (i + 0.5) / W * Math.PI * 2;
+      const west = -Math.cos(ph) * st, south = -Math.sin(ph) * st;
+      const xh = cL * up + sL * south, zh = sL * up - cL * south;
+      const dec = Math.asin(Math.max(-1, Math.min(1, zh))) * 180 / Math.PI;
+      let ra = lst - Math.atan2(west, xh) * 180 / Math.PI;
+      ra = ((ra + 180) % 360 + 360) % 360 - 180;
+      const ex = Math.min(EW - 1, Math.floor((ra + 180) / 360 * EW)), ey = Math.min(EH - 1, Math.floor((90 - dec) / 180 * EH));
+      const v = mwEq[(ey * EW + ex) * 4 + 3] / 255;
+      const k = (j * W + i) * 4;
+      px[k] = 150 * v; px[k + 1] = 165 * v; px[k + 2] = 215 * v; px[k + 3] = 255;
+    }
+  }
+  g.putImageData(img, 0, 0);
+  return out;
+}
+
+function drawStarSky(g, W, H) {
+  const lst = localSiderealDeg(), k = W / 4096, d = [0, 0, 0], p = [0, 0, 0];
+  starsLst = lst; // diese Sternzeit zeigt die Kugel ungedreht
+  g.fillStyle = '#000';
+  g.fillRect(0, 0, W, H);
+  g.save();
+  g.globalCompositeOperation = 'lighter';
+  g.filter = 'blur(3px)';
+  g.drawImage(milkyWayLayer(lst), 0, 0, W, H);
+  g.filter = 'none';
+
+  // Messier-Objekte: Galaxien als schräge Nebelflecken, Kugelhaufen als Lichtknoten, Gasnebel rötlich
+  for (const [ra, dec, type, mag, da, db] of skyData.messier) {
+    skyDir(ra, dec, lst, d);
+    skyPx(d, W, H, p);
+    const scale = W / 360 / 60 * 2.2; // Bogenminuten → Pixel, für das Auge vergrößert
+    const galaxy = type === 's' || type === 'e' || type === 'i';
+    const nebula = ['sfr', 'rn', 'snr', 'pn', 'en', 'dn', 'bn'].includes(type);
+    if (!galaxy && !nebula && type !== 'gc') continue;
+    const rx = Math.max(2.5 * k, da * scale), ry = Math.max(2 * k, db * scale);
+    const grad = g.createRadialGradient(0, 0, 0, 0, 0, 1);
+    const col = nebula ? '255,150,170' : galaxy ? '235,225,205' : '255,240,215';
+    const a = Math.min(0.55, 0.18 + (10 - mag) * 0.05);
+    grad.addColorStop(0, `rgba(${col},${a})`);
+    grad.addColorStop(1, `rgba(${col},0)`);
+    g.setTransform(rx / p[2], 0, 0, ry, p[0], p[1]);
+    g.rotate((ra * 7 + dec * 3) % 3.14);
     g.fillStyle = grad;
-    g.fillRect(0, 0, w, h);
+    g.beginPath(); g.arc(0, 0, 1, 0, 7); g.fill();
+  }
+  g.setTransform(1, 0, 0, 1, 0, 0);
+
+  // Sterne: Größe und Deckkraft nach Helligkeit, Farbe nach B−V, helle mit Lichthof
+  for (const [ra, dec, mag, bv] of [...skyData.stars, ...PSEUDO_STARS]) {
+    skyDir(ra, dec, lst, d);
+    skyPx(d, W, H, p);
+    const fade = 1;
+    const r = Math.max(0.6, 3.1 - 0.45 * mag) * Math.max(k, 0.6);
+    const alpha = Math.min(1, 1.25 - mag * 0.13) * fade;
+    const [cr, cg, cb] = bvColor(bv);
+    if (mag < 1.8) {
+      const halo = g.createRadialGradient(p[0], p[1], 0, p[0], p[1], r * 4);
+      halo.addColorStop(0, `rgba(${cr},${cg},${cb},${0.35 * alpha})`);
+      halo.addColorStop(1, `rgba(${cr},${cg},${cb},0)`);
+      g.fillStyle = halo;
+      g.beginPath(); g.ellipse(p[0], p[1], r * 4 / p[2], r * 4, 0, 0, 7); g.fill();
+    }
+    g.fillStyle = `rgba(${cr},${cg},${cb},${alpha})`;
+    g.beginPath(); g.ellipse(p[0], p[1], r / p[2], r, 0, 0, 7); g.fill();
+  }
+
+  // Sternbildfiguren: je Figur ein Netz von Dreiecken, affin aus dem Bild ins Panorama gemalt
+  if (skyOpts.art) {
+    loadPseudoArt();
+    for (const c of [...skyData.cons, PSEUDO_ART]) {
+      const img = c.img && skyArt.get(c.img);
+      if (!img) continue;
+      g.globalAlpha = c.alpha || 0.24;
+      const A = c.anchors.map(([u, v, ra, dec]) => [u, v, skyDir(ra, dec, lst)]);
+      const ctr = norm3(A.reduce((s, a) => [s[0] + a[2][0], s[1] + a[2][1], s[2] + a[2][2]], [0, 0, 0]));
+      const e1 = norm3(Math.abs(ctr[1]) > 0.99 ? cross3([1, 0, 0], ctr) : cross3([0, 1, 0], ctr)), e2 = cross3(ctr, e1);
+      const T = A.map(([u, v, a]) => [u, v, dot3(a, e1) / dot3(a, ctr), dot3(a, e2) / dot3(a, ctr)]);
+      // affine Abbildung Bildpixel → Tangentialebene aus den drei Ankern
+      const [[u0, v0, X0, Y0], [u1, v1, X1, Y1], [u2, v2, X2, Y2]] = T;
+      const den = (u1 - u0) * (v2 - v0) - (u2 - u0) * (v1 - v0);
+      if (Math.abs(den) < 1e-6) continue;
+      const ax = ((X1 - X0) * (v2 - v0) - (X2 - X0) * (v1 - v0)) / den, bx = ((X2 - X0) * (u1 - u0) - (X1 - X0) * (u2 - u0)) / den;
+      const ay = ((Y1 - Y0) * (v2 - v0) - (Y2 - Y0) * (v1 - v0)) / den, by = ((Y2 - Y0) * (u1 - u0) - (Y1 - Y0) * (u2 - u0)) / den;
+      const tan = (u, v) => [X0 + ax * (u - u0) + bx * (v - v0), Y0 + ay * (u - u0) + by * (v - v0)];
+      const [iw, ih] = c.size, N = 7, grid = [];
+      for (let j = 0; j <= N; j++) for (let i = 0; i <= N; i++) {
+        const u = i / N * iw, v = j / N * ih, [X, Y] = tan(u, v);
+        const dir = norm3([ctr[0] + X * e1[0] + Y * e2[0], ctr[1] + X * e1[1] + Y * e2[1], ctr[2] + X * e1[2] + Y * e2[2]]);
+        const q = skyPx(dir, W, H, [0, 0, 0]);
+        grid.push({ u: u * img.naturalWidth / iw, v: v * img.naturalHeight / ih, x: q[0], y: q[1], up: dir[1] });
+      }
+      const tri = (a, b, c2) => {
+        if (Math.max(a.x, b.x, c2.x) - Math.min(a.x, b.x, c2.x) > W / 2) return; // über die Panoramanaht
+        const den2 = (b.u - a.u) * (c2.v - a.v) - (c2.u - a.u) * (b.v - a.v);
+        if (Math.abs(den2) < 1e-9) return;
+        const ta = ((b.x - a.x) * (c2.v - a.v) - (c2.x - a.x) * (b.v - a.v)) / den2;
+        const tc = ((c2.x - a.x) * (b.u - a.u) - (b.x - a.x) * (c2.u - a.u)) / den2;
+        const tb = ((b.y - a.y) * (c2.v - a.v) - (c2.y - a.y) * (b.v - a.v)) / den2;
+        const td = ((c2.y - a.y) * (b.u - a.u) - (b.y - a.y) * (c2.u - a.u)) / den2;
+        g.save();
+        g.beginPath(); g.moveTo(a.x, a.y); g.lineTo(b.x, b.y); g.lineTo(c2.x, c2.y); g.closePath(); g.clip();
+        g.setTransform(ta, tb, tc, td, a.x - ta * a.u - tc * a.v, a.y - tb * a.u - td * a.v);
+        g.drawImage(img, 0, 0);
+        g.restore();
+      };
+      for (let j = 0; j < N; j++) for (let i = 0; i < N; i++) {
+        const a = grid[j * (N + 1) + i], b = grid[j * (N + 1) + i + 1], c3 = grid[(j + 1) * (N + 1) + i], e = grid[(j + 1) * (N + 1) + i + 1];
+        tri(a, b, e); tri(a, e, c3);
+      }
+    }
+    g.globalAlpha = 1;
+  }
+
+  // Sternbildlinien als Großkreisbögen, dazu die Namen
+  if (skyOpts.lines) {
+    g.strokeStyle = 'rgba(120,160,235,0.5)';
+    g.lineWidth = 1.6 * Math.max(k, 0.7);
+    g.font = `${Math.round(17 * Math.max(k, 0.6))}px Georgia, serif`;
+    g.textAlign = 'center';
+    for (const c of [...skyData.cons, PSEUDO_LINES]) {
+      let sum = [0, 0, 0];
+      for (const line of c.lines) {
+        g.beginPath();
+        let prev = null;
+        for (let s = 0; s < line.length - 1; s++) {
+          const a = skyDir(line[s][0], line[s][1], lst), b = skyDir(line[s + 1][0], line[s + 1][1], lst);
+          sum = [sum[0] + a[0], sum[1] + a[1], sum[2] + a[2]];
+          const steps = Math.max(2, Math.ceil(Math.acos(Math.min(1, dot3(a, b))) * 180 / Math.PI));
+          for (let t = 0; t <= steps; t++) {
+            const f = t / steps, q = norm3([a[0] + (b[0] - a[0]) * f, a[1] + (b[1] - a[1]) * f, a[2] + (b[2] - a[2]) * f]);
+            const px = skyPx(q, W, H, [0, 0, 0]);
+            if (prev && Math.abs(px[0] - prev[0]) > W / 2) { prev = null; continue; }
+            if (prev) g.lineTo(px[0], px[1]); else g.moveTo(px[0], px[1]);
+            prev = px;
+          }
+        }
+        g.stroke();
+      }
+      const ctr = norm3(sum);
+      if (Math.abs(ctr[1]) < 0.97) { // nicht an den Polen des Panoramas, dort wäre die Schrift verzerrt
+        skyPx(ctr, W, H, p);
+        // von innen gesehen läuft das Panorama gespiegelt: Schrift deshalb spiegeln
+        g.setTransform(-1 / p[2], 0, 0, 1, p[0], p[1]);
+        g.fillStyle = 'rgba(150,180,240,0.75)';
+        g.fillText(c.name, 0, 0);
+        g.setTransform(1, 0, 0, 1, 0, 0);
+      }
+    }
+    // Galaxien beschriften
+    g.fillStyle = 'rgba(230,215,190,0.7)';
+    g.font = `${Math.round(13 * Math.max(k, 0.6))}px Georgia, serif`;
+    for (const [ra, dec, type, , , , name, alt] of skyData.messier) {
+      if (!(type === 's' || type === 'e' || type === 'i')) continue;
+      skyDir(ra, dec, lst, d);
+      if (Math.abs(d[1]) > 0.97) continue;
+      skyPx(d, W, H, p);
+      g.setTransform(-1 / p[2], 0, 0, 1, p[0], p[1] + 16 * Math.max(k, 0.6));
+      g.fillText(alt ? `${name} ${alt}` : name, 0, 0);
+      g.setTransform(1, 0, 0, 1, 0, 0);
+    }
+  }
+  g.restore();
+}
+
+// Lichtshow am Burj Khalifa: Programme wechseln nach BURJ_SHOW_DUR Sekunden mit Überblendung. Leinwand: x = Umfang, y = Höhe (oben = Spitze)
+const BURJ_SHOW_DUR = [9, 9, 9, 9, 9, 9, 9, 60]; // die Uhr (7) bleibt länger stehen
+const BURJ_SHOW_CYCLE = BURJ_SHOW_DUR.reduce((a, b) => a + b);
+function drawBurjShow(tex, t) {
+  const c = tex.image, g = c.getContext('2d'), w = c.width, h = c.height;
+  g.globalCompositeOperation = 'source-over';
+  g.globalAlpha = 1;
+  g.fillStyle = '#000';
+  g.fillRect(0, 0, w, h);
+  let r = t % BURJ_SHOW_CYCLE, n = 0;
+  while (r >= BURJ_SHOW_DUR[n]) r -= BURJ_SHOW_DUR[n++];
+  const f = r / BURJ_SHOW_DUR[n], fade = Math.min(1, r / 1.5, (BURJ_SHOW_DUR[n] - r) / 1.5);
+  g.globalAlpha = fade;
+  if (n % 8 === 6) {
+    // Flammen: breiten sich im Laufe der Animation unregelmäßig von oberhalb der Flagge bis ins unterste Stockwerk aus
+    drawBurjFlag(g, w, h, t, true);
+    drawBurjFire(g, w, h, t, f);
+  } else {
+    switch (n % 8) {
+      case 0: // Regenbogenbänder steigen auf, mit dunklen Fugen für Kontrast
+        for (let y = -((t * 60) % 12); y < h; y += 12) {
+          g.fillStyle = `hsl(${(y / h * 720 + t * 140) % 360},100%,50%)`;
+          g.fillRect(0, y, w, 8);
+        }
+        break;
+      case 1: { // Lichtsäule kreist um den Turm, Spitze funkelt
+        for (let i = 0; i < 3; i++) {
+          const x = ((t * 0.35 + i / 3) % 1) * w;
+          const gr = g.createLinearGradient(x - 40, 0, x + 40, 0);
+          gr.addColorStop(0, 'rgba(0,60,255,0)'); gr.addColorStop(0.5, 'rgba(0,200,255,1)'); gr.addColorStop(1, 'rgba(0,60,255,0)');
+          g.fillStyle = gr;
+          g.fillRect(x - 40, 0, 80, h); g.fillRect(x - 40 - w, 0, 80, h); g.fillRect(x - 40 + w, 0, 80, h);
+        }
+        break;
+      }
+      case 2: // Rot-Weiß-Rot von unten nach oben aufgebaut
+        [['#d81e2a', 0], ['#ffffff', 1], ['#d81e2a', 2]].forEach(([col, i]) => {
+          const grow = Math.min(1, Math.max(0, f * 3 - i * 0.6));
+          g.fillStyle = col;
+          g.fillRect(0, h - (i + grow) * h / 3, w, grow * h / 3);
+        });
+        break;
+      case 3: // Schrift läuft rund um den Turm
+        g.fillStyle = '#ffb000';
+        g.font = 'bold 30px Georgia, serif';
+        g.textBaseline = 'middle';
+        for (let k = 0; k < 2; k++) {
+          const x = -((t * 60) % w) + k * w;
+          g.save(); g.translate(x + w / 2, h * 0.55); g.scale(1, 3.4);
+          g.textAlign = 'center';
+          g.fillText('MUSEUM', 0, 0);
+          g.restore();
+        }
+        break;
+      case 5: // Bunte Schmetterlinge flattern aufwärts
+        drawBurjButterflies(g, w, h, t);
+        break;
+      case 7: // nach den Flammen: Uhrzeit, Datum und Wetter
+        drawBurjClock(g, w, h, t);
+        break;
+      default: // Funkeln
+        for (let i = 0; i < 260; i++) {
+          const x = (Math.sin(i * 12.9898 + Math.floor(t * 8) * 0.37) * 43758.5453 % 1 + 1) % 1 * w;
+          const y = (Math.sin(i * 78.233 + Math.floor(t * 8) * 0.71) * 12345.678 % 1 + 1) % 1 * h;
+          g.fillStyle = `hsl(${(i * 37 + t * 50) % 360},100%,70%)`;
+          g.fillRect(x, y, 5, 5);
+        }
+    }
+    if (n !== 7) drawBurjFlag(g, w, h, t, false); // während der Uhr läuft die Schrift statt der Flagge
+  }
+  tex.needsUpdate = true;
+}
+
+// Feuer nach dem Doom-Verfahren: Glut unten, jede Zelle steigt mit zufälliger Abkühlung und seitlichem
+// Versatz eine Zeile auf; die Hitze wählt die Farbe aus einer Palette Schwarz → Violett → Rot → Orange → Gelb
+const FIRE_W = 64, FIRE_H = 96;
+const fireHeat = new Uint8Array(FIRE_W * FIRE_H);
+const FIRE_PAL = (() => {
+  const stops = [[0, [0, 0, 0]], [6, [70, 0, 120]], [12, [150, 0, 170]], [18, [220, 0, 60]], [24, [255, 50, 0]],
+    [30, [255, 140, 0]], [35, [255, 220, 0]], [37, [255, 255, 160]]];
+  const pal = [];
+  for (let v = 0; v <= 37; v++) {
+    let i = 1;
+    while (stops[i][0] < v) i++;
+    const [a, ca] = stops[i - 1], [b, cb] = stops[i], f = (v - a) / (b - a || 1);
+    pal.push(ca.map((c, k) => Math.round(c + (cb[k] - c) * f)));
+  }
+  return pal;
+})();
+let fireCanvas = null;
+// Datum, Uhrzeit und Wetter am Standort des Browsers (sonst Zürich), laufen nach der Flammenshow ganz unten um den Turm.
+// Wetter von Open-Meteo (ohne Schlüssel), Ortsname per BigDataCloud; einmal beim ersten Zeigen, dann alle 15 min
+const BURJ_WX_FALLBACK = { lat: 47.3769, lon: 8.5417, name: 'Zürich' };
+const WX_TEXT = { 0: 'klar', 1: 'heiter', 2: 'bewölkt', 3: 'bedeckt', 45: 'Nebel', 48: 'Reifnebel',
+  51: 'Niesel', 53: 'Niesel', 55: 'Niesel', 56: 'Eisniesel', 57: 'Eisniesel', 61: 'Regen', 63: 'Regen', 65: 'starker Regen',
+  66: 'Eisregen', 67: 'Eisregen', 71: 'Schnee', 73: 'Schnee', 75: 'starker Schnee', 77: 'Schneegriesel',
+  80: 'Schauer', 81: 'Schauer', 82: 'heftige Schauer', 85: 'Schneeschauer', 86: 'Schneeschauer',
+  95: 'Gewitter', 96: 'Gewitter mit Hagel', 99: 'Gewitter mit Hagel' };
+const burjWx = { loading: false, at: 0, place: null, tz: undefined, temp: null, text: '', icon: '' };
+// Wettersymbol zum WMO-Code; nachts Mond statt Sonne
+function wxIcon(code, day) {
+  if (code <= 1) return day ? '☀️' : '🌙';
+  if (code === 2) return day ? '⛅' : '☁️';
+  if (code === 3) return '☁️';
+  if (code <= 48) return '🌫️';
+  if (code <= 67 || (code >= 80 && code <= 82)) return day && code >= 80 ? '🌦️' : '🌧️';
+  if (code <= 86) return '❄️';
+  return '⛈️';
+}
+function burjLocation() {
+  return new Promise((resolve) => {
+    if (!navigator.geolocation) return resolve(BURJ_WX_FALLBACK);
+    navigator.geolocation.getCurrentPosition(
+      (p) => resolve({ lat: p.coords.latitude, lon: p.coords.longitude, name: null }),
+      () => resolve(BURJ_WX_FALLBACK), { timeout: 10000, maximumAge: 3600000 });
   });
+}
+async function loadBurjWeather() {
+  burjWx.loading = true;
+  try {
+    const loc = burjWx.loc || (burjWx.loc = await burjLocation());
+    if (!loc.name) {
+      try {
+        const r = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${loc.lat}&longitude=${loc.lon}&localityLanguage=de`);
+        const j = await r.json();
+        loc.name = j.city || j.locality || j.principalSubdivision || '';
+      } catch { loc.name = ''; }
+    }
+    const r = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${loc.lat}&longitude=${loc.lon}&current=temperature_2m,weather_code,is_day&timezone=auto`);
+    const j = await r.json();
+    burjWx.place = loc.name;
+    burjWx.tz = j.timezone;
+    burjWx.temp = j.current.temperature_2m;
+    burjWx.text = WX_TEXT[j.current.weather_code] ?? '';
+    burjWx.icon = wxIcon(j.current.weather_code, j.current.is_day === 1);
+    burjWx.at = Date.now();
+  } catch {
+    burjWx.at = Date.now() - 14 * 60000; // offline: in einer Minute nochmal versuchen
+  }
+  burjWx.loading = false;
+}
+function drawBurjClock(g, w, h, t) {
+  if (!burjWx.loading && Date.now() - burjWx.at > 15 * 60000) loadBurjWeather();
+  const now = new Date(), tz = burjWx.tz; // Zeitzone des Wetterorts, bis dahin die des Browsers
+  const fmt = (o) => { try { return now.toLocaleString('de-AT', { ...o, timeZone: tz }); } catch { return now.toLocaleString('de-AT', o); } };
+  const parts = [
+    fmt({ hour: '2-digit', minute: '2-digit' }),
+    fmt({ weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }),
+  ];
+  if (burjWx.temp !== null) parts.push(`${burjWx.place ? burjWx.place + ' ' : ''}${burjWx.icon} ${Math.round(burjWx.temp)} °C ${burjWx.text}`.trim());
+  // als Laufschrift ganz unten, wo sonst die Flagge weht: dort ist sie am Turm am größten zu sehen
+  const y0 = h * (1 - FLAG_BAND[1]), y1 = h * (1 - FLAG_BAND[0]), S = 3.4;
+  const px = Math.round((y1 - y0) * 0.8 / S / 0.75);
+  const txt = parts.join('   ·   ') + '   ✦   ';
+  g.save();
+  g.globalCompositeOperation = 'source-over';
+  g.font = `bold ${px}px Georgia, serif`;
+  g.textAlign = 'left';
+  g.textBaseline = 'middle';
+  const period = g.measureText(txt).width;
+  for (let x = -((t * 20) % period); x < w; x += period) {
+    g.save();
+    g.translate(x, (y0 + y1) / 2);
+    g.scale(1, S);
+    g.fillStyle = '#fff4d6';
+    g.fillText(txt, 0, 0);
+    g.restore();
+  }
+  g.restore();
+}
+
+function drawBurjFire(g, w, h, t, f) {
+  for (let x = 0; x < FIRE_W; x++) fireHeat[(FIRE_H - 1) * FIRE_W + x] = 26 + Math.floor(Math.random() * 12); // flackernde Glut
+  for (let y = 1; y < FIRE_H; y++) {
+    for (let x = 0; x < FIRE_W; x++) {
+      const src = y * FIRE_W + x, r = Math.floor(Math.random() * 3);
+      const dst = (y - 1) * FIRE_W + ((x - r + 1 + FIRE_W) % FIRE_W);
+      // im Mittel 0,7 pro Zeile: Zungen bis gut zur halben Höhe, dazwischen dunkle Lücken
+      fireHeat[dst] = Math.max(0, fireHeat[src] - (Math.random() < 0.55 ? 1 : 0) - (Math.random() < 0.12 ? 1 : 0));
+    }
+  }
+  if (!fireCanvas) { fireCanvas = document.createElement('canvas'); fireCanvas.width = FIRE_W; fireCanvas.height = FIRE_H; }
+  const fg = fireCanvas.getContext('2d'), img = fg.createImageData(FIRE_W, FIRE_H);
+  for (let i = 0; i < fireHeat.length; i++) {
+    const c = FIRE_PAL[Math.min(37, fireHeat[i])];
+    img.data[i * 4] = c[0]; img.data[i * 4 + 1] = c[1]; img.data[i * 4 + 2] = c[2]; img.data[i * 4 + 3] = 255;
+  }
+  fg.putImageData(img, 0, 0);
+  g.imageSmoothingEnabled = true;
+  const prevComp = g.globalCompositeOperation;
+  g.globalCompositeOperation = 'lighter';
+
+  // Flammen breiten sich unregelmäßig in Zungen nach unten bis ins unterste Stockwerk aus
+  const p = Math.min(1, Math.max(0, f / 0.75));
+  const baseExpand = p * p * (3 - 2 * p);
+  const hBase = h * (1 - FLAG_BAND[1]), hMax = h, step = 2;
+  for (let sx = 0; sx < w; sx += step) {
+    const th = (sx / w) * Math.PI * 2;
+    const wave = 0.5 * Math.sin(th * 2 + t * 0.9)
+               + 0.35 * Math.sin(th * 5 - t * 1.4 + 1.2)
+               + 0.2 * Math.sin(th * 9 + t * 2.3);
+    const localP = Math.min(1, Math.max(0, baseExpand + wave * 0.35));
+    const hCol = hBase + (hMax - hBase) * localP;
+    const fx = Math.floor((sx / w) * FIRE_W);
+    g.drawImage(fireCanvas, fx, 0, 1, FIRE_H, sx, 0, step + 0.6, hCol);
+  }
+  g.globalCompositeOperation = prevComp;
+}
+
+// Schmetterlinge steigen in Schlangenlinien auf und schlagen mit den Flügeln.
+// Ein Pixel in x ist am Turm etwa 3,4-mal so breit wie einer in y, daher wird senkrecht gestreckt
+const BURJ_BUTTERFLIES = 28;
+function drawBurjButterflies(g, w, h, t) {
+  const S = 3.4;
+  for (let i = 0; i < BURJ_BUTTERFLIES; i++) {
+    const r1 = (Math.sin(i * 12.9898) * 43758.5453 % 1 + 1) % 1, r2 = (Math.sin(i * 78.233) * 12345.678 % 1 + 1) % 1;
+    const speed = 22 + r2 * 26, size = 5 + r1 * 4, hue = (i * 360 / BURJ_BUTTERFLIES + t * 20) % 360;
+    const y = h + 30 - ((t * speed + r1 * h * 1.3) % (h * 1.3)); // unten herein, oben hinaus
+    const x = ((r2 * w + Math.sin(t * (0.8 + r1) + i) * 22 + t * (r1 - 0.5) * 10) % w + w) % w;
+    const flap = 0.2 + 0.8 * Math.abs(Math.cos(t * (9 + r2 * 6) + i)); // Flügelschlag: Breite pulsiert
+    const tilt = Math.cos(t * (0.8 + r1) + i) * 0.35; // in Flugrichtung geneigt
+    for (const ox of [0, -w, w]) {
+      if (x + ox < -size * 3 || x + ox > w + size * 3) continue;
+      g.save();
+      g.translate(x + ox, y);
+      g.scale(1, S);
+      g.rotate(tilt);
+      for (const side of [-1, 1]) {
+        g.fillStyle = `hsl(${hue},100%,58%)`; // Vorderflügel
+        g.beginPath();
+        g.ellipse(side * size * 0.55 * flap, -size * 0.35, size * 0.6 * flap, size * 0.75, side * 0.5, 0, Math.PI * 2);
+        g.fill();
+        g.fillStyle = `hsl(${(hue + 50) % 360},100%,55%)`; // Hinterflügel
+        g.beginPath();
+        g.ellipse(side * size * 0.4 * flap, size * 0.45, size * 0.42 * flap, size * 0.5, -side * 0.4, 0, Math.PI * 2);
+        g.fill();
+      }
+      g.fillStyle = '#fff'; // Körper
+      g.fillRect(-0.7, -size * 0.8, 1.4, size * 1.6);
+      g.restore();
+    }
+  }
+}
+
+// In den unteren Stockwerken weht eine Flagge, die um den Turm wandert:
+// Während der Flammenanimation (case 5) die israelische Flagge mit Davidstern,
+// in allen anderen Programmen die palästinensische Flagge.
+const FLAG_BAND = [0.035, 0.22]; // Höhenbereich als Anteil der Turmhöhe
+function drawBurjFlag(g, w, h, t, isIsrael = false) {
+  const y0 = h * (1 - FLAG_BAND[1]), y1 = h * (1 - FLAG_BAND[0]), fh = (y1 - y0) * 0.8;
+  g.globalAlpha = 1;
+  g.globalCompositeOperation = 'source-over';
+  g.fillStyle = '#000';
+  g.fillRect(0, y0, w, y1 - y0);
+  const fw = Math.round(w * 0.55 / 2) * 2, x0 = w - (t * 18) % w, // wandert zur Stange hin
+    top = (y0 + y1) / 2 - fh / 2, amp = fh * 0.07, step = 2;
+
+  if (isIsrael) {
+    const blue = [0, 95, 235];
+    const R = fh * 0.20, W = R * 0.866025, lw = Math.max(1.8, fh * 0.03);
+    const yTopStripe = fh * 0.094, hStripe = fh * 0.156, yBotStripe = fh * 0.75;
+    for (let sx = 0; sx < fw; sx += step) {
+      const along = sx / fw;
+      const phase = along * Math.PI * 3 - t * 4.2;
+      const dy = Math.sin(phase) * amp * (0.25 + along), shade = 0.72 + 0.28 * Math.cos(phase);
+      const x = (x0 + sx) % w;
+
+      // Weißes Fahnentuch mit Schattierung der Wehfalten
+      const ws = 255 * shade | 0;
+      g.fillStyle = `rgb(${ws},${ws},${ws})`;
+      g.fillRect(x, top + dy, step + 0.6, fh + 0.6);
+
+      // Zwei blaue Streifen
+      const bCol = `rgb(${blue[0] * shade | 0},${blue[1] * shade | 0},${blue[2] * shade | 0})`;
+      g.fillStyle = bCol;
+      g.fillRect(x, top + dy + yTopStripe, step + 0.6, hStripe);
+      g.fillRect(x, top + dy + yBotStripe, step + 0.6, hStripe);
+
+      // Davidstern im mittleren weißen Band
+      const dx = sx - fw / 2, adx = Math.abs(dx);
+      if (adx <= W) {
+        const cy = top + dy + fh / 2;
+        g.fillRect(x, cy - R * 0.5 - lw / 2, step + 0.6, lw);
+        g.fillRect(x, cy + R * 0.5 - lw / 2, step + 0.6, lw);
+        const ys1 = -R + 1.73205 * adx, ys2 = R - 1.73205 * adx;
+        const th = Math.min(lw * 1.8, Math.max(1.5, (W - adx) * 1.2));
+        g.fillRect(x, cy + ys1 - th / 2, step + 0.6, th);
+        g.fillRect(x, cy + ys2 - th / 2, step + 0.6, th);
+      }
+    }
+    return;
+  }
+
+  const colors = [[22, 22, 22], [255, 255, 255], [0, 150, 57]], red = [228, 49, 43];
+  for (let sx = 0; sx < fw; sx += step) {
+    const along = sx / fw;
+    const phase = along * Math.PI * 3 - t * 4.2;
+    const dy = Math.sin(phase) * amp * (0.25 + along), shade = 0.72 + 0.28 * Math.cos(phase);
+    const tri = Math.max(0, 1 - sx / (fw / 3)) * fh / 2; // halbe Höhe des Dreiecks an dieser Stelle
+    const x = (x0 + sx) % w; // Streifen für Streifen, über die Naht des Umfangs hinweg
+    for (let k = 0; k < 3; k++) {
+      const c = colors[k];
+      g.fillStyle = `rgb(${c[0] * shade | 0},${c[1] * shade | 0},${c[2] * shade | 0})`;
+      g.fillRect(x, top + dy + k * fh / 3, step + 0.6, fh / 3 + 0.6);
+    }
+    if (tri > 0) {
+      g.fillStyle = `rgb(${red[0] * shade | 0},${red[1] * shade | 0},${red[2] * shade | 0})`;
+      g.fillRect(x, top + dy + fh / 2 - tri, step + 0.6, tri * 2);
+    }
+  }
+}
+
+function redrawSky() {
+  const sky = outdoor.dome && outdoor.dome.material.map;
+  if (!sky) return;
+  drawSky(sky.image.getContext('2d'), sky.image.width, sky.image.height, weather);
+  sky.needsUpdate = true;
+  needsRender = true;
+  if (weather !== 'nacht') return;
+  if (!skyData) { loadSkyData().then(() => { if (weather === 'nacht') redrawSky(); }); return; }
+  const st = outdoor.stars.material.map;
+  drawStarSky(st.image.getContext('2d'), st.image.width, st.image.height);
+  st.needsUpdate = true;
+  updateStarRotation();
+}
+
+// Die Sterne liegen auf einer eigenen Kugel in der Kuppel, die sich um die Himmelsachse dreht: so läuft
+// der Zeitraffer flüssig, ohne das große Panorama ständig neu zu malen. Gemalt wird sie zur Sternzeit starsLst
+// über die ganze Kugel; was unter den Horizont gerät, blendet der Shader aus.
+let starsLst = 0, skyLst = 0, starsTurned = 0; // skyLst: Sternzeit, die der Himmel gerade zeigt
+const SKY_POLE = new THREE.Vector3(0, Math.sin(OBS_LAT), Math.cos(OBS_LAT)); // Himmelsnordpol: über den Pyramiden (+Z)
+function makeStarSphere() {
+  const { positionWorld, smoothstep, uniform } = THREE.TSL;
+  const mat = new THREE.MeshBasicNodeMaterial({
+    map: canvasTex(SKY_TEX_W, SKY_TEX_W / 2, () => {}), side: THREE.BackSide, fog: false,
+    transparent: true, blending: THREE.AdditiveBlending, depthWrite: false });
+  // Dunst über dem Horizont: bis etwa 7° Höhe ausblenden, darunter nichts
+  mat.opacityNode = smoothstep(0, 0.12 * (SKY_R - 2), positionWorld.y.sub(uniform(UPPER_Y)));
+  const stars = new THREE.Mesh(new THREE.SphereGeometry(SKY_R - 2, 64, 48), mat);
+  stars.renderOrder = -1;
+  stars.visible = false;
+  stars.frustumCulled = false;
+  return stars;
+}
+// Drehung um die Himmelsachse bis zur jetzigen (Zeitraffer-)Sternzeit; auch für das Anklicken der Galaxien
+function updateStarRotation() {
+  skyLst = localSiderealDeg();
+  outdoor.stars.quaternion.setFromAxisAngle(SKY_POLE, -(skyLst - starsLst) * Math.PI / 180);
+}
+
+
+// Vollmond mit Mare und weichem Hof
+function makeMoonTexture() {
+  return canvasTex(256, 256, (g, s) => {
+    const halo = g.createRadialGradient(s / 2, s / 2, s * 0.12, s / 2, s / 2, s / 2);
+    halo.addColorStop(0, 'rgba(200,215,255,0.5)');
+    halo.addColorStop(1, 'rgba(200,215,255,0)');
+    g.fillStyle = halo;
+    g.fillRect(0, 0, s, s);
+    g.fillStyle = '#eef0f4';
+    g.beginPath(); g.arc(s / 2, s / 2, s * 0.14, 0, 7); g.fill();
+    g.fillStyle = 'rgba(150,158,175,0.55)';
+    [[-0.04, -0.04, 0.05], [0.04, -0.02, 0.035], [0.01, 0.05, 0.04], [-0.06, 0.03, 0.025]].forEach(([dx, dy, r]) => {
+      g.beginPath(); g.arc(s / 2 + dx * s, s / 2 + dy * s, r * s, 0, 7); g.fill();
+    });
+  });
+}
+
+// Regen: Striche in einem Kasten um den Besucher, an festen Weltpositionen (wandern beim Gehen nicht mit)
+const RAIN_N = 3200, RAIN_B = 24, RAIN_H = 26, RAIN_LEN = 0.75, RAIN_V = 15, RAIN_WIND = 0.12;
+const rainDrops = Float32Array.from({ length: RAIN_N * 3 }, () => Math.random());
+function makeRain() {
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(RAIN_N * 6), 3));
+  const rain = new THREE.LineSegments(geo, new THREE.LineBasicMaterial({
+    color: 0xc8d2dc, transparent: true, opacity: 0.4, depthWrite: false }));
+  rain.frustumCulled = false;
+  rain.visible = false;
+  return rain;
+}
+function updateRain(rain, t) {
+  const pos = rain.geometry.attributes.position.array, c = camera.position;
+  const wrap = (v, lo, span) => lo + ((v - lo) % span + span) % span;
+  for (let i = 0; i < RAIN_N; i++) {
+    const x = wrap(rainDrops[i * 3] * RAIN_B * 2, c.x - RAIN_B, RAIN_B * 2);
+    const z = wrap(rainDrops[i * 3 + 1] * RAIN_B * 2, c.z - RAIN_B, RAIN_B * 2);
+    const y = wrap(rainDrops[i * 3 + 2] * RAIN_H - t * RAIN_V, c.y - 9, RAIN_H);
+    pos.set([x, y, z, x - RAIN_WIND * RAIN_LEN, y + RAIN_LEN, z], i * 6);
+  }
+  rain.geometry.attributes.position.needsUpdate = true;
+}
+
+// Alles auf ein Wetter umstellen. Die Leuchtstärken der Materialien draußen werden je Material einmal
+// gemerkt und dann skaliert; userData.nightGlow bekommen Fenster und Eiffelturm, die nachts leuchten.
+function applyWeather(mode) {
+  weather = mode;
+  const W = WEATHER[mode];
+  if (!outdoor.dome) return;
+  redrawSky();
+  if (mode === 'nacht' && skyOpts.art) loadSkyArt().then(() => { if (weather === 'nacht') redrawSky(); });
+  showSkyButtons();
+  outdoor.sunDisc.visible = mode === 'sonne';
+  outdoor.moon.visible = mode === 'nacht';
+  outdoor.stars.visible = mode === 'nacht';
+  for (const sp of outdoor.penGlow || []) sp.visible = mode === 'nacht';
+  if (outdoor.torches) outdoor.torches.glow = mode === 'nacht' ? 1 : mode === 'regen' ? 0.55 : 0.35; // tags blasser Schein
+  outdoor.sun.color.set(W.sun[0]);
+  outdoor.sun.intensity = W.sun[1];
+  outdoor.hemi.color.set(W.hemi[0]);
+  outdoor.hemi.groundColor.set(W.hemi[1]);
+  outdoor.hemi.intensity = W.hemi[2];
+  for (const c of clouds) {
+    c.sprite.material.color.set(W.cloud[0]);
+    c.shade = W.cloud[1];
+    c.sprite.visible = !c.rainOnly || mode === 'regen';
+  }
+  roofGroup.traverse((o) => {
+    if (!o.isMesh || !o.material.isMeshStandardMaterial) return;
+    const m = o.material, u = m.userData;
+    if (u.baseEmissive === undefined) u.baseEmissive = m.emissiveIntensity;
+    if (u.nightGlow !== undefined) {
+      m.emissive.set(W.glow ? u.nightGlow : 0x000000);
+      m.emissiveIntensity = (u.glowI || 1) * W.glow;
+    } else {
+      m.emissiveIntensity = u.baseEmissive * (mode === 'nacht' && u.nightFactor ? u.nightFactor : W.emissive);
+    }
+  });
+  if (camera.position.y > ROOF_SEEN) setOutdoorFog();
+  needsRender = true;
+}
+function setOutdoorFog() {
+  const W = WEATHER[weather];
+  scene.fog.near = W.near;
+  scene.fog.far = W.far;
+  scene.fog.color.set(W.fog);
 }
 
 // Quellwolke aus vielen weichen Tupfern: unten flach und leicht grau, oben hell
@@ -2735,10 +3545,24 @@ function updateRoof(dt) {
   for (const c of clouds) {
     c.sprite.position.x += c.speed * dt;
     if (c.sprite.position.x > CLOUD_X) c.sprite.position.x -= CLOUD_X * 2;
-    c.sprite.material.opacity = c.alpha * Math.min(1, (CLOUD_X - Math.abs(c.sprite.position.x)) / 50);
+    c.sprite.material.opacity = c.alpha * (c.shade ?? 1) * Math.min(1, (CLOUD_X - Math.abs(c.sprite.position.x)) / 50);
   }
 }
 
+// Fackeln flackern: Flammengröße, -neigung und Schein aus überlagerten Sinuswellen mit eigener Phase je Fackel
+function updateTorches(set, dt) { // set: { list, t } — eine Gruppe Fackeln mit eigener Uhr
+  const T = outdoor.torches;
+  if (!T) return;
+  set.t += dt;
+  for (const f of set.list) {
+    const t = set.t * f.sp + f.ph;
+    const k = 0.75 + 0.14 * Math.sin(t * 13.1) + 0.08 * Math.sin(t * 23.7 + 1.3) + 0.05 * Math.sin(t * 41.3 + 2.1);
+    f.flame.scale.set(0.32 * (0.85 + 0.15 * Math.sin(t * 17.3)), 0.62 * k, 1);
+    f.flame.position.set(f.base.x + 0.02 * Math.sin(t * 9.7), f.base.y + 0.31 * k - 0.2, f.base.z);
+    f.halo.scale.setScalar((1.5 + 0.25 * k) * (0.6 + 0.4 * T.glow));
+    f.halo.material.opacity = T.glow * (0.55 + 0.35 * k);
+  }
+}
 function buildRoofTerrace() {
   const cx = ROOM_W * 1.5, cz = ROOM_D / 2;
   const w = ROOF.x1 - ROOF.x0 + ROOF_EDGE * 2, d = ROOF.z1 - ROOF.z0 + ROOF_EDGE * 2;
@@ -2767,7 +3591,14 @@ function buildRoofTerrace() {
   sunDisc.scale.setScalar(70);
   sunDisc.position.copy(dome.position).addScaledVector(sunDir, SKY_R - 8);
   scene.add(sunDisc);
-  Object.assign(outdoor, { dome, sunDisc, sunDir });
+  const moon = new THREE.Sprite(new THREE.SpriteMaterial({ map: makeMoonTexture(), fog: false, depthWrite: false, transparent: true }));
+  moon.scale.setScalar(34);
+  moon.position.copy(sunDisc.position); // sonst stünde er bis zum ersten Gang aufs Dach im Ursprung, mitten in Saal I
+  moon.visible = false;
+  scene.add(moon);
+  const stars = makeStarSphere();
+  dome.add(stars); // wandert mit der Kuppel
+  Object.assign(outdoor, { dome, sunDisc, moon, sunDir, stars });
 
   const cloudTex = [makeCloudTexture(), makeCloudTexture(), makeCloudTexture()];
   for (let i = 0; i < 16; i++) {
@@ -2778,6 +3609,16 @@ function buildRoofTerrace() {
     sprite.position.set(cx - CLOUD_X + (i + Math.random()) * CLOUD_X / 8, UPPER_Y + 48 + Math.random() * 26, cz + (Math.random() - 0.5) * 240);
     scene.add(sprite);
     clouds.push({ sprite, speed: 2.5 + Math.random() * 1.8, alpha: 0.85 + Math.random() * 0.15 });
+  }
+  // bei Regen eine geschlossene, tiefer hängende Wolkendecke dazu
+  for (let i = 0; i < 26; i++) {
+    const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: cloudTex[i % 3], transparent: true, fog: false, depthWrite: false }));
+    const size = 110 + Math.random() * 70;
+    sprite.scale.set(size, size * 0.4, 1);
+    sprite.position.set(cx - CLOUD_X + (i + Math.random()) * CLOUD_X / 13, UPPER_Y + 34 + Math.random() * 16, cz + (Math.random() - 0.5) * 300);
+    sprite.visible = false;
+    scene.add(sprite);
+    clouds.push({ sprite, speed: 4 + Math.random() * 2, alpha: 1, rainOnly: true });
   }
 
   const roof = new THREE.Group();
@@ -2806,8 +3647,17 @@ function buildRoofTerrace() {
   // Die Lichter hängen direkt an der Szene, nicht an roofGroup: würden sie mit dem Dach aus- und eingeblendet,
   // änderte sich die Lichtliste der Szene, und WebGPU baute beim Gang über die Treppe alle ~900 Renderobjekte
   // neu auf — das war die Sekundenpause beim Hinauf- und Hinabgehen
-  scene.add(sun, sun.target, sky);
+  // Stirnlampe: nachts draußen ein kräftiger Lichtkegel in Blickrichtung (siehe animate). Sie ist immer da und
+  // wird nur über die Stärke ein- und ausgeschaltet — ein Licht, das seine Sichtbarkeit wechselt, ließe WebGPU
+  // alle Renderobjekte neu aufbauen. Ohne Schatten; als Dachlicht sehen sie nur die Materialien draußen
+  const headlamp = new THREE.SpotLight(0xfff1dc, 0, 70, THREE.MathUtils.degToRad(24), 0.55, 1.3);
+  headlamp.userData.roof = true;
+  scene.add(sun, sun.target, sky, headlamp, headlamp.target);
   outdoor.sun = sun;
+  outdoor.hemi = sky;
+  outdoor.headlamp = headlamp;
+  outdoor.rain = makeRain();
+  roofGroup.add(outdoor.rain);
 
   // Parklandschaft bis zum Horizont, begehbar; verdeckt zugleich die Säle unter dem Dach. Feines Gras
   // in Metern gekachelt, darüber großflächige Wiesentöne über einen zweiten UV-Satz (Kanal 1)
@@ -2902,16 +3752,21 @@ function buildRoofTerrace() {
 
   // Giza: Cheops, Chephren, Mykerinos in der Diagonale, auf Wüstensand
   const GIZA_X = -60, GIZA_Z = 140;
-  groundPatch(GIZA_X, GIZA_Z, 62, 44, 0xd9c49a);
-  [[8, 4, 25, 44, 0], [-9, 1, 23.5, 42, 0.22], [-23, -5, 11.5, 24, 0]].forEach(([dx, dz, h, courses, casing]) => {
-    // vier flache Seiten: nicht indiziert, sonst glättet das Licht die Kanten
-    const g = new THREE.ConeGeometry(h * 1.11, h, 4, 1, true).toNonIndexed();
-    g.computeVertexNormals();
-    const pyr = new THREE.Mesh(g, new THREE.MeshStandardMaterial({ map: gizaTexture(courses, casing), roughness: 1, metalness: 0 }));
-    pyr.rotation.y = Math.PI / 4;
-    pyr.position.set(GIZA_X + dx, h / 2 - 0.2, GIZA_Z + dz);
-    roof.add(pyr);
-  });
+  groundPatch(GIZA_X - 6, GIZA_Z + 8, 72, 50, 0xd9c49a);
+  // Diagonal von Nordost nach Südwest, so weit auseinander, dass sich die Grundflächen nicht überschneiden
+  // (sonst läge ein Eingang im Nachbarn). Gänge und Kammern: Gangbreite cw, -höhe ch, Kammer room × room, roomH hoch (gebaut weiter unten, nach boxUVs)
+  const GIZA_PYRAMIDS = [
+    // path: Knickpunkte des Gangs (lokal, x/z), vom Eingang in der Südflanke bis an die Kammer. Die Gänge bleiben
+    // überall so tief im Stein, dass die Flanke über ihrer Decke liegt (Mykerinos: höchstens 7 m von der Mitte)
+    { dx: 22, dz: 18, h: 25, courses: 44, casing: 0, cw: 2.4, ch: 2.8, room: 8, roomH: 4.5,         // Cheops: Zickzack
+      path: [[0, -21], [0, -15], [10, -15], [10, -10.5], [-10, -10.5], [-10, -6.5], [0, -6.5], [0, -4]] },
+    { dx: -18, dz: 2, h: 23.5, courses: 42, casing: 0.22, cw: 2.4, ch: 2.8, room: 8, roomH: 4.5,   // Chephren
+      path: [[0, -20], [0, -14], [-8, -14], [-8, -9.5], [7, -9.5], [7, -6.5], [0, -6.5], [0, -4]] },
+    { dx: -50, dz: -14, h: 11.5, courses: 24, casing: 0, cw: 2.0, ch: 2.4, room: 4.8, roomH: 3.2,  // Mykerinos: um die Kammer herum
+      path: [[0, -10], [0, -5.5], [4.2, -5.5], [4.2, 4.5], [-4.2, 4.5], [-4.2, 0], [-2.4, 0]] },
+  ];
+  const gizaMats = GIZA_PYRAMIDS.map(({ courses, casing }) =>
+    new THREE.MeshStandardMaterial({ map: gizaTexture(courses, casing), roughness: 1, metalness: 0 }));
 
   // Grauer Kalkstein von Chichén Itzá, in Metern gekachelt (boxUVs)
   const limestone = canvasTex(512, 512, (g, w, h) => {
@@ -2948,41 +3803,531 @@ function buildRoofTerrace() {
     return geo;
   };
 
-  // Chichén Itzá: neun Stufen, Freitreppe zum Betrachter, Tempel obenauf, im Dschungel
+  // Chichén Itzá, El Castillo (Tempel des Kukulcán), Maßstab ≈ 1 : 1,7: neun Terrassen mit geneigten Wänden,
+  // durch Pilaster in vertiefte Felder gegliedert und von einem Gesims abgeschlossen; vier Freitreppen zu je
+  // 91 Stufen zwischen Wangen (alfardas), am Fuß der Haupttreppe (zum Besucher) zwei Schlangenköpfe; oben der
+  // Tempel mit Sockelprofil, Türöffnungen (vorn drei, zwischen Schlangensäulen), Fries mit Stufenmäander,
+  // Gesims und Zinnen. Alles je Material zusammengefügt.
   const MAYA_X = 62, MAYA_Z = 140;
   groundPatch(MAYA_X, MAYA_Z, 44, 38, 0x3f7a40);
+  groundPatch(MAYA_X, MAYA_Z - 2, 30, 30, 0x9c9a74).position.y = 0.02; // gemähter Platz um die Pyramide
+  const BASE = 32, TIERS = 9, PH = 14, TH = PH / TIERS, SET = 1.15, LEAN = 0.32;
+  // Plattform = Außenkante des obersten Gesimses: dort endet die Treppe, die weiter unten vor den Terrassen liegt
+  const TOP = 2 * (BASE / 2 - (TIERS - 1) * SET - LEAN + 0.14);
+  const STAIR_W = 5.2, RAIL_W = 0.75, STAIR_OUT = BASE / 2 + 1.9, STEPS = 91;
+  const fret = canvasTex(512, 128, (g, w, h) => { // Fries: Stufenmäander und Felder in Relief
+    g.fillStyle = '#b5ad9c'; g.fillRect(0, 0, w, h);
+    g.strokeStyle = '#6d675b'; g.lineWidth = 7;
+    for (let x = 0; x < w; x += 64) {
+      g.beginPath();
+      g.moveTo(x + 6, h - 18); g.lineTo(x + 6, 22); g.lineTo(x + 44, 22); g.lineTo(x + 44, 60); g.lineTo(x + 24, 60); g.lineTo(x + 24, 42);
+      g.stroke();
+      g.fillStyle = '#8a8374'; g.fillRect(x + 50, 70, 10, h - 88);
+    }
+    g.fillStyle = '#d2cbbb'; g.fillRect(0, 0, w, 8); g.fillRect(0, h - 8, w, 8);
+    weather(g, w, h, 40, 'rgba(58,60,50,0.2)', 'rgba(226,222,208,0.16)');
+    hazeOver(g, w, h);
+  });
+  fret.wrapS = THREE.RepeatWrapping;
   const mayaMat = new THREE.MeshStandardMaterial({ map: limestone, roughness: 1, metalness: 0 });
-  const STEPS = 9, STEP_H = 1.8, BASE = 32, TOP = 11;
-  for (let i = 0; i < STEPS; i++) {
-    const w = BASE - (BASE - TOP) * i / (STEPS - 1);
-    const step = new THREE.Mesh(boxUVs(new THREE.BoxGeometry(w, STEP_H, w), 4), mayaMat);
-    step.position.set(MAYA_X, STEP_H * (i + 0.5), MAYA_Z);
-    roof.add(step);
-    landBlockers.push(step); // Klick auf die Stufenflanken: zum Fuß gehen; die oberste ist zugleich begehbar
-    if (i === STEPS - 1) climbMeshes.push(step);
+  const recessMat = new THREE.MeshStandardMaterial({ map: limestone, color: 0xaba393, roughness: 1, metalness: 0 });
+  const fretMat = new THREE.MeshStandardMaterial({ map: fret, roughness: 1, metalness: 0 });
+  const voidMat = new THREE.MeshStandardMaterial({ color: 0x1d1b18, roughness: 1, metalness: 0 });
+  const M = { body: [], light: [], steps: [], fret: [], void: [] };
+  const geoQuads = (quads) => { // [ [A,B,C,D], ... ] → Dreiecke, UVs in Metern (Fläche nach ihrer Lage)
+    const pos = [];
+    for (const [A, B, C, D] of quads) pos.push(...A, ...C, ...B, ...A, ...D, ...C); // Normale nach außen
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+    const uv = [];
+    for (let i = 0; i < pos.length; i += 18) { // je Viereck: u längs der Wand, v nach oben
+      const tx = pos[i + 6] - pos[i], tz = pos[i + 8] - pos[i + 2], tl = Math.hypot(tx, tz) || 1; // A → B
+      for (let j = 0; j < 18; j += 3) uv.push((pos[i + j] * tx + pos[i + j + 2] * tz) / tl / 4, pos[i + j + 1] / 4);
+    }
+    g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
+    g.computeVertexNormals();
+    return g;
+  };
+  const flatGeo = (g) => g.index ? g.toNonIndexed() : g;
+  const bx = (w, h, d, x, y, z, list = M.light, metres = 4) => list.push(boxUVs(new THREE.BoxGeometry(w, h, d), metres).translate(x, y, z));
+  // Seite k: Außenrichtung (ox, oz), Querrichtung (px, pz)
+  const SIDES = [[0, -1, 1, 0], [1, 0, 0, 1], [0, 1, -1, 0], [-1, 0, 0, -1]];
+  for (let i = 0; i < TIERS; i++) {
+    const y0 = i * TH, y1 = (i + 1) * TH - 0.2, b = BASE / 2 - i * SET, bt = b - LEAN;
+    // geneigte Wand, etwas dunkler: dazwischen wirken die Felder vertieft
+    M.body.push(geoQuads(SIDES.map(([ox, oz, px, pz]) => [
+      [ox * b - px * b, y0, oz * b - pz * b], [ox * b + px * b, y0, oz * b + pz * b],
+      [ox * bt + px * bt, y1, oz * bt + pz * bt], [ox * bt - px * bt, y1, oz * bt - pz * bt]])));
+    // Gesims, zugleich der Absatz zur nächsten Terrasse bzw. der Rand der Plattform
+    bx((bt + 0.14) * 2, 0.2, (bt + 0.14) * 2, 0, y1 + 0.1, 0);
+    // Pilaster zwischen den Feldern, mit der Wand geneigt, außer im Bereich der Treppe
+    const ang = Math.atan2(LEAN, y1 - y0), ph = Math.hypot(LEAN, y1 - y0);
+    for (const [ox, oz, px, pz] of SIDES) {
+      for (let t = -b + 0.9; t <= b - 0.9; t += 1.45) {
+        if (Math.abs(t) < STAIR_W / 2 + RAIL_W + 0.4) continue;
+        const g = boxUVs(new THREE.BoxGeometry(0.32, ph, 0.16), 4);
+        g.rotateX(ang); // obere Kante zur Mitte hin (lokal −Z zeigt nach außen)
+        g.rotateY(Math.atan2(-ox, -oz));
+        g.translate(ox * (b - LEAN / 2 + 0.06) + px * t, (y0 + y1) / 2, oz * (b - LEAN / 2 + 0.06) + pz * t);
+        M.light.push(g);
+      }
+    }
   }
-  const flightH = STEPS * STEP_H, flightRun = (BASE - TOP) / 2;
-  // kürzer als die Flanke: darf nicht unter die Saaldecke reichen, sonst fehlt ihr das Tageslicht
-  const flight = new THREE.Mesh(
-    boxUVs(new THREE.BoxGeometry(5, Math.hypot(flightH, flightRun) - 1, 0.8), 0.45),
-    new THREE.MeshStandardMaterial({ map: treads, roughness: 1, metalness: 0 })
-  );
-  flight.position.set(MAYA_X, flightH / 2, MAYA_Z - TOP / 2 - flightRun / 2 - 0.4);
-  flight.rotation.x = Math.atan2(flightRun, flightH);
-  roof.add(flight);
-  const temple = new THREE.Mesh(boxUVs(new THREE.BoxGeometry(7, 3.6, 7), 4), mayaMat);
-  temple.position.set(MAYA_X, flightH + 1.8, MAYA_Z);
-  roof.add(temple);
-  const door = new THREE.Mesh(new THREE.BoxGeometry(1.5, 2.2, 0.1), new THREE.MeshStandardMaterial({ color: 0x26231f, roughness: 1 }));
-  door.position.set(MAYA_X, flightH + 1.2, MAYA_Z - 3.53);
-  roof.add(door);
-  landBlockers.push(temple);
-  climbMeshes.push(flight);
-  // begehbar: die Freitreppe hinauf und rund um den Tempel (Weltkoordinaten, siehe groundAt/climbBlocked)
-  // Rampe = Vorderfläche der gekippten Treppenplatte (0,4 m vor ihrer Mittellinie)
-  const fa = flight.rotation.x;
-  climb = { x: cx + MAYA_X, z: cz + MAYA_Z, half: BASE / 2, top: TOP / 2, h: flightH, stair: 2.5, temple: 3.5,
-    rampZ: cz + flight.position.z - 0.4 * Math.cos(fa), rampY: flight.position.y + 0.4 * Math.sin(fa), slope: flightH / flightRun };
+  // Treppen mit Wangen; die Stufen reichen bis zum Boden bzw. in den Kern
+  const RISE = PH / STEPS, RUN = (STAIR_OUT - TOP / 2) / STEPS;
+  for (const [ox, oz, px, pz] of SIDES) {
+    const rot = Math.atan2(-ox, -oz);
+    for (let k = 0; k < STEPS; k++) {
+      const s = STAIR_OUT - (k + 0.5) * RUN, top = (k + 1) * RISE, bottom = Math.max(0, top - 1.2);
+      const g = boxUVs(new THREE.BoxGeometry(STAIR_W, top - bottom, RUN + 0.02), 0.6);
+      g.rotateY(rot);
+      g.translate(ox * s, (top + bottom) / 2, oz * s);
+      M.steps.push(g);
+    }
+    const len = Math.hypot(PH, STAIR_OUT - TOP / 2), slopeAng = Math.atan2(PH, STAIR_OUT - TOP / 2);
+    for (const side of [-1, 1]) {
+      const g = boxUVs(new THREE.BoxGeometry(RAIL_W, 0.9, len + 0.6), 4);
+      g.rotateX(-slopeAng); // vorn unten, hinten oben
+      g.rotateY(rot);
+      const mid = (STAIR_OUT + TOP / 2) / 2, lat = side * (STAIR_W / 2 + RAIL_W / 2);
+      g.translate(ox * mid + px * lat, PH / 2 + 0.25, oz * mid + pz * lat);
+      M.light.push(g);
+      // unten ein Sockel, damit die Wange nicht in der Luft endet
+      bx(RAIL_W, 1.0, 1.2, 0, 0, 0, M.light);
+      M.light[M.light.length - 1].rotateY(rot).translate(ox * (STAIR_OUT - 0.3) + px * lat, 0.5, oz * (STAIR_OUT - 0.3) + pz * lat);
+    }
+  }
+  // Schlangenköpfe am Fuß der Haupttreppe: Kopf, offenes Maul mit Zähnen, Augen, Federbrauen
+  for (const side of [-1, 1]) {
+    const hx = side * (STAIR_W / 2 + RAIL_W / 2), hz = -STAIR_OUT - 0.7;
+    bx(1.0, 0.9, 1.5, hx, 0.45, hz, M.light, 1);
+    bx(1.05, 0.28, 0.9, hx, 1.0, hz - 0.25, M.light, 1); // Oberkiefer
+    bx(0.9, 0.18, 0.7, hx, 0.12, hz - 0.85, M.light, 1); // Unterkiefer, vorgestreckt
+    bx(0.7, 0.35, 0.05, hx, 0.5, hz - 0.76, M.void);     // Rachen
+    for (const t of [-0.3, 0.3]) {
+      const tooth = new THREE.ConeGeometry(0.06, 0.25, 6).rotateX(Math.PI).translate(hx + t, 0.76, hz - 0.68);
+      M.light.push(tooth);
+      bx(0.16, 0.12, 0.06, hx + t, 1.0, hz - 0.72, M.void); // Augen
+      bx(0.3, 0.12, 0.5, hx + t, 1.2, hz - 0.3, M.light, 1); // Brauen
+    }
+  }
+  // Plattform und Tempel
+  const platform = new THREE.Mesh(boxUVs(new THREE.BoxGeometry(TOP + 0.3, 0.3, TOP + 0.3), 4), mayaMat);
+  platform.position.set(MAYA_X, PH - 0.13, MAYA_Z); // 2 cm über dem obersten Gesims
+  roof.add(platform);
+  climbMeshes.push(platform);
+  const T = 7.6, TW = T / 2, TWALL = 0.8, TDOOR_H = 2.0, TWALL_H = 2.4;
+  bx(T + 0.3, 0.35, T + 0.3, 0, PH + 0.175, 0);                 // Sockelprofil
+  for (const [ox, oz, px, pz] of SIDES) {
+    const front = oz < 0; // Haupteingang zum Besucher: drei Öffnungen, dazwischen zwei Schlangensäulen
+    const doors = front ? [[0, 4.8]] : [[0, 1.6]]; // vorn eine weite Öffnung, die zwei Säulen teilen sie in drei
+    let t = -TW;
+    const piece = (t0, t1, y0, y1) => {
+      const w = t1 - t0, c = (t0 + t1) / 2;
+      const g = boxUVs(new THREE.BoxGeometry(w, y1 - y0, TWALL), 4);
+      g.rotateY(Math.atan2(-ox, -oz));
+      g.translate(ox * (TW - TWALL / 2) + px * c, PH + 0.35 + (y0 + y1) / 2, oz * (TW - TWALL / 2) + pz * c);
+      M.light.push(g);
+    };
+    for (const [c, w] of doors) {
+      if (c - w / 2 > t) piece(t, c - w / 2, 0, TWALL_H);
+      piece(c - w / 2, c + w / 2, TDOOR_H, TWALL_H); // Sturz
+      t = c + w / 2;
+    }
+    piece(t, TW, 0, TWALL_H);
+    if (front) for (const c of [-0.95, 0.95]) {
+      const col = new THREE.CylinderGeometry(0.2, 0.24, TDOOR_H, 12).translate(px * c, PH + 0.35 + TDOOR_H / 2, oz * (TW - TWALL / 2));
+      M.light.push(col);
+      bx(0.42, 0.4, 0.6, px * c, PH + 0.55, oz * (TW + 0.2), M.light, 1); // Schlangenkopf am Säulenfuß
+    }
+  }
+  const FR = PH + 0.35 + TWALL_H;
+  bx(T + 0.2, 0.2, T + 0.2, 0, FR + 0.1, 0);                     // Mittelgesims
+  const frieze = new THREE.BoxGeometry(T, 1.1, T);
+  const fu = frieze.attributes.uv; // Fries: Muster rundum in Metern
+  for (let i = 0; i < fu.count; i++) fu.setX(i, fu.getX(i) * T / 2.2);
+  M.fret.push(frieze.translate(0, FR + 0.2 + 0.55, 0));
+  bx(T + 0.4, 0.25, T + 0.4, 0, FR + 1.42, 0);                  // Kranzgesims
+  for (const [ox, oz, px, pz] of SIDES) {                        // Zinnen
+    for (let t = -TW + 0.4; t <= TW - 0.4; t += 0.95) {
+      bx(0.45, 0.4, 0.3, ox * (TW + 0.05) + px * t, FR + 1.75, oz * (TW + 0.05) + pz * t, M.light, 1);
+    }
+  }
+  // Im Tempel: der Federkopfschmuck des Moctezuma (Penacho, Weltmuseum Wien), 1,16 × 1,75 m, in seiner Vitrine
+  // mitten im Raum, zum Haupteingang gewandt. Ein Halbrund aus langen grün schillernden Quetzalfedern, innen Bänder aus
+  // türkisblauen Kotinga-, rosa Rosalöffler- und braunen Federn, besetzt mit Goldplättchen; vorn unten ein
+  // goldenes Stirnstück. Federn als Instanzen einer Form mit Feder-Textur (Alpha), je mit eigenem Farbton.
+  const PEN_Y = PH + 0.35 + 0.75, PEN_Z = 0; // Oberkante des Sockels; frei in der Raummitte, Türen gibt es auf allen Seiten
+  const plinthG = new THREE.Mesh(new THREE.BoxGeometry(2.3, 0.75, 0.7), new THREE.MeshStandardMaterial({ color: 0x1c1a1e, roughness: 0.6, metalness: 0 }));
+  plinthG.position.set(MAYA_X, PH + 0.35 + 0.375, MAYA_Z + PEN_Z);
+  roof.add(plinthG);
+  const vit = new THREE.Mesh(new THREE.BoxGeometry(2.3, 1.3, 0.7), new THREE.MeshStandardMaterial({
+    color: 0xffffff, roughness: 0.05, metalness: 0, transparent: true, opacity: 0.12, depthWrite: false }));
+  vit.position.set(MAYA_X, PEN_Y + 0.65, MAYA_Z + PEN_Z);
+  roof.add(vit);
+  const penacho = new THREE.Group();
+  penacho.position.set(MAYA_X, PEN_Y + 0.14, MAYA_Z + PEN_Z);
+  roof.add(penacho);
+  const backing = new THREE.Mesh(new THREE.CircleGeometry(1.0, 48, 0, Math.PI), new THREE.MeshStandardMaterial({ color: 0x15130f, roughness: 1, metalness: 0 }));
+  backing.position.z = 0.02;
+  backing.rotation.y = Math.PI; // Vorderseite zur Tür (−Z)
+  penacho.add(backing);
+  // lange Quetzalfeder: Kiel, Fahnen, zur Spitze schmal, Alpha für die Form
+  const featherTex = canvasTex(64, 512, (g, w, h) => {
+    const vane = g.createLinearGradient(0, h, 0, 0);
+    vane.addColorStop(0, '#0d4f2c'); vane.addColorStop(0.45, '#17a050'); vane.addColorStop(0.8, '#5fd06a'); vane.addColorStop(1, '#c8d850');
+    g.fillStyle = vane;
+    g.beginPath();
+    g.moveTo(w / 2, h);
+    g.bezierCurveTo(w * 0.05, h * 0.75, w * 0.08, h * 0.2, w / 2, 0);
+    g.bezierCurveTo(w * 0.92, h * 0.2, w * 0.95, h * 0.75, w / 2, h);
+    g.fill();
+    g.strokeStyle = 'rgba(10,40,20,0.5)'; g.lineWidth = 1; // Fahnenstrahlen
+    for (let y = 8; y < h; y += 6) { g.beginPath(); g.moveTo(w / 2, y); g.lineTo(4, y - 14); g.moveTo(w / 2, y); g.lineTo(w - 4, y - 14); g.stroke(); }
+    g.fillStyle = '#e8e2b0'; g.fillRect(w / 2 - 1, 0, 2, h); // Kiel
+  });
+  const featherMat = new THREE.MeshStandardMaterial({ map: featherTex, emissive: 0xffffff, emissiveMap: featherTex, emissiveIntensity: 0.35,
+    alphaTest: 0.4, side: THREE.DoubleSide, roughness: 0.45, metalness: 0, userData: { nightFactor: 2.6 } }); // nachts kräftig leuchtend
+  const featherGeo = new THREE.PlaneGeometry(0.075, 0.62).translate(0, 0.31, 0);
+  const plumes = [];
+  for (let layer = 0; layer < 2; layer++) {
+    const n = layer ? 120 : 140;
+    for (let i = 0; i < n; i++) {
+      const a = -1.75 + 3.5 * (i + layer * 0.5) / n; // von links unten über oben nach rechts unten
+      plumes.push({ a, r: 0.4 + layer * 0.02, len: (0.9 + Math.random() * 0.2) * (layer ? 0.93 : 1), z: -0.01 - layer * 0.008 });
+    }
+  }
+  const feathers = new THREE.InstancedMesh(featherGeo, featherMat, plumes.length);
+  const fm = new THREE.Matrix4(), fq = new THREE.Quaternion(), fe = new THREE.Euler(), fp = new THREE.Vector3(), fs = new THREE.Vector3(), fc = new THREE.Color();
+  plumes.forEach(({ a, r, len, z }, i) => {
+    fe.set(0, 0, a);
+    fq.setFromEuler(fe);
+    fp.set(-Math.sin(a) * r, Math.cos(a) * r, z);
+    fs.set(1, len, 1);
+    feathers.setMatrixAt(i, fm.compose(fp, fq, fs));
+    feathers.setColorAt(i, fc.setHSL(0.36 + (Math.random() - 0.5) * 0.08, 0.8, 0.5 + Math.random() * 0.25)); // schillerndes Grün
+  });
+  penacho.add(feathers);
+  // innere Bänder (von außen nach innen): Goldrand, Türkis, Rosa, Braun, Türkis, Gold
+  const scales = canvasTex(128, 128, (g, w, h) => {
+    g.fillStyle = '#ffffff'; g.fillRect(0, 0, w, h);
+    for (let y = 0; y < h + 16; y += 12) for (let x = (y / 12 % 2) * 8; x < w + 16; x += 16) {
+      g.fillStyle = 'rgba(0,0,0,0.22)';
+      g.beginPath(); g.arc(x, y, 8, 0, Math.PI); g.fill();
+    }
+  });
+  scales.wrapS = scales.wrapT = THREE.RepeatWrapping;
+  scales.repeat.set(10, 1);
+  [[0.38, 0.43, 0xc89a38], [0.3, 0.38, 0x18b8c8], [0.23, 0.3, 0xe86a8c], [0.17, 0.23, 0x7a4a26], [0.1, 0.17, 0x1aa6c0], [0, 0.1, 0xc89a38]]
+    .forEach(([r0, r1, col], k) => {
+      const band = new THREE.Mesh(new THREE.RingGeometry(Math.max(r0, 0.001), r1, 48, 1, -0.2, Math.PI + 0.4),
+        new THREE.MeshStandardMaterial({ map: scales, color: col, emissive: col, emissiveIntensity: 0.25, roughness: 0.6, metalness: 0, side: THREE.DoubleSide, userData: { nightFactor: 2.6 } }));
+      band.position.z = -0.02 - k * 0.002;
+      penacho.add(band);
+    });
+  // Goldplättchen auf den Bändern und das Stirnstück
+  const goldMat = new THREE.MeshStandardMaterial({ color: 0xe0b040, emissive: 0xb08020, emissiveIntensity: 0.45, roughness: 0.3, metalness: 0.2, side: THREE.DoubleSide, userData: { nightFactor: 2.4 } });
+  const discs = [];
+  [[0.405, 46], [0.265, 30], [0.2, 22], [0.135, 14]].forEach(([r, n]) => {
+    for (let i = 0; i < n; i++) { const a = -0.15 + (Math.PI + 0.3) * (i + 0.5) / n; discs.push([Math.cos(a) * r, Math.sin(a) * r]); }
+  });
+  const discMesh = new THREE.InstancedMesh(new THREE.CircleGeometry(0.014, 10), goldMat, discs.length);
+  discs.forEach(([x, y], i) => discMesh.setMatrixAt(i, fm.makeTranslation(x, y, -0.04)));
+  penacho.add(discMesh);
+  const frontlet = new THREE.Mesh(new THREE.ShapeGeometry(new THREE.Shape([new THREE.Vector2(-0.16, 0), new THREE.Vector2(0.16, 0),
+    new THREE.Vector2(0.1, 0.08), new THREE.Vector2(-0.1, 0.08)])), goldMat);
+  frontlet.position.z = -0.045;
+  penacho.add(frontlet);
+  // Nachts ein starker Schein: hinter der Krone ein grüner und ein goldener Hof (die dunkle Rückwand
+  // verdeckt die Mitte, so strahlt er rundum über die Federspitzen hinaus), davor ein schwacher goldener
+  const penGlow = [[0x40ff80, 3.6, 0.15, 0.9], [0xffc050, 2.4, 0.12, 0.9], [0xffd070, 1.7, -0.25, 0.3]].map(([col, size, z, op]) => {
+    const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: glow, color: col, transparent: true, opacity: op,
+      blending: THREE.AdditiveBlending, depthWrite: false }));
+    sp.scale.set(size, size * 0.8, 1);
+    sp.position.set(0, 0.42, z);
+    sp.visible = false;
+    penacho.add(sp);
+    return sp;
+  });
+  outdoor.penGlow = penGlow;
+  // Decke des Tempelraums: dunkle Holzbalken aus Sapote, wie sie die Maya über ihre Räume legten
+  const beams = canvasTex(256, 256, (g, w, h) => {
+    g.fillStyle = '#2a1c12'; g.fillRect(0, 0, w, h);
+    for (let x = 0; x < w; x += 32) {
+      const l = Math.random() * 20;
+      g.fillStyle = `rgb(${92 + l | 0},${62 + l | 0},${40 + l | 0})`; g.fillRect(x + 2, 0, 26, h);
+      g.fillStyle = 'rgba(30,18,10,0.5)'; for (let y = 0; y < h; y += 9) g.fillRect(x + 4 + Math.random() * 20, y, 2, 6 + Math.random() * 10);
+    }
+  });
+  const ceiling = new THREE.Mesh(new THREE.PlaneGeometry(T - 2 * TWALL, T - 2 * TWALL).rotateX(Math.PI / 2),
+    new THREE.MeshStandardMaterial({ map: beams, roughness: 0.9, metalness: 0 }));
+  ceiling.position.set(MAYA_X, PH + 0.35 + TWALL_H - 0.01, MAYA_Z);
+  roof.add(ceiling);
+  // Schild und Info: wie eine Skulptur anklickbar
+  const penTitle = 'Federkopfschmuck des Moctezuma', penArtist = 'Azteken, Mexiko, um 1515';
+  const placardP = new THREE.Mesh(new THREE.PlaneGeometry(0.72, 0.18), new THREE.MeshBasicMaterial({ map: makePlacardTexture(penTitle, penArtist) }));
+  placardP.position.set(MAYA_X, PH + 0.35 + 0.5, MAYA_Z + PEN_Z - 0.351);
+  placardP.rotation.y = Math.PI;
+  roof.add(placardP);
+  const penProxy = new THREE.Mesh(new THREE.BoxGeometry(2.0, 1.2, 0.4), new THREE.MeshBasicMaterial());
+  penProxy.position.set(MAYA_X, PEN_Y + 0.65, MAYA_Z + PEN_Z);
+  penProxy.visible = false;
+  roof.add(penProxy);
+  occluders.push(penProxy);
+  sculptureSpots.push({ mesh: penProxy, title: penTitle, artist: penArtist, sculpture: true });
+  // Infotafel zum Kopfschmuck an der linken Innenwand, zwischen Vorderwand und Seitentür, zum Raum gewandt.
+  // Unbeleuchtet (MeshBasic) wie die Schilder, damit sie im dunklen Tempelraum lesbar bleibt; anklickbar wie die Vitrine
+  const boardTex = canvasTex(1024, 1366, (g, w, h) => {
+    g.fillStyle = '#efe6d4'; g.fillRect(0, 0, w, h);
+    g.strokeStyle = '#8a7c5a'; g.lineWidth = 6; g.strokeRect(14, 14, w - 28, h - 28);
+    g.fillStyle = '#1c1810'; g.textAlign = 'center';
+    g.font = '600 62px Georgia, serif'; g.fillText('Federkopfschmuck', w / 2, 130);
+    g.fillText('des Moctezuma', w / 2, 205);
+    g.fillStyle = '#4a4030'; g.font = 'italic 42px Georgia, serif'; g.fillText(penArtist, w / 2, 275);
+    g.fillStyle = '#8a7c5a'; g.fillRect(w / 2 - 160, 315, 320, 3);
+    g.fillStyle = '#1c1810'; g.textAlign = 'left'; g.font = '35px Georgia, serif';
+    let y = 395, line = '';
+    for (const word of ABOUT_WORKS[`${penTitle}|${penArtist}`].split(' ')) { // Zeilen umbrechen
+      if (line && g.measureText(line + ' ' + word).width > w - 150) { g.fillText(line, 75, y); y += 50; line = word; }
+      else line = line ? line + ' ' + word : word;
+    }
+    g.fillText(line, 75, y);
+    g.fillStyle = '#6a5e48'; g.textAlign = 'center'; g.font = 'italic 32px Georgia, serif';
+    g.fillText('Original: Weltmuseum Wien · Klick: mehr dazu', w / 2, h - 60);
+  });
+  const board = new THREE.Mesh(new THREE.PlaneGeometry(1.0, 1.334), new THREE.MeshBasicMaterial({ map: boardTex }));
+  const boardFrame = new THREE.Mesh(new THREE.BoxGeometry(0.04, 1.40, 1.07), new THREE.MeshStandardMaterial({ color: 0x2a1c12, roughness: 0.8, metalness: 0 }));
+  const innerX = -(TW - TWALL);
+  boardFrame.position.set(MAYA_X + innerX + 0.02, PH + 0.35 + 1.4, MAYA_Z - 1.9);
+  board.position.set(MAYA_X + innerX + 0.045, PH + 0.35 + 1.4, MAYA_Z - 1.9);
+  board.rotation.y = Math.PI / 2; // Vorderseite nach +X, in den Raum
+  roof.add(boardFrame, board);
+  occluders.push(board); // die Klick-Abfrage sucht Skulpturen unter den Verdeckern
+  sculptureSpots.push({ mesh: board, title: penTitle, artist: penArtist, sculpture: true });
+
+  // Fackeln auf beiden Treppenwangen der Haupttreppe, vom Fuß bis hinauf zur Plattform: Holzschaft mit
+  // Steinschale, darüber eine flackernde Flamme (Sprite, additiv) und ein Lichtschein. Keine echten Lichter,
+  // die müsste jedes Material auf dem Dach mitrechnen. Flackern in updateTorches, nur wenn man sie sieht
+  const torchWood = new THREE.MeshStandardMaterial({ color: 0x4a3220, roughness: 0.9, metalness: 0 });
+  const torchBowl = new THREE.MeshStandardMaterial({ color: 0x3a3430, roughness: 0.9, metalness: 0,
+    userData: { nightGlow: 0x3a1c08, glowI: 1 } }); // innen vom Feuer angestrahlt
+  const flameTex = canvasTex(64, 128, (g, w, h) => { // Flammenzunge: weißgelber Kern, orange, roter Saum
+    const rg = g.createRadialGradient(w / 2, h * 0.72, 0, w / 2, h * 0.72, h * 0.62);
+    rg.addColorStop(0, 'rgba(255,250,220,1)');
+    rg.addColorStop(0.25, 'rgba(255,200,80,0.95)');
+    rg.addColorStop(0.55, 'rgba(255,110,20,0.6)');
+    rg.addColorStop(1, 'rgba(180,30,0,0)');
+    g.fillStyle = rg;
+    g.beginPath();
+    g.moveTo(w / 2, 0);
+    g.bezierCurveTo(w * 0.62, h * 0.3, w, h * 0.55, w * 0.8, h * 0.85);
+    g.bezierCurveTo(w * 0.65, h, w * 0.35, h, w * 0.2, h * 0.85);
+    g.bezierCurveTo(0, h * 0.55, w * 0.38, h * 0.3, w / 2, 0);
+    g.fill();
+  });
+  const T_PARTS = { wood: [], bowl: [] };
+  const torches = [];
+  const runLen = STAIR_OUT - TOP / 2, slopeA = Math.atan2(PH, runLen);
+  const railTop = (sv) => 0.25 + PH * (STAIR_OUT - sv) / runLen + 0.45 / Math.cos(slopeA); // Oberkante der Wange
+  const N_TORCH = 9;
+  for (let i = 0; i < N_TORCH; i++) {
+    const sv = STAIR_OUT - 0.8 - (runLen - 1.2) * i / (N_TORCH - 1); // von unten nach oben
+    for (const side of [-1, 1]) {
+      const lx = side * (STAIR_W / 2 + RAIL_W / 2), lz = -sv, y0 = railTop(sv) - 0.15;
+      T_PARTS.wood.push(new THREE.CylinderGeometry(0.045, 0.06, 0.85, 8).translate(lx, y0 + 0.42, lz));
+      T_PARTS.bowl.push(new THREE.CylinderGeometry(0.17, 0.08, 0.16, 10, 1, true).translate(lx, y0 + 0.9, lz));
+      T_PARTS.bowl.push(new THREE.CircleGeometry(0.15, 10).rotateX(-Math.PI / 2).translate(lx, y0 + 0.92, lz));
+      const flame = new THREE.Sprite(new THREE.SpriteMaterial({ map: flameTex, transparent: true,
+        blending: THREE.AdditiveBlending, depthWrite: false }));
+      const halo = new THREE.Sprite(new THREE.SpriteMaterial({ map: glow, color: 0xff8a30, transparent: true,
+        blending: THREE.AdditiveBlending, depthWrite: false }));
+      const base = new THREE.Vector3(MAYA_X + lx, y0 + 1.15, MAYA_Z + lz);
+      flame.position.copy(base);
+      halo.position.copy(base);
+      roof.add(halo, flame);
+      torches.push({ flame, halo, base, ph: Math.random() * 100, sp: 0.8 + Math.random() * 0.5 });
+    }
+  }
+  [[T_PARTS.wood, torchWood], [T_PARTS.bowl, torchBowl]].forEach(([list, mat]) => {
+    const mesh = new THREE.Mesh(mergeGeometries(list.map(flatGeo)), mat);
+    mesh.position.set(MAYA_X, 0, MAYA_Z);
+    roof.add(mesh);
+  });
+  outdoor.torches = { glow: 0.35 }; // Stärke des Scheins je Wetter, siehe applyWeather
+  // jede Fackelgruppe flackert nur, solange ihre Kugel im Blick ist
+  const torchGroup = (list, center, r) => {
+    const set = { list, t: 0 };
+    updateTorches(set, 0);
+    turntables.push({ group: new THREE.Group(), turnSecs: 1e9, smoke: null, wind: (dt) => updateTorches(set, dt), roof: true,
+      sphere: new THREE.Sphere(center, r) });
+  };
+  torchGroup(torches, new THREE.Vector3(cx + MAYA_X, UPPER_Y + PH / 2, cz + MAYA_Z), 26);
+  const maya = new THREE.Group();
+  maya.position.set(MAYA_X, 0, MAYA_Z);
+  roof.add(maya);
+  const mayaMeshes = {};
+  [['body', recessMat], ['light', mayaMat], ['steps', mayaMat], ['fret', fretMat], ['void', voidMat]].forEach(([k, mat]) => {
+    mayaMeshes[k] = new THREE.Mesh(mergeGeometries(M[k].map(flatGeo)), mat);
+    maya.add(mayaMeshes[k]);
+  });
+  landBlockers.push(mayaMeshes.body, mayaMeshes.light, mayaMeshes.fret);
+  climbMeshes.push(mayaMeshes.steps);
+  // begehbar: die vier Treppen hinauf und rund um den Tempel (Weltkoordinaten, siehe groundAt/climbBlocked)
+  climb = { x: cx + MAYA_X, z: cz + MAYA_Z, half: BASE / 2, top: TOP / 2, h: PH, stair: STAIR_W / 2, rail: RAIL_W,
+    temple: TW + 0.2, out: STAIR_OUT, slope: PH / (STAIR_OUT - TOP / 2),
+    // Tempelraum: Boden auf dem Sockelprofil, Innenmaß, Durchgang zwischen den Säulen, Vitrine an der Rückwand
+    floor: PH + 0.35, tw: TW, inner: TW - TWALL, door: 0.3, vitX: 1.15, vitZ: 0.35 };
+
+  // Grabkammern in den drei Giza-Pyramiden: von Süden (zum Besucher, −Z) führt ein ebener Gang durch eine
+  // Öffnung im Mantel zur Kammer in der Mitte. Gang und Kammer sind aus Quadern (boxUVs), am Eingang
+  // schneiden die Gangwände dreieckig an der Pyramidenflanke ab. Fackeln an den Wänden; in Cheops' Kammer
+  // die Büste des Tutanchamun, in Chephrens die der Nofretete, in Mykerinos' ein goldener Osiris (alle drei in SCULPTURES, roof). Kollisionen: der Grundriss als
+  // Kästen um Gang und Kammer herum; Mantel und Gangwände sind landBlockers, die Böden floorMeshes.
+  const tombStone = canvasTex(256, 256, (g, w, h) => { // Kalksteinquader, in Metern gekachelt (2 m je Kachel)
+    for (let r = 0; r < 4; r++) for (let x = r % 2 ? -32 : 0; x < w; x += 64) {
+      const l = 150 + Math.random() * 30;
+      g.fillStyle = `rgb(${l + 26},${l + 8},${l - 30})`; g.fillRect(x, r * 64, 64, 64);
+      g.fillStyle = 'rgba(70,52,30,0.5)'; g.fillRect(x, r * 64, 2, 64); g.fillRect(x, r * 64 + 62, 64, 2);
+    }
+    weather(g, w, h, 40, 'rgba(90,70,40,0.15)', 'rgba(236,214,170,0.12)');
+  });
+  tombStone.wrapS = tombStone.wrapT = THREE.RepeatWrapping;
+  const tombWallMat = new THREE.MeshStandardMaterial({ map: tombStone, roughness: 1, metalness: 0 });
+  const tombFloorMat = new THREE.MeshStandardMaterial({ map: tombStone, color: 0xb8a888, roughness: 1, metalness: 0 });
+  const gizaTorches = [];
+  const wallTorch = (list, ox, oz, x, y, z, nx, nz) => { // Fackel im Wandhalter, Teile relativ zu (ox, oz); (nx, nz) zeigt in den Raum
+    list.wood.push(new THREE.BoxGeometry(Math.abs(nx) * 0.3 + 0.07, 0.07, Math.abs(nz) * 0.3 + 0.07).translate(x + nx * 0.15, y, z + nz * 0.15));
+    list.wood.push(new THREE.CylinderGeometry(0.035, 0.045, 0.5, 8).translate(x + nx * 0.3, y + 0.2, z + nz * 0.3));
+    list.bowl.push(new THREE.CylinderGeometry(0.13, 0.06, 0.12, 10, 1, true).translate(x + nx * 0.3, y + 0.5, z + nz * 0.3));
+    list.bowl.push(new THREE.CircleGeometry(0.11, 10).rotateX(-Math.PI / 2).translate(x + nx * 0.3, y + 0.52, z + nz * 0.3));
+    const flame = new THREE.Sprite(new THREE.SpriteMaterial({ map: flameTex, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false }));
+    const halo = new THREE.Sprite(new THREE.SpriteMaterial({ map: glow, color: 0xff8a30, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false }));
+    const base = new THREE.Vector3(ox + x + nx * 0.3, y + 0.72, oz + z + nz * 0.3);
+    flame.position.copy(base); halo.position.copy(base);
+    roof.add(halo, flame);
+    gizaTorches.push({ flame, halo, base, ph: Math.random() * 100, sp: 0.8 + Math.random() * 0.5 });
+  };
+  GIZA_PYRAMIDS.forEach(({ dx, dz, h, cw, ch, room, roomH, path }, i) => {
+    const px = GIZA_X + dx, pz = GIZA_Z + dz, a = h * 1.11 * Math.SQRT1_2; // halbe Basisbreite
+    const R = room / 2, W = cw / 2;
+    const faceH = (x, z) => h * (1 - Math.max(Math.abs(x), Math.abs(z)) / a) - 0.2; // Höhe der Flanke über dem Boden
+    // Gang und Kammer als Rechtecke; daraus ein 20-cm-Raster der freien Zellen, an dessen Grenzen Wände,
+    // darüber Decken (nicht, wo die Flanke tiefer liegt: dort ist der Eingang offen), darunter Bodenplatten
+    const rects = path.slice(1).map(([x1, z1], k) => {
+      const [x0, z0] = path[k];
+      return [Math.min(x0, x1) - W, Math.max(x0, x1) + W, Math.min(z0, z1) - W, Math.max(z0, z1) + W, ch];
+    });
+    rects.push([-R, R, -R, R, roomH]);
+    const G = 0.2, N = Math.ceil(a / G) * 2, A = N * G / 2;
+    const ceilAt = new Float32Array(N * N); // 0 = Stein, sonst Deckenhöhe der freien Zelle
+    for (let iz = 0; iz < N; iz++) for (let ix = 0; ix < N; ix++) {
+      const x = -A + (ix + 0.5) * G, z = -A + (iz + 0.5) * G;
+      for (const [x0, x1, z0, z1, hh] of rects) if (x > x0 && x < x1 && z > z0 && z < z1) ceilAt[iz * N + ix] = Math.max(ceilAt[iz * N + ix], hh);
+    }
+    const P = { wall: [], floor: [], wood: [], bowl: [] };
+    const quads = { wall: [], floor: [] }, uvs = { wall: [], floor: [] };
+    // Viereck A-B-C-D; die Normale soll in Richtung want zeigen, sonst andersherum
+    const quad = (key, A4, want, uvOf) => {
+      const [p0, p1, p2] = A4, n = [0, 1, 2].map((k) => {
+        const u = [p1[0] - p0[0], p1[1] - p0[1], p1[2] - p0[2]], v = [p2[0] - p0[0], p2[1] - p0[1], p2[2] - p0[2]];
+        return [u[1] * v[2] - u[2] * v[1], u[2] * v[0] - u[0] * v[2], u[0] * v[1] - u[1] * v[0]][k];
+      });
+      const Q = n[0] * want[0] + n[1] * want[1] + n[2] * want[2] >= 0 ? A4 : [A4[0], A4[3], A4[2], A4[1]];
+      for (const k of [0, 1, 2, 0, 2, 3]) { quads[key].push(...Q[k]); uvs[key].push(...uvOf(Q[k])); }
+    };
+    const wallUV = (q) => [(q[0] + q[2]) / 2, q[1] / 2], flatUV = (q) => [q[0] / 2, q[2] / 2];
+    const free = (ix, iz) => ix >= 0 && iz >= 0 && ix < N && iz < N ? ceilAt[iz * N + ix] : -1; // −1: außerhalb
+    for (let iz = 0; iz < N; iz++) for (let ix = 0; ix < N; ix++) {
+      const H = ceilAt[iz * N + ix];
+      if (!H) continue;
+      const x0 = -A + ix * G, x1 = x0 + G, z0 = -A + iz * G, z1 = z0 + G, xc = x0 + G / 2, zc = z0 + G / 2;
+      quad('floor', [[x0, 0.04, z0], [x1, 0.04, z0], [x1, 0.04, z1], [x0, 0.04, z1]], [0, 1, 0], flatUV);
+      if (faceH(xc, zc) >= H) quad('wall', [[x0, H, z0], [x1, H, z0], [x1, H, z1], [x0, H, z1]], [0, -1, 0], flatUV);
+      for (const [ddx, ddz] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+        const nb = free(ix + ddx, iz + ddz);
+        if (nb === -1 || nb >= H) continue; // Rand des Rasters, gleich hoher oder höherer Nachbar
+        // Kante zur Nachbarzelle; nach innen (zu dieser Zelle) gerichtet
+        const ex = ddx ? (ddx > 0 ? x1 : x0) : null, ez = ddz ? (ddz > 0 ? z1 : z0) : null;
+        const e0 = ex !== null ? [ex, z0] : [x0, ez], e1 = ex !== null ? [ex, z1] : [x1, ez];
+        const top0 = Math.min(H, faceH(e0[0], e0[1])), top1 = Math.min(H, faceH(e1[0], e1[1])), bot = nb > 0 ? nb : 0;
+        if (top0 <= bot && top1 <= bot) continue;
+        quad('wall', [[e0[0], bot, e0[1]], [e1[0], bot, e1[1]], [e1[0], Math.max(bot, top1), e1[1]], [e0[0], Math.max(bot, top0), e0[1]]],
+          [-ddx, 0, -ddz], wallUV);
+      }
+    }
+    for (const key of ['wall', 'floor']) {
+      const g = new THREE.BufferGeometry();
+      g.setAttribute('position', new THREE.Float32BufferAttribute(quads[key], 3));
+      g.setAttribute('uv', new THREE.Float32BufferAttribute(uvs[key], 2));
+      g.computeVertexNormals();
+      P[key].push(g);
+    }
+    // Stein im Grundriss als möglichst große Kollisionskästen (gierig: erst entlang x, dann so weit wie möglich in z)
+    const X = cx + px, Z = cz + pz, used = new Uint8Array(N * N);
+    tombs.push({ X, Z, A, G, N, ceilAt, faceH });
+    const solidCell = (ix, iz) => !ceilAt[iz * N + ix] && !used[iz * N + ix] && Math.max(Math.abs(-A + (ix + 0.5) * G), Math.abs(-A + (iz + 0.5) * G)) < a;
+    for (let iz = 0; iz < N; iz++) for (let ix = 0; ix < N; ix++) {
+      if (!solidCell(ix, iz)) continue;
+      let w = 1, d = 1;
+      while (ix + w < N && solidCell(ix + w, iz)) w++;
+      grow: while (iz + d < N) {
+        for (let k = 0; k < w; k++) if (!solidCell(ix + k, iz + d)) break grow;
+        d++;
+      }
+      for (let jz = 0; jz < d; jz++) for (let k = 0; k < w; k++) used[(iz + jz) * N + ix + k] = 1;
+      addCollider(X - A + (ix + w / 2) * G, Z - A + (iz + d / 2) * G, w * G, d * G, roofColliders);
+    }
+    // Fackeln: auf jedem Gangstück abwechselnd links und rechts alle 5 m, in der Kammer an den Seitenwänden
+    let side = 1;
+    path.slice(1).forEach(([x1, z1], k) => {
+      const [x0, z0] = path[k], len = Math.hypot(x1 - x0, z1 - z0), ux = (x1 - x0) / len, uz = (z1 - z0) / len;
+      for (let t = k === 0 ? Math.max(len - 3, 2) : 2.2; t < len - 1.8; t += 5) {
+        const x = x0 + ux * t, z = z0 + uz * t, nx = -uz * side, nz = ux * side; // Normale zeigt in den Gang
+        if (faceH(x, z) < ch + 0.5) continue;
+        wallTorch(P, px, pz, x - nx * W, 1.6, z - nz * W, nx, nz);
+        side = -side;
+      }
+    });
+    for (const sx of [-1, 1]) for (const fz of room > 6 ? [-R * 0.4, R * 0.5] : [-1.7, 1.7]) wallTorch(P, px, pz, sx * R, 1.9, fz, -sx, 0);
+    // Mantel mit Öffnung: vier Dreiecke, die Südseite mit ausgesparter Tür; Steinlagen wie bisher
+    const faces = [];
+    for (let f = 0; f < 4; f++) {
+      const sh = new THREE.Shape();
+      sh.moveTo(-a, 0);
+      if (f === 0) { sh.lineTo(-W, 0); sh.lineTo(-W, ch + 0.2); sh.lineTo(W, ch + 0.2); sh.lineTo(W, 0); }
+      sh.lineTo(a, 0); sh.lineTo(0, h); sh.closePath();
+      const g = new THREE.ShapeGeometry(sh).toNonIndexed(), pos = g.attributes.position, uv = g.attributes.uv;
+      for (let k = 0; k < pos.count; k++) {
+        const u = pos.getX(k), y = pos.getY(k);
+        pos.setXYZ(k, u, y, -a * (1 - y / h));
+        uv.setXY(k, 0.25 * f + 0.125 * (u / a + 1), y / h);
+      }
+      for (let k = 0; k < pos.count; k += 3) { // Wicklung umdrehen: Normale nach außen
+        const tmp = [pos.getX(k + 1), pos.getY(k + 1), pos.getZ(k + 1)], tu = [uv.getX(k + 1), uv.getY(k + 1)];
+        pos.setXYZ(k + 1, pos.getX(k + 2), pos.getY(k + 2), pos.getZ(k + 2)); uv.setXY(k + 1, uv.getX(k + 2), uv.getY(k + 2));
+        pos.setXYZ(k + 2, ...tmp); uv.setXY(k + 2, ...tu);
+      }
+      g.rotateY(-f * Math.PI / 2);
+      faces.push(g);
+    }
+    const shellGeo = mergeGeometries(faces);
+    shellGeo.computeVertexNormals();
+    const shell = new THREE.Mesh(shellGeo, gizaMats[i]);
+    shell.position.set(px, -0.2, pz);
+    roof.add(shell);
+    landBlockers.push(shell);
+    const walls = new THREE.Mesh(P.wall[0], tombWallMat);
+    const floor = new THREE.Mesh(P.floor[0], tombFloorMat);
+    for (const [list, mat] of [[P.wood, torchWood], [P.bowl, torchBowl]]) {
+      const m = new THREE.Mesh(mergeGeometries(list.map(flatGeo)), mat);
+      m.position.set(px, 0, pz);
+      roof.add(m);
+    }
+    for (const m of [walls, floor]) { m.position.set(px, 0, pz); roof.add(m); }
+    landBlockers.push(walls);
+    floorMeshes.push(floor);
+  });
+  torchGroup(gizaTorches, new THREE.Vector3(cx + GIZA_X - 14, UPPER_Y + 5, cz + GIZA_Z + 10), 70);
 
   // Hinter dem Denker: links der Eiffelturm auf dem Marsfeld, rechts der Burj Khalifa in der Wüste,
   // beide 34 bzw. 85 m hoch (330 : 828 m), der Eiffelturm näher. Alles bleibt über y = −0,2 (über ROOM_H in Weltkoordinaten).
@@ -3004,44 +4349,97 @@ function buildRoofTerrace() {
   const latticeMat = (rx, ry) => {
     const t = lattice.clone();
     t.repeat.set(rx, ry);
-    return new THREE.MeshStandardMaterial({ map: t, alphaTest: 0.3, side: THREE.DoubleSide, roughness: 0.9, metalness: 0 });
+    const m = new THREE.MeshStandardMaterial({ map: t, alphaTest: 0.3, side: THREE.DoubleSide, roughness: 0.9, metalness: 0 });
+    m.userData.nightGlow = 0xffa640; // nachts goldene Beleuchtung
+    m.userData.glowI = 0.7;
+    return m;
   };
   const ironMat = new THREE.MeshStandardMaterial({ color: 0x75604a, roughness: 0.9, metalness: 0 });
+  ironMat.userData.nightGlow = 0xffa640;
+  ironMat.userData.glowI = 0.5;
 
   const EIFFEL_X = -30, EIFFEL_Z = -78, EH = 34;
   groundPatch(EIFFEL_X, EIFFEL_Z, 26, 22, 0x5f8f4a);
   const eiffel = new THREE.Group();
   eiffel.position.set(EIFFEL_X, 0, EIFFEL_Z); // Pfeiler reichen schräg unter den Boden, aber nicht unter ROOM_H
   roof.add(eiffel);
-  // vier Pfeiler von den Ecken bis zur ersten Etage
-  const legMat = latticeMat(6, 2);
+  // Vier Pfeiler bis zur zweiten Etage. Jeder ist ein vierkantiger Gitterpfeiler mit waagrechten Querschnitten,
+  // der dem geschwungenen Umriss folgt: außen die halbe Turmbreite W(y), Pfeilerstärke a(y), Anteile von EH.
+  // Eigene UVs je Seitenfläche (u quer, v längs in Pfeilerbreiten), damit das Fachwerk gerade steht
+  const LEG = [[0, 0.19, 0.038], [0.04, 0.17, 0.036], [0.08, 0.152, 0.034], [0.12, 0.136, 0.032], [0.17, 0.115, 0.031],
+    [0.22, 0.098, 0.031], [0.28, 0.081, 0.031], [0.35, 0.064, 0.032]];
+  const legGeo = (sx, sz) => {
+    const pos = [], uv = [];
+    let v = 0;
+    const ring = ([y, W, a]) => ({ y: y * EH, cx: sx * (W - a) * EH, cz: sz * (W - a) * EH, a: a * EH });
+    const corners = (r) => [[r.cx - r.a, r.cz - r.a], [r.cx + r.a, r.cz - r.a], [r.cx + r.a, r.cz + r.a], [r.cx - r.a, r.cz + r.a]];
+    for (let i = 0; i < LEG.length - 1; i++) {
+      const r0 = ring(LEG[i]), r1 = ring(LEG[i + 1]), c0 = corners(r0), c1 = corners(r1);
+      const v1 = v + Math.hypot(r1.y - r0.y, r1.cx - r0.cx, r1.cz - r0.cz) / (r0.a + r1.a);
+      for (let k = 0; k < 4; k++) {
+        const k2 = (k + 1) % 4;
+        const A = [c0[k][0], r0.y, c0[k][1]], B = [c0[k2][0], r0.y, c0[k2][1]];
+        const C = [c1[k2][0], r1.y, c1[k2][1]], D = [c1[k][0], r1.y, c1[k][1]];
+        pos.push(...A, ...B, ...C, ...A, ...C, ...D);
+        uv.push(0, v, 1, v, 1, v1, 0, v, 1, v1, 0, v1);
+      }
+      v = v1;
+    }
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+    g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
+    g.computeVertexNormals();
+    return g;
+  };
+  const legMat = latticeMat(1, 1);
+  const pierMat = new THREE.MeshStandardMaterial({ color: 0xbdb3a2, roughness: 0.95, metalness: 0 });
   for (const sx of [-1, 1]) for (const sz of [-1, 1]) {
-    const curve = new THREE.QuadraticBezierCurve3(
-      new THREE.Vector3(sx * 0.15 * EH, 0, sz * 0.15 * EH),
-      new THREE.Vector3(sx * 0.135 * EH, 0.1 * EH, sz * 0.135 * EH),
-      new THREE.Vector3(sx * 0.095 * EH, 0.175 * EH, sz * 0.095 * EH));
-    eiffel.add(new THREE.Mesh(new THREE.TubeGeometry(curve, 8, 0.032 * EH, 4, false), legMat));
+    eiffel.add(new THREE.Mesh(legGeo(sx, sz), legMat));
+    const c = (LEG[0][1] - LEG[0][2]) * EH, s = LEG[0][2] * EH * 2.3; // Steinsockel unter jedem Fuß
+    const pier = new THREE.Mesh(new THREE.BoxGeometry(s, 0.025 * EH, s), pierMat);
+    pier.position.set(sx * c, 0.0125 * EH, sz * c);
+    eiffel.add(pier);
   }
-  // die Bögen zwischen den Pfeilern
+  // die Zierbögen zwischen den Pfeilern unter der ersten Etage
   for (let i = 0; i < 4; i++) {
-    const arch = new THREE.Mesh(new THREE.TorusGeometry(0.112 * EH, 0.007 * EH, 4, 20, Math.PI), ironMat);
-    arch.scale.y = 1.12;
-    arch.position.y = 0.02 * EH;
+    const arch = new THREE.Mesh(new THREE.TorusGeometry(0.108 * EH, 0.008 * EH, 6, 28, Math.PI), ironMat);
+    arch.scale.y = 1.2;
+    arch.position.y = 0.015 * EH;
     arch.rotation.y = i * Math.PI / 2;
-    arch.translateZ(0.122 * EH);
+    arch.translateZ(0.128 * EH);
     eiffel.add(arch);
   }
-  // Schaft über der ersten Etage: vierseitige Drehform mit dem geschwungenen Umriss (halbe Breite → Eckabstand)
+  // Etagen: erste als Ring um die Öffnung zwischen den Pfeilern, zweite als volle Plattform, beide mit
+  // durchbrochener Brüstung
+  const eiffelDeck = (outer, inner, y, t) => {
+    const s = new THREE.Shape([new THREE.Vector2(-outer, -outer), new THREE.Vector2(outer, -outer), new THREE.Vector2(outer, outer), new THREE.Vector2(-outer, outer)]);
+    if (inner) s.holes.push(new THREE.Path([new THREE.Vector2(-inner, -inner), new THREE.Vector2(-inner, inner), new THREE.Vector2(inner, inner), new THREE.Vector2(inner, -inner)]));
+    const m = new THREE.Mesh(new THREE.ExtrudeGeometry(s, { depth: t, bevelEnabled: false }).rotateX(-Math.PI / 2), ironMat);
+    m.position.y = y;
+    eiffel.add(m);
+    const railMat = latticeMat(Math.round(outer / (0.02 * EH)), 1);
+    for (let i = 0; i < 4; i++) {
+      const rail = new THREE.Mesh(new THREE.BoxGeometry(outer * 2, 0.022 * EH, 0.004 * EH), railMat);
+      rail.position.set(0, y + t + 0.011 * EH, outer);
+      rail.position.applyAxisAngle(new THREE.Vector3(0, 1, 0), i * Math.PI / 2);
+      rail.rotation.y = i * Math.PI / 2;
+      eiffel.add(rail);
+    }
+  };
+  eiffelDeck(0.12 * EH, 0.056 * EH, 0.165 * EH, 0.02 * EH);
+  eiffelDeck(0.07 * EH, 0, 0.345 * EH, 0.013 * EH);
+  // Schaft über der zweiten Etage: vierseitige Drehform mit dem geschwungenen Umriss (halbe Breite → Eckabstand)
   const shaftGeo = new THREE.LatheGeometry(
-    [[0.105, 0.17], [0.08, 0.25], [0.06, 0.35], [0.045, 0.45], [0.03, 0.6], [0.02, 0.75], [0.012, 0.88]]
+    [[0.064, 0.35], [0.052, 0.42], [0.042, 0.5], [0.032, 0.6], [0.022, 0.72], [0.015, 0.82], [0.012, 0.875]]
       .map(([hw2, y]) => new THREE.Vector2(hw2 * Math.SQRT2 * EH, y * EH)), 4, Math.PI / 4).toNonIndexed();
   shaftGeo.computeVertexNormals();
-  eiffel.add(new THREE.Mesh(shaftGeo, latticeMat(4, 9)));
-  [[0.25, 0.022, 0.17], [0.14, 0.018, 0.35], [0.034, 0.035, 0.885]].forEach(([s, t, y]) => {
-    const deck = new THREE.Mesh(new THREE.BoxGeometry(s * EH, t * EH, s * EH), ironMat);
-    deck.position.y = y * EH;
-    eiffel.add(deck);
-  });
+  eiffel.add(new THREE.Mesh(shaftGeo, latticeMat(4, 8)));
+  // Spitze: Aussichtskabine, Laterne, Antenne
+  const cabin = new THREE.Mesh(new THREE.BoxGeometry(0.036 * EH, 0.03 * EH, 0.036 * EH), ironMat);
+  cabin.position.y = 0.89 * EH;
+  const lantern = new THREE.Mesh(new THREE.CylinderGeometry(0.008 * EH, 0.012 * EH, 0.03 * EH, 8), ironMat);
+  lantern.position.y = 0.92 * EH;
+  eiffel.add(cabin, lantern);
   const mast = new THREE.Mesh(new THREE.CylinderGeometry(0.003 * EH, 0.005 * EH, 0.1 * EH, 6), ironMat);
   mast.position.y = 0.95 * EH;
   eiffel.add(mast);
@@ -3143,7 +4541,27 @@ function buildRoofTerrace() {
   const shellGeo = facadeUVs(mergeGeometries(shell.map((g) => g.index ? g.toNonIndexed() : g)), 2);
   burj.add(new THREE.Mesh(shellGeo, new THREE.MeshStandardMaterial({
     map: facade, emissive: 0xffffff, emissiveMap: facade, emissiveIntensity: 0.2, roughness: 0.35, metalness: 0,
+    userData: { nightFactor: 0.5 }, // nachts dunkel, damit die LED-Show darauf satt leuchtet
   })));
+  // Lichtshow bei Nacht wie an der echten LED-Fassade: eine etwas größere Hülle mit derselben Geometrie,
+  // additiv, deren Bild jeden Frame neu gemalt wird. Eigener UV-Satz: Umfangswinkel und Höhe
+  const sp = shellGeo.attributes.position, suv1 = new Float32Array(sp.count * 2);
+  for (let i = 0; i < sp.count; i++) {
+    suv1[i * 2] = 0.5 - Math.atan2(sp.getZ(i), sp.getX(i)) / (Math.PI * 2); // so herum liest man Schrift von außen richtig
+    suv1[i * 2 + 1] = sp.getY(i) / BH;
+  }
+  shellGeo.setAttribute('uv1', new THREE.BufferAttribute(suv1, 2));
+  const showTex = canvasTex(256, 512, () => {});
+  showTex.channel = 1;
+  showTex.wrapS = THREE.RepeatWrapping;
+  // ohne Tonemapping und Nebel: LEDs leuchten satt durch den Dunst, ACES würde die Farben ausbleichen
+  const show = new THREE.Mesh(shellGeo, new THREE.MeshBasicMaterial({
+    map: showTex, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, fog: false, toneMapped: false }));
+  show.scale.set(1.006, 1.001, 1.006);
+  show.visible = false;
+  show.castShadow = false;
+  burj.add(show);
+  outdoor.burjShow = show;
   burj.add(new THREE.Mesh(mergeGeometries(bands.map((g) => g.index ? g.toNonIndexed() : g)),
     new THREE.MeshStandardMaterial({ color: 0x76818a, roughness: 0.6, metalness: 0 })));
   // Spitze: schlanker Stahlschaft mit Rippen, oben fast ein Mast
@@ -3224,6 +4642,7 @@ function buildRoofTerrace() {
   const stoneMat = (map, color, glow, side = THREE.FrontSide) => new THREE.MeshStandardMaterial({
     map, color, emissive: 0xffffff, emissiveMap: map, emissiveIntensity: glow, roughness: 0.95, metalness: 0, side });
   const travMat = stoneMat(travertine, 0xffffff, 0.12);
+  travMat.userData.nightFactor = 1.6; // nachts angestrahlt
   const shadeMat = stoneMat(travertine, 0x9a8a72, 0.04); // Innenring und Gänge: im Halbdunkel
   const vaultMat = stoneMat(travertine, 0x857661, 0.03, THREE.DoubleSide);
   const brickMat = stoneMat(brick, 0xffffff, 0.1);
@@ -3521,6 +4940,8 @@ function buildRoofTerrace() {
   const whiteMat = new THREE.MeshStandardMaterial({ color: 0xf1ebe0, roughness: 0.75, metalness: 0 });
   const doorMat = new THREE.MeshStandardMaterial({ map: planks, color: 0x8a6a4a, roughness: 0.8, metalness: 0 });
   const darkMat = new THREE.MeshStandardMaterial({ color: 0x2a221c, roughness: 1, metalness: 0 });
+  darkMat.userData.nightGlow = 0xffb45a; // Fenster: nachts warm erleuchtet
+  darkMat.userData.glowI = 1.6;
   const villa = { wall: [], roof: [], white: [], door: [], dark: [], pave: [] };
 
   // Wand: Putztextur hoch wie die Wand (Sockel unten, Gesims oben), waagrecht in Metern
@@ -3655,7 +5076,7 @@ function buildRoofTerrace() {
     pathSegs.push(new THREE.PlaneGeometry(wd, len).rotateX(-Math.PI / 2).rotateY(Math.atan2(x1 - x0, z1 - z0))
       .translate((x0 + x1) / 2, 0.02, (z0 + z1) / 2));
   };
-  pathSeg(0, hd + 3.6, 0, 95, 3); pathSeg(0, 95, -42, 121, 3); pathSeg(0, 95, 44, 124, 3);
+  pathSeg(0, hd + 3.6, 0, 95, 3); pathSeg(0, 95, -42, 121, 3); pathSeg(-42, 121, -38, 138, 2.5); pathSeg(-42, 121, -78, 122, 2.5); pathSeg(-78, 122, -110, 116, 2.5); pathSeg(0, 95, 44, 124, 3);
   pathSeg(0, -hd - 3.6, 0, -99, 3); pathSeg(0, -50, -14, -66, 2.5); pathSeg(0, -62, 30, -110, 2.5);
   pathSeg(PX1 - 0.6, 0, -150, 0, 4);
   const paths = new THREE.Mesh(facadeUVs(mergeGeometries(pathSegs.map(flat)), 3),
@@ -3694,7 +5115,6 @@ function buildRoofTerrace() {
   oakSpots.forEach(([x, z]) => solid(x, z, 0.9, 0.9));
 
   // Kollisionen und Klickblocker der fernen Bauwerke
-  [[8, 4, 25], [-9, 1, 23.5], [-23, -5, 11.5]].forEach(([dx, dz, h2]) => solid(GIZA_X + dx, GIZA_Z + dz, h2 * 1.57, h2 * 1.57, h2 * 0.6));
   for (const sx of [-1, 1]) for (const sz of [-1, 1]) solid(EIFFEL_X + sx * 0.15 * EH, EIFFEL_Z + sz * 0.15 * EH, 2.6, 2.6, 6);
   solid(BURJ_X, BURJ_Z, 14, 14, 60);
   [[-14, 6, 16, 1.6, 8], [12, 8, 10, 1.2, 12], [0, -14, 20, 1, 7]].forEach(([x, z, w2, h2, d2]) => solid(BURJ_X + x, BURJ_Z + z, w2, d2, h2));
@@ -3835,7 +5255,7 @@ document.addEventListener('keydown', (e) => {
     case 'KeyA': case 'ArrowLeft': move.left = true; break;
     case 'KeyD': case 'ArrowRight': move.right = true; break;
     // Esc verlässt zuerst die Nahansicht, erst danach öffnet es das Menü
-    case 'Escape': if (infoOpen()) closeInfo(); else if (focusState.active) exitFocus(); else openMenu(); break;
+    case 'Escape': if (photoOpen()) closePhoto(); else if (infoOpen()) closeInfo(); else if (focusState.active) exitFocus(); else openMenu(); break;
   }
 });
 document.addEventListener('keyup', (e) => {
@@ -3911,22 +5331,43 @@ function stepStair(step, dt) {
 // Steckt der Punkt in einer Wand (Spielerradius eingerechnet)?
 // Die Pyramide von Chichén Itzá ist besteigbar: Höhe über dem Gelände (Freitreppe als Rampe, oben die
 // Plattform) und welche Stellen ihres Grundrisses man nicht betreten kann (die Stufenflanken, der Tempel)
+// die vier Treppen: Abstand nach außen (s) und quer (l) je Seite
+const climbSides = (dx, dz) => [[-dz, dx], [dz, dx], [-dx, dz], [dx, dz]];
 function groundAt(x, z) {
   if (!climb) return 0;
-  const dx = Math.abs(x - climb.x), dz = z - climb.z;
-  if (dx <= climb.top && Math.abs(dz) <= climb.top) return climb.h;
-  if (dx <= climb.stair && dz < -climb.top) {
-    return THREE.MathUtils.clamp(climb.rampY + climb.slope * (z - climb.rampZ), 0, climb.h);
+  const dx = x - climb.x, dz = z - climb.z;
+  if (Math.abs(dx) < climb.tw && Math.abs(dz) < climb.tw) return climb.floor; // im Tempel
+  if (Math.abs(dx) <= climb.top && Math.abs(dz) <= climb.top) return climb.h;
+  for (const [s, l] of climbSides(dx, dz)) {
+    if (s > climb.top && Math.abs(l) <= climb.stair) return THREE.MathUtils.clamp((climb.out - s) * climb.slope, 0, climb.h);
   }
   return 0;
 }
+// Unter Stein: in einem überdeckten Gang oder einer Kammer der Giza-Pyramiden oder im Maya-Tempel.
+// Dort regnet es nicht, und die Stirnlampe brennt auch bei Tag
+function underStone(x, z) {
+  if (climb && Math.abs(x - climb.x) < climb.tw && Math.abs(z - climb.z) < climb.tw) return true;
+  for (const { X, Z, A, G, N, ceilAt, faceH } of tombs) {
+    const ix = Math.floor((x - X + A) / G), iz = Math.floor((z - Z + A) / G);
+    if (ix < 0 || iz < 0 || ix >= N || iz >= N) continue;
+    const H = ceilAt[iz * N + ix];
+    if (H && faceH(x - X, z - Z) >= H) return true;
+  }
+  return false;
+}
 function climbBlocked(x, z) {
   if (!climb) return false;
-  const R = PLAYER_R, dx = Math.abs(x - climb.x), dz = z - climb.z, adz = Math.abs(dz);
-  if (dx > climb.half + R || adz > climb.half + R) return false;
-  if (dx <= climb.stair - R && dz < -climb.top + R) return false; // auf der Treppe
-  if (dx <= climb.top - R && adz <= climb.top - R && !(dx < climb.temple + R && adz < climb.temple + R)) return false;
-  return true;
+  const R = PLAYER_R, dx = x - climb.x, dz = z - climb.z, adx = Math.abs(dx), adz = Math.abs(dz);
+  if (Math.max(adx, adz) > climb.out + R) return false;
+  const sides = climbSides(dx, dz);
+  for (const [s, l] of sides) if (s > climb.top - R && Math.abs(l) <= climb.stair - R) return false; // auf einer Treppe
+  if (adx <= climb.top - R && adz <= climb.top - R && !(adx < climb.temple + R && adz < climb.temple + R)) return false;
+  // Tempelraum mit der Vitrine in der Mitte, und der Durchgang in der Mitte der Vorderseite
+  if (adx <= climb.inner - R && adz <= climb.inner - R && !(adx < climb.vitX + R && adz < climb.vitZ + R)) return false;
+  if (adx <= climb.door && dz < 0 && adz <= climb.temple + R) return false;
+  if (Math.max(adx, adz) <= climb.half + R) return true; // Terrassen
+  for (const [s, l] of sides) if (s > climb.half && Math.abs(l) <= climb.stair + climb.rail + R) return true; // Wangen
+  return false;
 }
 
 function isBlocked(x, z) {
@@ -4128,6 +5569,8 @@ async function warmUp() {
   const culled = [];
   scene.traverse((o) => { if (o.frustumCulled) { culled.push(o); o.frustumCulled = false; } });
   roofGroup.visible = true;
+  const extras = [outdoor.rain, outdoor.moon, outdoor.burjShow, outdoor.stars, ...outdoor.penGlow, ...clouds.map((c) => c.sprite)].filter((o) => !o.visible);
+  extras.forEach((o) => { o.visible = true; });
   try {
     await renderer.compileAsync(scene, camera);
     roofGroup.visible = true; // die Schleife kann es inzwischen wieder ausgeblendet haben
@@ -4137,12 +5580,14 @@ async function warmUp() {
     console.warn('Vorübersetzen fehlgeschlagen', e);
   }
   roofGroup.visible = camera.position.y > ROOF_SEEN;
+  extras.forEach((o) => { o.visible = false; });
   culled.forEach((o) => { o.frustumCulled = true; });
   outdoor.sun.shadow.needsUpdate = true;
   needsRender = true;
 }
 
 loadingManager.onLoad = () => {
+  applyWeather(weather); // auch die inzwischen geladenen Figuren auf dem Dach
   warmUp();
   assetsReady = true;
   loadText.textContent = 'Bereit — klicken zum Betreten';
@@ -4402,6 +5847,39 @@ musicToggle.addEventListener('click', () => {
   showMusic();
 });
 showMusic();
+
+// Wetter draußen: Sonne → Mondnacht → Regen
+const weatherToggle = document.getElementById('weatherToggle');
+const WEATHER_ORDER = ['sonne', 'nacht', 'regen'];
+function showWeather() { weatherToggle.textContent = WEATHER[weather].label; }
+weatherToggle.addEventListener('click', () => {
+  const next = WEATHER_ORDER[(WEATHER_ORDER.indexOf(weather) + 1) % WEATHER_ORDER.length];
+  try { localStorage.setItem('wetter', next); } catch {}
+  applyWeather(next);
+  showWeather();
+});
+showWeather();
+
+// Sternbilder (nur in der Mondnacht): Linien mit Namen, Figuren
+const linesToggle = document.getElementById('linesToggle'), artToggle = document.getElementById('artToggle');
+function showSkyButtons() {
+  const night = weather === 'nacht';
+  linesToggle.style.display = artToggle.style.display = night ? 'inline-block' : 'none';
+  linesToggle.classList.toggle('aus', !skyOpts.lines);
+  artToggle.classList.toggle('aus', !skyOpts.art);
+}
+function saveSkyOpts() {
+  try { localStorage.setItem('sternbilder', [skyOpts.lines && 'linien', skyOpts.art && 'bilder'].filter(Boolean).join(',')); } catch {}
+  showSkyButtons();
+}
+linesToggle.addEventListener('click', () => { skyOpts.lines = !skyOpts.lines; saveSkyOpts(); redrawSky(); });
+artToggle.addEventListener('click', () => {
+  skyOpts.art = !skyOpts.art;
+  saveSkyOpts();
+  if (skyOpts.art) loadSkyArt().then(() => { if (weather === 'nacht') redrawSky(); });
+  else redrawSky();
+});
+showSkyButtons();
 overlay.addEventListener('click', (e) => { if (e.target === overlay) closeMenu(); });
 
 /* ---------------------------------------------------------------
@@ -4727,9 +6205,113 @@ function handleSelect(event) {
 
   if (spot) { focusPainting(spot); return; }
   if (stairClicked(event)) return;
+  const skyObj = skyObjectAt(event);
+  if (skyObj) { showPhoto(skyObj); return; }
   const floorPoint = raycastFloorAt(event);
   if (floorPoint) travelTo(floorPoint);
 }
+
+// Fotos zum Anklicken am Nachthimmel: Galaxien (Messier) und Mond. Bild-URLs von Wikimedia Commons
+// (1280er Vorschau), dazu Urheber und Lizenz für die Bildunterschrift
+const SKY_PHOTOS = {
+  // das Originalfoto zum Pseudo-Sternbild (dessen Bild am Himmel ist daraus freigestellt)
+  Assange: ['https://upload.wikimedia.org/wikipedia/commons/b/bf/Julian_Assange_August_2014.jpg', 'David G Silvers, Cancillería del Ecuador, 2014 · CC BY-SA 2.0'],
+  M84: ['https://upload.wikimedia.org/wikipedia/commons/5/59/A_fascinating_core.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled', "ESA/Hubble & NASA · CC BY 4.0"],
+  M61: ['https://upload.wikimedia.org/wikipedia/commons/e/e9/A_hungry_starburst_galaxy.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled', "ESA/Hubble & NASA Acknowledgement: Det58 · CC BY 4.0"],
+  M60: ['https://thumb.wikimedia.org/wikipedia/commons/thumb/6/63/Arp116_Hubble.jpg/1280px-Arp116_Hubble.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', "NASA, ESA · CC BY 3.0"],
+  M86: ['https://thumb.wikimedia.org/wikipedia/commons/thumb/9/95/Beacon_of_Light_Messier_86.jpg/1280px-Beacon_of_Light_Messier_86.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', "ESA/Hubble & NASA, P. Cote et al. · CC BY 4.0"],
+  M101: ['https://thumb.wikimedia.org/wikipedia/commons/thumb/c/c5/M101_hires_STScI-PRC2006-10a.jpg/1280px-M101_hires_STScI-PRC2006-10a.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', "Image: European Space Agency & NASA Acknowledgements: Project … · CC BY 4.0"],
+  M102: ['https://thumb.wikimedia.org/wikipedia/commons/thumb/0/07/M102_PS.jpg/1280px-M102_PS.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', "Sboone61 · CC0"],
+  M109: ['https://thumb.wikimedia.org/wikipedia/commons/thumb/a/a7/M109_%28noao-m109hatfield%29.jpg/1280px-M109_%28noao-m109hatfield%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', "KPNO/NOIRLab/NSF/AURA/George Hatfield and Flynn Haase · CC BY 4.0"],
+  M31: ['https://thumb.wikimedia.org/wikipedia/commons/thumb/5/57/M31-Andromede-16-09-2023-Hamois.jpg/1280px-M31-Andromede-16-09-2023-Hamois.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', "Lviatour · CC BY-SA 2.5"],
+  M58: ['https://upload.wikimedia.org/wikipedia/commons/b/b0/M58s_%28visible%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled', "Adam Block/Mount Lemmon SkyCenter/University of Arizona · CC BY-SA 3.0 us"],
+  M63: ['https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b4/M63_%28NGC_5055%29.jpg/1280px-M63_%28NGC_5055%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', "NASA/ESA - The Hubble Legacy Archive (HLA): Space Telescope Science … · Public domain"],
+  M65: ['https://thumb.wikimedia.org/wikipedia/commons/thumb/c/cf/M65%2C_NGC_3623_%28noao-m65%29.jpg/1280px-M65%2C_NGC_3623_%28noao-m65%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', "NOIRLab/NSF/AURA · CC BY 4.0"],
+  M82: ['https://thumb.wikimedia.org/wikipedia/commons/thumb/c/ce/M82_HST_ACS_2006-14-a-large_web.jpg/1280px-M82_HST_ACS_2006-14-a-large_web.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', "NASA, ESA, and The Hubble Heritage Team (STScI/AURA) · Public domain"],
+  M88: ['https://upload.wikimedia.org/wikipedia/commons/b/bf/M88_2022_revision.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled', "Ngc1535 · CC BY-SA 4.0"],
+  M91: ['https://thumb.wikimedia.org/wikipedia/commons/thumb/4/42/M91_wfc3_4_crop_v2_final.jpg/1280px-M91_wfc3_4_crop_v2_final.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', "NASA, ESA, and J. Lee (California Institute of Technology) · CC BY-SA 4.0"],
+  M99: ['https://upload.wikimedia.org/wikipedia/commons/8/83/M99s_crop.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled', "Adam Block/Mount Lemmon SkyCenter/University of Arizona · CC BY-SA 3.0"],
+  M105: ['https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ec/Messier105_-_HST_-_Potw1901a.jpg/1280px-Messier105_-_HST_-_Potw1901a.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', "ESA/Hubble & NASA, C. Sarazin et al. · CC BY 4.0"],
+  M108: ['https://thumb.wikimedia.org/wikipedia/commons/thumb/1/11/Messier108_-_SDSS_DR_14_%28panorama%29.jpg/1280px-Messier108_-_SDSS_DR_14_%28panorama%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', "Sloan Digital Sky Survey · CC BY 4.0"],
+  M51: ['https://thumb.wikimedia.org/wikipedia/commons/thumb/d/db/Messier51_sRGB.jpg/1280px-Messier51_sRGB.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', "NASA and European Space Agency · Public domain"],
+  M59: ['https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8f/Messier59_-_HST_-_Potw1921a.jpg/1280px-Messier59_-_HST_-_Potw1921a.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', "ESA/Hubble & NASA, L. Ho et al. · CC BY 4.0"],
+  M85: ['https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e8/Messier85_-_HST_-_Potw1905a.jpg/1280px-Messier85_-_HST_-_Potw1905a.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', "ESA/Hubble & NASA, R. O'Connell · CC BY 4.0"],
+  M89: ['https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b2/Messier89_-_HST_-_Potw1902a.tif/lossy-page1-1280px-Messier89_-_HST_-_Potw1902a.tif.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', "ESA/Hubble and NASA · CC BY 4.0"],
+  M100: ['https://upload.wikimedia.org/wikipedia/commons/8/85/Messier_100_%E2%80%94_Grand_Design_Splendour.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled', "ESO · CC BY 4.0"],
+  M106: ['https://thumb.wikimedia.org/wikipedia/commons/thumb/2/2d/Messier_106_visible_and_infrared_composite.jpg/1280px-Messier_106_visible_and_infrared_composite.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', "NASA, ESA, the Hubble Heritage Team (STScI/AURA), and R. Gendler (for … · Public domain"],
+  M32: ['https://upload.wikimedia.org/wikipedia/commons/a/a3/Messier_32_from_Hubble.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled', "NASA/ESA · Public domain"],
+  M49: ['https://thumb.wikimedia.org/wikipedia/commons/thumb/5/55/Messier_49-Rubin_Observatory.png/1280px-Messier_49-Rubin_Observatory.png?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', "RubinObs/NOIRLab/SLAC/NSF/DOE/AURA · CC BY 4.0"],
+  M77: ['https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d9/Messier_77_spiral_galaxy_by_HST.jpg/1280px-Messier_77_spiral_galaxy_by_HST.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', "NASA, ESA & A. van der Hoeven · Public domain"],
+  M81: ['https://thumb.wikimedia.org/wikipedia/commons/thumb/6/63/Messier_81_HST.jpg/1280px-Messier_81_HST.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', "NASA, ESA and the Hubble Heritage Team (STScI/AURA) · Public domain"],
+  M87: ['https://thumb.wikimedia.org/wikipedia/commons/thumb/0/07/Messier_87_Hubble_WikiSky.jpg/1280px-Messier_87_Hubble_WikiSky.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', "NASA, STScI, WikiSky · Public domain"],
+  M90: ['https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b0/Messier_90_-_HST.png/1280px-Messier_90_-_HST.png?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', "Judy Schmidt from USA · CC BY 2.0"],
+  M94: ['https://upload.wikimedia.org/wikipedia/commons/1/1c/Messier_94.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled', "R Jay Gabany (Blackbird Obs.) · CC BY-SA 3.0"],
+  M96: ['https://thumb.wikimedia.org/wikipedia/commons/thumb/d/dc/Messier_96_as_Seen_with_DESI_Legacy_Survey_%28noirlab2620a%29.jpg/1280px-Messier_96_as_Seen_with_DESI_Legacy_Survey_%28noirlab2620a%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', "DESI Legacy Imaging Surveys/LBNL/DOE & KPNO/CTIO/NOIRLab/NSF/AURA … · CC BY 4.0"],
+  M98: ['https://upload.wikimedia.org/wikipedia/commons/9/92/Messier_98.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled', "ESO Acknowledgements: Flickr user jbarring · CC BY 4.0"],
+  M64: ['https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e8/NGC_4826_-_HST.png/1280px-NGC_4826_-_HST.png?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', "Judy Schmidt from USA · CC BY 2.0"],
+  M110: ['https://thumb.wikimedia.org/wikipedia/commons/thumb/1/1b/Not_So_Dead_After_All_%2848763200193%29.jpg/1280px-Not_So_Dead_After_All_%2848763200193%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', "European Space Agency · CC BY 2.0"],
+  M66: ['https://thumb.wikimedia.org/wikipedia/commons/thumb/7/7c/Phot-33c-03-fullres.jpg/1280px-Phot-33c-03-fullres.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', "ESO · CC BY 4.0"],
+  M104: ['https://thumb.wikimedia.org/wikipedia/commons/thumb/c/cc/Sombrero_Galaxy_%28heic2506a%29.jpg/1280px-Sombrero_Galaxy_%28heic2506a%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', "ESA/Hubble & NASA, K. Noll · CC BY 4.0"],
+  M83: ['https://thumb.wikimedia.org/wikipedia/commons/thumb/6/69/The_Outskirts_of_the_Southern_Pinwheel_Galaxy_%28noirlab2429a%29.jpg/1280px-The_Outskirts_of_the_Southern_Pinwheel_Galaxy_%28noirlab2429a%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', "CTIO/NOIRLab/DOE/NSF/AURA Image processing: T.A. Rector (University … · CC BY 4.0"],
+  M95: ['https://thumb.wikimedia.org/wikipedia/commons/thumb/f/fd/The_VLT_goes_lion_hunting.jpg/1280px-The_VLT_goes_lion_hunting.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', "ESO · CC BY 3.0"],
+  M33: ['https://thumb.wikimedia.org/wikipedia/commons/thumb/6/64/VST_snaps_a_very_detailed_view_of_the_Triangulum_Galaxy.jpg/1280px-VST_snaps_a_very_detailed_view_of_the_Triangulum_Galaxy.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', "ESO · CC BY 4.0"],
+  M74: ['https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d6/Webb_and_Hubble%E2%80%99s_Views_of_Spiral_Galaxy_NGC_628_%282024-105%29.png/1280px-Webb_and_Hubble%E2%80%99s_Views_of_Spiral_Galaxy_NGC_628_%282024-105%29.png?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', "NASA, ESA, CSA, STScI, Janice Lee (STScI), Thomas Williams (Oxford) … · Public domain"],
+  Mond: ['https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e1/FullMoon2010.jpg/1280px-FullMoon2010.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', "Gregory H. Revera · CC BY-SA 3.0"],
+};
+const GALAXY_DE = {
+  Andromeda: 'Andromedagalaxie', Triangulum: 'Dreiecksgalaxie', Whirlpool: 'Whirlpool-Galaxie',
+  'Sunflower Galaxy': 'Sonnenblumengalaxie', 'Blackeye Galaxy': 'Black-Eye-Galaxie', 'Cetus A': 'Cetus A',
+  'Bode´s Galaxy': 'Bodes Galaxie', 'Cigar Galaxy': 'Zigarrengalaxie', 'Southern Pinwheel': 'Südliche Feuerradgalaxie',
+  'Virgo A': 'Virgo A', 'Cat’s Eye Galaxy': 'Katzenaugengalaxie', Pinwheel: 'Feuerradgalaxie', Spindle: 'Spindelgalaxie',
+  Sombrero: 'Sombrerogalaxie',
+};
+
+// Was liegt am Nachthimmel unter dem Zeiger? Mond oder eine Galaxie, sofern kein Bauwerk davor steht
+function skyObjectAt(event) {
+  if (!stair.level || weather !== 'nacht' || !skyData) return null;
+  raycaster.setFromCamera(eventToNDC(event), camera);
+  const dir = raycaster.ray.direction;
+  if (dir.y <= 0.02) return null;
+  const ang = (v) => Math.acos(Math.max(-1, Math.min(1, dir.x * v[0] + dir.y * v[1] + dir.z * v[2]))) * 180 / Math.PI;
+  let best = null, bestA = Infinity;
+  const sd = outdoor.sunDir;
+  if (ang([sd.x, sd.y, sd.z]) < 3) { best = 'Mond'; bestA = 0; }
+  for (const [ra, dec, type, , da, , name] of skyData.messier) {
+    if (!(type === 's' || type === 'e' || type === 'i') || !SKY_PHOTOS[name]) continue;
+    const d = skyDir(ra, dec, skyLst);
+    if (d[1] < 0.03) continue;
+    const a = ang(d), limit = Math.max(1.4, da / 60 * 2.2 * 0.7);
+    if (a < limit && a < bestA) { best = name; bestA = a; }
+  }
+  // das Pseudo-Sternbild Assange, wenn Linien oder Figuren zu sehen sind: Klick irgendwo auf das Porträt
+  // (gut 10° um seine Mitte), Mond und Galaxien darin haben Vorrang
+  if (!best && (skyOpts.lines || skyOpts.art)) {
+    const d = skyDir(PSEUDO_CONS.ra, PSEUDO_CONS.dec, skyLst);
+    if (d[1] > 0.03 && ang(d) < 10.5) best = 'Assange';
+  }
+  if (!best) return null;
+  if (raycaster.intersectObjects(landBlockers.concat(occluders), false).length) return null;
+  return best;
+}
+function skyTitle(key) {
+  if (key === 'Mond') return ['Der Mond', 'Vollmond'];
+  if (key === 'Assange') return ['Julian Assange', 'Sternbild'];
+  const m = skyData.messier.find((x) => x[6] === key);
+  return [m && m[7] ? `${key} · ${GALAXY_DE[m[7]] || m[7]}` : key, 'Galaxie'];
+}
+const photoBox = document.getElementById('photo');
+function showPhoto(key) {
+  const [url, credit] = SKY_PHOTOS[key];
+  const [title] = skyTitle(key);
+  document.getElementById('photoImg').src = url;
+  document.getElementById('photoImg').alt = title;
+  document.getElementById('photoTitle').textContent = title;
+  document.getElementById('photoCredit').textContent = 'Foto: ' + credit + ' · Wikimedia Commons';
+  photoBox.style.display = 'flex';
+}
+function closePhoto() { photoBox.style.display = 'none'; }
+const photoOpen = () => photoBox.style.display === 'flex';
+photoBox.addEventListener('click', closePhoto);
 
 function setHover(spot, x, y) {
   renderer.domElement.classList.toggle('hover', !!spot);
@@ -4927,7 +6509,11 @@ window.addEventListener('mousemove', (e) => {
   pointerMove(e.clientX, e.clientY);
   // Bilder als anklickbar ausweisen: Zeiger wechselt, Titel erscheint
   if (dragging || !navActive || focusState.active || focusState.animating) setHover(null);
-  else setHover(raycastPaintingAt(e), e.clientX, e.clientY);
+  else {
+    const spot = raycastPaintingAt(e), sky = !spot && skyObjectAt(e);
+    if (sky) { const [title] = skyTitle(sky); setHover({ title, artist: 'Klick: Foto ansehen' }, e.clientX, e.clientY); }
+    else setHover(spot, e.clientX, e.clientY);
+  }
 });
 window.addEventListener('mouseup', (e) => { if (e.button === 0) pointerUp(); });
 renderer.domElement.addEventListener('click', (e) => {
@@ -5117,11 +6703,11 @@ function animate() {
 
   // Oben gilt der Museumsnebel nicht, und erst dort erscheinen Palmen und Venus
   const high = camera.position.y > ROOF_SEEN;
+  const inStone = high && underStone(camera.position.x, camera.position.z);
   if (high !== roofGroup.visible) {
     roofGroup.visible = high;
-    scene.fog.near = high ? 150 : 18;
-    scene.fog.far = high ? 400 : 40;
-    scene.fog.color.set(high ? 0xe6eef0 : 0x0a0806); // draußen Dunst in der Farbe des Horizonts
+    if (high) setOutdoorFog(); // draußen Dunst in der Farbe des Horizonts, je nach Wetter
+    else { scene.fog.near = 18; scene.fog.far = 40; scene.fog.color.set(0x0a0806); }
     camera.far = high ? LAND_DISC + 20 : 200;
     camera.updateProjectionMatrix();
     needsRender = true;
@@ -5132,6 +6718,20 @@ function animate() {
   if (high) { // Himmel, Sonne und Schattenausschnitt gehen mit; der Schatten springt nur im 4-m-Raster
     outdoor.dome.position.set(camera.position.x, UPPER_Y, camera.position.z);
     outdoor.sunDisc.position.copy(outdoor.dome.position).addScaledVector(outdoor.sunDir, SKY_R - 8);
+    outdoor.moon.position.copy(outdoor.sunDisc.position);
+    outdoor.rain.visible = weather === 'regen' && !inStone;
+    if (outdoor.stars.visible && performance.now() - starsTurned > 200) { // Zeitraffer: 5-mal pro Sekunde weiterdrehen
+      starsTurned = performance.now();
+      updateStarRotation();
+      needsRender = true;
+    }
+    const show = outdoor.burjShow;
+    show.visible = weather === 'nacht';
+    if (show.visible) { // höchstens 20 Bilder pro Sekunde neu malen
+      const t = performance.now() / 1000;
+      if (t - (show.userData.drawn || 0) > 0.05) { show.userData.drawn = t; drawBurjShow(show.material.map, t); }
+    }
+    if (outdoor.rain.visible) updateRain(outdoor.rain, performance.now() / 1000);
     // Schattenausschnitt: im Garten eng und scharf (Palmwedel), draußen weit genug für Bauwerke samt Schatten.
     // Nicht über ±100 m: ab etwa ±120 m (und mit 4096er-Karte) fielen unter WebGPU alle Schatten weg
     const inGarden = Math.abs(camera.position.x - ROOF_CX) < 16 && Math.abs(camera.position.z - ROOF_CZ) < 16;
@@ -5150,6 +6750,15 @@ function animate() {
     outdoor.sun.target.position.set(ROOF_CX + tx, UPPER_Y, ROOF_CZ + tz);
     outdoor.sun.position.copy(outdoor.sun.target.position).addScaledVector(outdoor.sunDir, 250);
   }
+  // Stirnlampe: nachts an der Oberfläche und in Pyramiden immer an, sitzt etwas über dem Auge und leuchtet in Blickrichtung
+  const lamp = outdoor.headlamp, lampOn = high && (weather === 'nacht' || inStone);
+  lamp.intensity = lampOn ? HEADLAMP_I : 0;
+  if (lampOn) {
+    lamp.position.copy(camera.position).y += 0.12;
+    _lampDir.set(0, 0, -1).applyQuaternion(camera.quaternion);
+    lamp.target.position.copy(lamp.position).addScaledVector(_lampDir, 10);
+    lamp.target.updateMatrixWorld();
+  }
 
   camera.updateMatrixWorld();
   updateTurntables(dt); // stellt auch _frustum für die Palette ein
@@ -5162,6 +6771,7 @@ function animate() {
     settleFrames--;
   }
 }
+const HEADLAMP_I = 60, _lampDir = new THREE.Vector3();
 // Zurück im Vordergrund neu zeichnen — der Browser verwirft den Canvas-Inhalt mitunter
 document.addEventListener('visibilitychange', () => { needsRender = true; });
 renderer.setAnimationLoop(animate); // wartet intern auf renderer.init()
