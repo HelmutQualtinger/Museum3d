@@ -430,7 +430,10 @@ const SCULPTURES = [
   // David gegenüber: Scan des Gipsabgusses der Statens Museum for Kunst, Kopenhagen, mit seinem Sockel;
   // die Breite entspricht mit 1,95 m dem Original im Petersdom
   { room: 3, x: 10.6, z: 7.6, title: 'Pietà', artist: 'Michelangelo Buonarroti, 1498–1499',
-    url: 'models/pieta.glb', height: 2.0, plinth: [2.4, 0.6, 2.4], marble: true, rotY: Math.PI, light: 50, turnSecs: 70 },
+    url: 'models/pieta.glb', height: 2.0, plinth: [2.4, 0.6, 2.4], marble: true, rotY: Math.PI, light: 50, turnSecs: 70,
+    // Marias Gesicht ist nach unten zu Christus geneigt und liegt im Schatten: eine kleine Leuchte vorn im
+    // Drehteller strahlt es von unten an und dreht sich mit (Drehteller-Koordinaten, Gesicht aus dem Scan vermessen)
+    faceLamp: { pos: [0, 0.05, -0.85], target: [-0.04, 1.76, -0.12], intensity: 7 } },
   // Die beiden ägyptischen Porträts stehen links und rechts der Bank in Saal I, dreifach vergrößert
   { room: 0, x: 3.6, z: 7, title: 'Goldmaske des Tutanchamun · dreifach vergrößert', artist: 'Ägypten, 18. Dynastie, um 1323 v. Chr.',
     url: 'models/tutanchamun.glb', height: 1.62, plinth: [1.4, 0.8, 1.4], rotY: Math.PI, light: 35, turnSecs: 40,
@@ -1212,7 +1215,7 @@ function colorizeMandel(which) {
 // Palette läuft nur, solange das Bild im Blickfeld liegt (wie die Drehteller)
 const _mandelSphere = new THREE.Sphere();
 function cycleMandelColors() {
-  if (!navActive || document.hidden || !mandel.mesh) return;
+  if (!navActive || document.hidden || !mandel.mesh || camera.position.y > ROOF_SEEN) return;
   if (!mandel.mesh.geometry.boundingSphere) mandel.mesh.geometry.computeBoundingSphere();
   _mandelSphere.copy(mandel.mesh.geometry.boundingSphere).applyMatrix4(mandel.mesh.matrixWorld);
   if (!_frustum.intersectsSphere(_mandelSphere)) return;
@@ -1450,6 +1453,22 @@ function buildBench(color) {
    Kollisions-AABBs (nur feste Außen-/Zwischenwände)
 --------------------------------------------------------------- */
 const colliders = [];
+// Säle und Skulpturen darin: draußen in der Landschaft werden ihre Meshes ausgeblendet (nicht die Lichter —
+// das würde die Shader neu übersetzen), damit sie unter der Wiese nicht mitgezeichnet werden
+const indoorRoots = [];
+const hiddenIndoor = [];
+let indoorShown = true;
+function setIndoorVisible(v) {
+  indoorShown = v;
+  if (v) {
+    hiddenIndoor.forEach((o) => { o.visible = true; });
+    hiddenIndoor.length = 0;
+    return;
+  }
+  indoorRoots.forEach((root) => root.traverse((o) => {
+    if (o.isMesh && o.visible) { o.visible = false; hiddenIndoor.push(o); }
+  }));
+}
 const roofColliders = [];  // dasselbe auf der Dachterrasse
 function addCollider(x, z, w, d, list = colliders) {
   list.push({ minX: x - w / 2, maxX: x + w / 2, minZ: z - d / 2, maxZ: z + d / 2 });
@@ -1716,6 +1735,7 @@ function buildRoom(index, def) {
   hangWall(def.back, true, backDoor);
   hangWall(def.front, false, frontDoor);
 
+  indoorRoots.push(group);
   scene.add(group);
 }
 
@@ -1752,12 +1772,13 @@ function updateTurntables(dt) {
   for (const t of turntables) {
     if (!_frustum.intersectsSphere(t.sphere)) continue;
     if (t.roof && camera.position.y < ROOF_SEEN) continue;
+    if (!t.roof && camera.position.y > ROOF_SEEN) continue; // von oben sieht man die Säle nicht
     t.group.rotation.y += dt * Math.PI * 2 / t.turnSecs;
     if (t.smoke) updateSmoke(t.smoke, dt);
     if (t.wind) t.wind(dt);
     needsRender = true;
   }
-  if (_frustum.intersectsSphere(spray.sphere)) updateSpray(dt);
+  if (camera.position.y < ROOF_SEEN && _frustum.intersectsSphere(spray.sphere)) updateSpray(dt);
 }
 
 /* ---------------------------------------------------------------
@@ -2266,6 +2287,31 @@ function makeSunglasses({ x, y, z, sep, w, h, wrap, taper, armX, arm }) {
   return g;
 }
 
+// Kleine Leuchte im Drehteller, schräg nach oben auf ein Gesicht gerichtet: Gehäuse, warm leuchtende Linse,
+// ein enger Strahler. Als Kind des Drehtellers dreht sich alles mit der Figur.
+function makeFaceLamp({ pos, target, intensity }) {
+  const g = new THREE.Group();
+  const from = new THREE.Vector3(...pos), to = new THREE.Vector3(...target);
+  const dir = to.clone().sub(from).normalize();
+  const lamp = new THREE.Group();
+  lamp.position.copy(from);
+  lamp.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir);
+  const housing = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.055, 0.13, 20),
+    new THREE.MeshStandardMaterial({ color: 0x2b2b2e, roughness: 0.45, metalness: 0.6 }));
+  housing.position.y = 0.04;
+  const lens = new THREE.Mesh(new THREE.CircleGeometry(0.038, 20), new THREE.MeshBasicMaterial({ color: 0xfff1d0 }));
+  lens.rotation.x = -Math.PI / 2;
+  lens.position.y = 0.106;
+  const foot = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.08, 0.03, 20), housing.material);
+  foot.position.copy(from).setY(from.y + 0.015);
+  lamp.add(housing, lens);
+  const spot = new THREE.SpotLight(0xfff1dc, intensity, 4, THREE.MathUtils.degToRad(10), 0.6, 1.25);
+  spot.position.copy(from).addScaledVector(dir, 0.12);
+  spot.target.position.copy(to);
+  g.add(lamp, foot, spot, spot.target);
+  return g;
+}
+
 function buildSculpture(def) {
   const [col, row] = ROOMS[def.room].cell;
   const x = col * ROOM_W + def.x, z = row * ROOM_D + def.z;
@@ -2306,6 +2352,7 @@ function buildSculpture(def) {
   );
   disc.position.y = TURNTABLE_H / 2;
   turntable.add(disc);
+  if (def.faceLamp) turntable.add(makeFaceLamp(def.faceLamp));
   group.add(turntable);
   const turntableEntry = {
     group: turntable, turnSecs: def.turnSecs, smoke: null, wind: null,
@@ -2328,6 +2375,7 @@ function buildSculpture(def) {
   spot.target.position.set(0, ph + reach * 0.55, 0);
   if (!def.roof) group.add(spot, spot.target);
 
+  if (!def.roof) indoorRoots.push(group);
   (def.roof ? roofGroup : scene).add(group);
 
   gltfLoader.load(def.url, (gltf) => {
@@ -2505,8 +2553,13 @@ buildStair();
 --------------------------------------------------------------- */
 // Begehbare Fläche auf dem Dach (Weltkoordinaten), innen an der Hecke
 const ROOF = { x0: 12.9, x1: 35.1, z0: -3.1, z1: 17.1 };
+const ROOF_CX = (ROOF.x0 + ROOF.x1) / 2, ROOF_CZ = (ROOF.z0 + ROOF.z1) / 2;
+const LAND_R = 190;    // so weit geht man draußen, gemessen von der Mitte der Terrasse
+const LAND_DISC = 440; // Radius der Landschaftsscheibe; dahinter nur noch Dunst
+const landBlockers = []; // unsichtbare Klötze um Bauwerke draußen: ein Klick darauf trifft nicht den Boden dahinter
+const outdoor = {};    // Himmel, Sonnenscheibe und Sonnenlicht wandern mit dem Besucher
 const ROOF_EDGE = 0.9; // Brüstung plus Hecke
-const ROOF_SHADOW_PX = matchMedia('(pointer: coarse)').matches ? 1024 : 2048;
+const ROOF_SHADOW_PX = matchMedia('(pointer: coarse)').matches ? 1024 : 2048; // 4096 lieferte unter WebGPU gar keine Schatten
 const SKY_R = 170;
 
 function makeSkyTexture() {
@@ -2712,6 +2765,7 @@ function buildRoofTerrace() {
   sunDisc.scale.setScalar(70);
   sunDisc.position.copy(dome.position).addScaledVector(sunDir, SKY_R - 8);
   scene.add(sunDisc);
+  Object.assign(outdoor, { dome, sunDisc, sunDir });
 
   const cloudTex = [makeCloudTexture(), makeCloudTexture(), makeCloudTexture()];
   for (let i = 0; i < 16; i++) {
@@ -2731,49 +2785,65 @@ function buildRoofTerrace() {
   const sun = new THREE.DirectionalLight(0xfff3dc, 2.6);
   // Schatten: nur das Dach sieht dieses Licht, und die Werfer liegen in roofGroup —
   // in den Sälen fällt die Arbeit also nicht an. Die Kamera umfasst die Terrasse.
-  sun.position.copy(sunDir).multiplyScalar(40);
+  sun.target.position.set(cx, UPPER_Y, cz);
+  sun.position.copy(sun.target.position).addScaledVector(sunDir, 250);
   sun.userData.roof = true;
   sun.castShadow = true;
   sun.shadow.mapSize.setScalar(ROOF_SHADOW_PX);
   sun.shadow.camera.left = sun.shadow.camera.bottom = -24;
   sun.shadow.camera.right = sun.shadow.camera.top = 24;
-  sun.shadow.camera.near = 5;
-  sun.shadow.camera.far = 80;
-  sun.shadow.bias = -0.0006;
+  sun.shadow.camera.near = 1;
+  sun.shadow.camera.far = 500; // weit genug für den Schatten des Burj Khalifa
+  sun.shadow.bias = -0.0001;
   sun.shadow.normalBias = 0.03;
+  // nur neu zeichnen, wenn sich der Ausschnitt verschiebt oder Palmen darin im Wind schwingen (siehe animate)
+  sun.shadow.autoUpdate = false;
+  sun.shadow.needsUpdate = true;
   const sky = new THREE.HemisphereLight(0xbfe0ff, 0x5a7a3c, 1.5);
   sky.userData.roof = true;
-  roof.add(sun, sun.target, sky);
+  // Die Lichter hängen direkt an der Szene, nicht an roofGroup: würden sie mit dem Dach aus- und eingeblendet,
+  // änderte sich die Lichtliste der Szene, und WebGPU baute beim Gang über die Treppe alle ~900 Renderobjekte
+  // neu auf — das war die Sekundenpause beim Hinauf- und Hinabgehen
+  scene.add(sun, sun.target, sky);
+  outdoor.sun = sun;
 
-  // Parklandschaft bis zum Horizont; verdeckt zugleich die Säle unter dem Dach
-  const fields = canvasTex(1024, 1024, (g, s) => {
-    g.fillStyle = '#6f9a58';
+  // Parklandschaft bis zum Horizont, begehbar; verdeckt zugleich die Säle unter dem Dach. Feines Gras
+  // in Metern gekachelt, darüber großflächige Wiesentöne über einen zweiten UV-Satz (Kanal 1)
+  const fields = canvasTex(512, 512, (g, s) => {
+    g.fillStyle = '#000';
     g.fillRect(0, 0, s, s);
-    const tones = ['#5d8a4b', '#7ea863', '#4a7442', '#8fb06c', '#6b8f4e'];
-    for (let i = 0; i < 700; i++) {
+    const tones = ['#1c2a10', '#0c1408', '#2a3a14', '#000000', '#24301a'];
+    for (let i = 0; i < 500; i++) {
       g.fillStyle = tones[i % 5];
       g.beginPath();
       g.ellipse(Math.random() * s, Math.random() * s, 8 + Math.random() * 26, 6 + Math.random() * 18, Math.random() * 3, 0, 7);
       g.fill();
     }
-    const haze = g.createRadialGradient(s / 2, s / 2, s * 0.1, s / 2, s / 2, s * 0.5);
-    haze.addColorStop(0, 'rgba(230,238,240,0)');
-    haze.addColorStop(0.55, 'rgba(230,238,240,0.35)');
-    haze.addColorStop(1, 'rgba(230,238,240,1)');
-    g.fillStyle = haze;
-    g.fillRect(0, 0, s, s);
   });
-  const landShape = new THREE.Shape().absarc(0, 0, SKY_R - 2, 0, Math.PI * 2, false);
+  fields.wrapS = fields.wrapT = THREE.RepeatWrapping;
+  fields.channel = 1;
+  const grass = makeLeafyTexture('#5a8a45', '#86b066', 4200);
+  grass.wrapS = grass.wrapT = THREE.RepeatWrapping;
+  const landShape = new THREE.Shape().absarc(0, 0, LAND_DISC, 0, Math.PI * 2, false);
   landShape.holes.push(new THREE.Path([
     new THREE.Vector2(-hw, -hd), new THREE.Vector2(-hw, hd), new THREE.Vector2(hw, hd), new THREE.Vector2(hw, -hd),
   ]));
-  const landGeo = new THREE.ShapeGeometry(landShape, 64);
+  const landGeo = new THREE.ShapeGeometry(landShape, 96);
   const lp = landGeo.attributes.position, luv = landGeo.attributes.uv;
-  for (let i = 0; i < lp.count; i++) luv.setXY(i, lp.getX(i) / (SKY_R * 2) + 0.5, lp.getY(i) / (SKY_R * 2) + 0.5);
+  const luv1 = new Float32Array(lp.count * 2);
+  for (let i = 0; i < lp.count; i++) {
+    luv.setXY(i, lp.getX(i) / 4, lp.getY(i) / 4);
+    luv1[i * 2] = lp.getX(i) / 160; luv1[i * 2 + 1] = lp.getY(i) / 160;
+  }
+  landGeo.setAttribute('uv1', new THREE.BufferAttribute(luv1, 2));
   landGeo.rotateX(-Math.PI / 2);
-  const land = new THREE.Mesh(landGeo, new THREE.MeshBasicMaterial({ map: fields, fog: false }));
+  const land = new THREE.Mesh(landGeo, new THREE.MeshStandardMaterial({
+    map: grass, emissive: 0xffffff, emissiveMap: fields, emissiveIntensity: 0.6, roughness: 1, metalness: 0,
+  }));
   land.position.y = -0.05;
+  land.receiveShadow = true;
   roof.add(land);
+  floorMeshes.push(land);
 
   // In der Ferne, hinter der Venus: links die Pyramide von Chichén Itzá, rechts Giza,
   // in ihren heutigen Steinfarben. Die Texturen tragen auch den leichten Dunst der Entfernung.
@@ -2790,7 +2860,9 @@ function buildRoofTerrace() {
     }
   };
   const groundPatch = (x, z, rx, rz, c) => {
-    const patch = new THREE.Mesh(new THREE.CircleGeometry(1, 40), new THREE.MeshBasicMaterial({ color: c, fog: false }));
+    const patch = new THREE.Mesh(new THREE.CircleGeometry(1, 40), new THREE.MeshStandardMaterial({ color: c, roughness: 1, metalness: 0 }));
+    patch.receiveShadow = true;
+    floorMeshes.push(patch);
     patch.rotation.x = -Math.PI / 2;
     patch.scale.set(rx, rz, 1);
     patch.position.set(x, 0, z);
@@ -2828,7 +2900,7 @@ function buildRoofTerrace() {
 
   // Giza: Cheops, Chephren, Mykerinos in der Diagonale, auf Wüstensand
   const GIZA_X = -60, GIZA_Z = 140;
-  groundPatch(GIZA_X, GIZA_Z, 42, 22, 0xd9c49a);
+  groundPatch(GIZA_X, GIZA_Z, 62, 44, 0xd9c49a);
   [[8, 4, 25, 44, 0], [-9, 1, 23.5, 42, 0.22], [-23, -5, 11.5, 24, 0]].forEach(([dx, dz, h, courses, casing]) => {
     // vier flache Seiten: nicht indiziert, sonst glättet das Licht die Kanten
     const g = new THREE.ConeGeometry(h * 1.11, h, 4, 1, true).toNonIndexed();
@@ -2876,7 +2948,7 @@ function buildRoofTerrace() {
 
   // Chichén Itzá: neun Stufen, Freitreppe zum Betrachter, Tempel obenauf, im Dschungel
   const MAYA_X = 62, MAYA_Z = 140;
-  groundPatch(MAYA_X, MAYA_Z, 34, 20, 0x3f7a40);
+  groundPatch(MAYA_X, MAYA_Z, 44, 38, 0x3f7a40);
   const mayaMat = new THREE.MeshStandardMaterial({ map: limestone, roughness: 1, metalness: 0 });
   const STEPS = 9, STEP_H = 1.8, BASE = 32, TOP = 11;
   for (let i = 0; i < STEPS; i++) {
@@ -2926,9 +2998,9 @@ function buildRoofTerrace() {
   const ironMat = new THREE.MeshStandardMaterial({ color: 0x75604a, roughness: 0.9, metalness: 0 });
 
   const EIFFEL_X = -30, EIFFEL_Z = -78, EH = 34;
-  groundPatch(EIFFEL_X, EIFFEL_Z, 26, 16, 0x5f8f4a);
+  groundPatch(EIFFEL_X, EIFFEL_Z, 26, 22, 0x5f8f4a);
   const eiffel = new THREE.Group();
-  eiffel.position.set(EIFFEL_X, -0.2, EIFFEL_Z);
+  eiffel.position.set(EIFFEL_X, 0, EIFFEL_Z); // Pfeiler reichen schräg unter den Boden, aber nicht unter ROOM_H
   roof.add(eiffel);
   // vier Pfeiler von den Ecken bis zur ersten Etage
   const legMat = latticeMat(6, 2);
@@ -2967,7 +3039,7 @@ function buildRoofTerrace() {
   // wandern reihum von Flügel zu Flügel nach oben (bis ≈ 72 % der Höhe), darüber gestufte Rundtürme und
   // die Spitze. Maßstab 85 : 828 m, ein Geschoss also ≈ 0,4 m
   const BURJ_X = 54, BURJ_Z = -128, BH = 85;
-  groundPatch(BURJ_X, BURJ_Z, 30, 18, 0xdcc49a);
+  groundPatch(BURJ_X, BURJ_Z, 34, 30, 0xdcc49a);
   groundPatch(BURJ_X + 6, BURJ_Z + 19, 20, 6, 0x4f86a8).position.y = 0.04; // Burj Lake
   // Fassade, eine Kachel = 2 × 2 m: fünf Geschosse, acht Achsen; Glas mit unterschiedlich gespiegeltem Himmel,
   // helle Brüstungsbänder und Edelstahl-Lisenen
@@ -3363,24 +3435,265 @@ function buildRoofTerrace() {
   path.receiveShadow = true;
   roof.add(path);
 
-  // Brüstung mit Hecke davor
-  const parapetMat = new THREE.MeshStandardMaterial({ color: 0xd6cfc2, roughness: 0.85, metalness: 0 });
+  // Hecke vor den Villenflügeln im Westen und Osten; nach Norden und Süden ist der Garten offen
   const hedgeTex = makeLeafyTexture('#26501f', '#4f8a3a', 9000);
   hedgeTex.repeat.set(9, 1);
   const hedgeMat = new THREE.MeshStandardMaterial({ map: hedgeTex, roughness: 1, metalness: 0 });
-  [[0, -hd + 0.15, w, 0.3], [0, hd - 0.15, w, 0.3], [-hw + 0.15, 0, 0.3, d], [hw - 0.15, 0, 0.3, d]].forEach(([x, z, bw, bd]) => {
-    const wall = new THREE.Mesh(new THREE.BoxGeometry(bw, 1.05, bd), parapetMat);
-    wall.position.set(x, 0.525, z);
-    wall.receiveShadow = true;
-    roof.add(wall);
-    occluders.push(wall);
-    const horiz = bw > bd;
-    const hx = horiz ? 0 : x - Math.sign(x) * 0.45, hz = horiz ? z - Math.sign(z) * 0.45 : 0;
-    const hedge = new THREE.Mesh(new THREE.BoxGeometry(horiz ? bw - 0.6 : 0.6, 0.8, horiz ? 0.6 : bd - 0.6), hedgeMat);
-    hedge.position.set(hx, 0.4, hz);
+  [-1, 1].forEach((sx) => {
+    const hedge = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.8, d - 0.6), hedgeMat);
+    hedge.position.set(sx * (hw - 0.6), 0.4, 0);
     hedge.receiveShadow = true;
     roof.add(hedge);
+    addCollider(cx + sx * (hw - 0.6), cz, 0.6, d - 0.6, roofColliders);
   });
+
+  // Hindernis draußen: Kollisionsbox (Terrassenkoordinaten) und, mit Höhe, ein unsichtbarer Klickblocker,
+  // damit ein Klick auf ein Bauwerk nicht den Boden dahinter trifft
+  const solid = (x, z, w2, d2, h2 = 0) => {
+    addCollider(cx + x, cz + z, w2, d2, roofColliders);
+    if (!h2) return;
+    const proxy = new THREE.Mesh(new THREE.BoxGeometry(w2, h2, d2), new THREE.MeshBasicMaterial());
+    proxy.position.set(x, h2 / 2, z);
+    proxy.visible = false;
+    roof.add(proxy);
+    landBlockers.push(proxy);
+  };
+
+  // Römische Villa: so sieht das Museum von draußen aus. Die Terrasse ist ihr Peristylgarten, im Westen
+  // und Osten je ein Flügel mit Walmdach aus Hohl- und Leistenziegeln, hellem Putz über pompejanisch rotem
+  // Sockel; im Norden und Süden zweischiffige Säulenhallen, durch die man in die Landschaft hinausgeht.
+  // Im Westen der Haupteingang mit Giebelportikus, auf den eine Zypressenallee zuläuft.
+  const WALL_H = 4.4, WING_IN = hw, WING_OUT = hw + 8, WING_Z = hd + 3.5;
+  const stucco = canvasTex(512, 512, (g, w2, h2) => {
+    g.fillStyle = '#eadcc0';
+    g.fillRect(0, 0, w2, h2);
+    weather(g, w2, h2, 160, 'rgba(190,160,120,0.12)', 'rgba(255,248,232,0.18)');
+    const dado = h2 * 0.9 / WALL_H;
+    g.fillStyle = '#9b3a2c';
+    g.fillRect(0, h2 - dado, w2, dado);
+    g.fillStyle = 'rgba(70,20,14,0.25)';
+    for (let i = 0; i < 40; i++) g.fillRect(Math.random() * w2, h2 - dado + Math.random() * dado, 4 + Math.random() * 30, 2 + Math.random() * 6);
+    g.fillStyle = '#5e2018';
+    g.fillRect(0, h2 - dado - 5, w2, 5);
+    const dirt = g.createLinearGradient(0, h2 - 30, 0, h2);
+    dirt.addColorStop(0, 'rgba(60,40,25,0)');
+    dirt.addColorStop(1, 'rgba(60,40,25,0.35)');
+    g.fillStyle = dirt;
+    g.fillRect(0, h2 - 30, w2, 30);
+    g.fillStyle = '#f4ecdc'; // Gesims unter der Traufe
+    g.fillRect(0, 0, w2, 24);
+    g.fillStyle = 'rgba(90,70,50,0.4)';
+    g.fillRect(0, 24, w2, 4);
+  });
+  stucco.wrapS = THREE.RepeatWrapping;
+  const tiles = canvasTex(256, 256, (g, w2, h2) => {
+    for (let y = 0; y < h2; y += 64) for (let x = 0; x < w2; x += 64) {
+      const l = Math.random() * 26 - 13;
+      g.fillStyle = `rgb(${168 + l | 0},${74 + l | 0},${46 + l * 0.6 | 0})`; // Leistenziegel
+      g.fillRect(x, y, 64, 64);
+      const gr = g.createLinearGradient(x + 40, 0, x + 64, 0); // Hohlziegel über der Fuge
+      gr.addColorStop(0, `rgb(${110 + l | 0},${44 + l | 0},${28 | 0})`);
+      gr.addColorStop(0.4, `rgb(${214 + l | 0},${118 + l | 0},${80 + l | 0})`);
+      gr.addColorStop(1, `rgb(${104 + l | 0},${40 + l | 0},${24 | 0})`);
+      g.fillStyle = gr;
+      g.fillRect(x + 40, y, 24, 64);
+    }
+    for (let y = 0; y < h2; y += 64) {
+      g.fillStyle = 'rgba(60,25,15,0.45)';
+      g.fillRect(0, y, w2, 5);
+    }
+    weather(g, w2, h2, 70, 'rgba(70,40,25,0.16)', 'rgba(230,160,120,0.12)');
+  });
+  tiles.wrapS = tiles.wrapT = THREE.RepeatWrapping;
+  const wallMat = new THREE.MeshStandardMaterial({ map: stucco, roughness: 0.9, metalness: 0 });
+  const roofMat = new THREE.MeshStandardMaterial({ map: tiles, roughness: 0.8, metalness: 0, side: THREE.DoubleSide });
+  const whiteMat = new THREE.MeshStandardMaterial({ color: 0xf1ebe0, roughness: 0.75, metalness: 0 });
+  const doorMat = new THREE.MeshStandardMaterial({ map: planks, color: 0x8a6a4a, roughness: 0.8, metalness: 0 });
+  const darkMat = new THREE.MeshStandardMaterial({ color: 0x2a221c, roughness: 1, metalness: 0 });
+  const villa = { wall: [], roof: [], white: [], door: [], dark: [], pave: [] };
+
+  // Wand: Putztextur hoch wie die Wand (Sockel unten, Gesims oben), waagrecht in Metern
+  const wallBox = (w2, d2, x, z) => {
+    const g = new THREE.BoxGeometry(w2, WALL_H, d2).translate(x, WALL_H / 2, z);
+    const p = g.attributes.position, n = g.attributes.normal, uv = g.attributes.uv;
+    for (let i = 0; i < p.count; i++) {
+      const u = Math.abs(n.getX(i)) > 0.5 ? p.getZ(i) : p.getX(i);
+      uv.setXY(i, u / WALL_H, p.getY(i) / WALL_H);
+    }
+    return g;
+  };
+  // geneigte Dachfläche aus Dreiecken, UVs in Metern: u längs der Traufe, v die Schräge hinauf
+  const roofTris = (tris) => {
+    const pos = [], uv = [];
+    for (const [pts, uvs] of tris) { pts.forEach((pt) => pos.push(...pt)); uvs.forEach((t) => uv.push(...t)); }
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+    g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
+    g.computeVertexNormals();
+    return g;
+  };
+  // Walmdach über w (x) × l (z), l ≥ w, Traufe in y0
+  const hipRoof = (w2, l2, y0, pitch, over, x, z) => {
+    const W = w2 / 2 + over, L = l2 / 2 + over, rise = W * Math.tan(pitch), rl = L - W, s = Math.hypot(W, rise), t = y0 + rise;
+    const A = [x - W, y0, z - L], B = [x + W, y0, z - L], C = [x + W, y0, z + L], D = [x - W, y0, z + L];
+    const R0 = [x, t, z - rl], R1 = [x, t, z + rl];
+    return roofTris([
+      [[B, R0, C], [[-L, 0], [-rl, s], [L, 0]]], [[C, R0, R1], [[L, 0], [-rl, s], [rl, s]]],
+      [[D, R1, A], [[L, 0], [rl, s], [-L, 0]]], [[A, R1, R0], [[-L, 0], [rl, s], [-rl, s]]],
+      [[A, R0, B], [[-W, 0], [0, s], [W, 0]]], [[C, R1, D], [[W, 0], [0, s], [-W, 0]]],
+    ]);
+  };
+  // Satteldach mit First längs x: Traufen bei zA/zB in yE, First bei zR in yR
+  const gableX = (x0, x1, zA, zB, zR, yE, yR) => {
+    const sA = Math.hypot(zR - zA, yR - yE), sB = Math.hypot(zR - zB, yR - yE);
+    const a0 = [x0, yE, zA], a1 = [x1, yE, zA], r0 = [x0, yR, zR], r1 = [x1, yR, zR], b0 = [x0, yE, zB], b1 = [x1, yE, zB];
+    return roofTris([
+      [[a0, r0, a1], [[x0, 0], [x0, sA], [x1, 0]]], [[a1, r0, r1], [[x1, 0], [x0, sA], [x1, sA]]],
+      [[b0, b1, r0], [[x0, 0], [x1, 0], [x0, sB]]], [[b1, r1, r0], [[x1, 0], [x1, sB], [x0, sB]]],
+    ]);
+  };
+  // Säule: Basis, leicht verjüngter Schaft, Kapitell
+  const column = (x, z, h2, r) => {
+    villa.white.push(
+      box(r * 3, 0.2, r * 3, x, 0.1, z),
+      new THREE.CylinderGeometry(r * 0.85, r, h2 - 0.42, 16).translate(x, 0.2 + (h2 - 0.42) / 2, z),
+      new THREE.CylinderGeometry(r * 1.25, r * 0.85, 0.12, 16).translate(x, h2 - 0.28, z),
+      box(r * 2.9, 0.16, r * 2.9, x, h2 - 0.08, z));
+    solid(x, z, r * 2.4, r * 2.4);
+  };
+  const opening = (list, x, y, z, w2, h2, alongX, depth = 0.08) => // Tür oder Fenster vor der Wand
+    list.push(box(alongX ? w2 : depth, h2, alongX ? depth : w2, x, y + h2 / 2, z));
+
+  // Flügel
+  [-1, 1].forEach((sx) => {
+    const xm = sx * (WING_IN + WING_OUT) / 2;
+    villa.wall.push(wallBox(8, WING_Z * 2, xm, 0));
+    villa.roof.push(hipRoof(8, WING_Z * 2, WALL_H, 0.38, 0.6, xm, 0));
+    solid(xm, 0, 8, WING_Z * 2, WALL_H + 1.6);
+    const xin = sx * (WING_IN - 0.04), xout = sx * (WING_OUT + 0.04);
+    [-7, 0, 7].forEach((z) => { // Türen zum Garten mit hellem Rahmen
+      opening(villa.white, sx * (WING_IN - 0.02), 0, z, 1.9, 2.95, false, 0.06);
+      opening(villa.door, xin, 0, z, 1.4, 2.6, false);
+    });
+    [-10.5, -3.5, 3.5, 10.5].forEach((z) => opening(villa.dark, xin, 3.0, z, 0.7, 0.8, false));
+    // außen: kleine hoch sitzende Fenster, wie an römischen Häusern üblich
+    [-12, -8.5, -5, 5, 8.5, 12].forEach((z) => opening(villa.dark, xout, 2.7, z, 0.6, 0.9, false));
+    if (sx > 0) opening(villa.door, xout, 0, 0, 1.3, 2.5, false);
+    [-1, 1].forEach((sz) => [-2, 2].forEach((dx) => opening(villa.dark, xm + dx, 2.7, sz * (WING_Z + 0.04), 0.6, 0.9, true)));
+  });
+
+  // Säulenhallen im Norden und Süden: zwei Reihen, Gebälk, flaches Satteldach, Steinboden
+  const COL_IN = hd + 0.4, COL_OUT = hd + 3.2, EAVE = 3.85;
+  [-1, 1].forEach((sz) => {
+    for (let x = -10.5; x <= 10.5; x += 3) { column(x, sz * COL_IN, 3.5, 0.2); column(x, sz * COL_OUT, 3.5, 0.2); }
+    [COL_IN, COL_OUT].forEach((zr) => villa.white.push(box(WING_IN * 2, 0.35, 0.5, 0, 3.5 + 0.175, sz * zr)));
+    villa.roof.push(gableX(-WING_IN, WING_IN, sz * (COL_IN - 0.45), sz * (COL_OUT + 0.45), sz * (COL_IN + COL_OUT) / 2, EAVE, 4.3));
+    const pave = new THREE.PlaneGeometry(WING_IN * 2, COL_OUT - hd + 0.6).rotateX(-Math.PI / 2)
+      .translate(0, 0.04, sz * (hd + (COL_OUT - hd + 0.6) / 2));
+    villa.pave.push(pave);
+  });
+
+  // Haupteingang im Westen: Podium, vier Säulen, Gebälk, Giebel mit Dreiecksfeld
+  const PX0 = -WING_OUT, PX1 = -WING_OUT - 3.6;
+  villa.pave.push(new THREE.PlaneGeometry(4.4, 9.4).rotateX(-Math.PI / 2).translate((PX0 + PX1) / 2 - 0.2, 0.04, 0));
+  [-3.3, -1.1, 1.1, 3.3].forEach((z) => column(PX1 + 0.4, z, 4.4, 0.26));
+  villa.white.push(box(3.9, 0.45, 8.6, (PX0 + PX1) / 2, 4.4 + 0.225, 0));
+  const PED_Y = 4.85, PED_R = PED_Y + 4.3 * Math.tan(0.3);
+  const tym = new THREE.Shape([new THREE.Vector2(-4.3, 0), new THREE.Vector2(4.3, 0), new THREE.Vector2(0, PED_R - PED_Y)]);
+  villa.white.push(new THREE.ExtrudeGeometry(tym, { depth: 0.3, bevelEnabled: false }).rotateY(-Math.PI / 2).translate(PX1 + 0.3, PED_Y, 0));
+  const pedRoof = roofTris([ // Giebeldach, First längs x
+    [[[PX0, PED_Y, -4.6], [PX1 - 0.3, PED_Y, -4.6], [PX0, PED_R + 0.1, 0]], [[0, 0], [3.9, 0], [0, 4.7]]],
+    [[[PX1 - 0.3, PED_Y, -4.6], [PX1 - 0.3, PED_R + 0.1, 0], [PX0, PED_R + 0.1, 0]], [[3.9, 0], [3.9, 4.7], [0, 4.7]]],
+    [[[PX0, PED_Y, 4.6], [PX0, PED_R + 0.1, 0], [PX1 - 0.3, PED_Y, 4.6]], [[0, 0], [0, 4.7], [3.9, 0]]],
+    [[[PX1 - 0.3, PED_Y, 4.6], [PX0, PED_R + 0.1, 0], [PX1 - 0.3, PED_R + 0.1, 0]], [[3.9, 0], [0, 4.7], [3.9, 4.7]]],
+  ]);
+  villa.roof.push(pedRoof);
+  opening(villa.white, PX0 - 0.02, 0, 0, 2.8, 3.8, false, 0.06);
+  opening(villa.door, PX0 - 0.05, 0, 0, 2.2, 3.4, false);
+
+  const villaGroup = new THREE.Group();
+  roof.add(villaGroup);
+  [['wall', wallMat], ['roof', roofMat], ['white', whiteMat], ['door', doorMat], ['dark', darkMat], ['pave', null]].forEach(([key, mat]) => {
+    if (!mat) return;
+    const mesh = new THREE.Mesh(mergeGeometries(villa[key].map(flat)), mat);
+    mesh.castShadow = mesh.receiveShadow = true;
+    villaGroup.add(mesh);
+  });
+  const paveTex = travertine.clone();
+  paveTex.repeat.set(0.4, 0.4);
+  const paving = new THREE.Mesh(facadeUVs(mergeGeometries(villa.pave.map(flat)), 1),
+    new THREE.MeshStandardMaterial({ map: paveTex, color: 0xe8e0d0, roughness: 0.85, metalness: 0 }));
+  paving.receiveShadow = true;
+  villaGroup.add(paving);
+  floorMeshes.push(paving);
+
+  // Kieswege von den Säulenhallen zu den Bauwerken und die Allee zum Westportal
+  const gravel = canvasTex(256, 256, (g, w2, h2) => {
+    g.fillStyle = '#cdbf9f';
+    g.fillRect(0, 0, w2, h2);
+    for (let i = 0; i < 2600; i++) {
+      const l = Math.random() * 70 - 35;
+      g.fillStyle = `rgb(${200 + l | 0},${188 + l | 0},${160 + l | 0})`;
+      g.fillRect(Math.random() * w2, Math.random() * h2, 2 + Math.random() * 3, 2 + Math.random() * 3);
+    }
+  });
+  gravel.wrapS = gravel.wrapT = THREE.RepeatWrapping;
+  const pathSegs = [];
+  const pathSeg = (x0, z0, x1, z1, wd) => {
+    const len = Math.hypot(x1 - x0, z1 - z0) + wd;
+    pathSegs.push(new THREE.PlaneGeometry(wd, len).rotateX(-Math.PI / 2).rotateY(Math.atan2(x1 - x0, z1 - z0))
+      .translate((x0 + x1) / 2, 0.02, (z0 + z1) / 2));
+  };
+  pathSeg(0, hd + 3.6, 0, 95, 3); pathSeg(0, 95, -42, 121, 3); pathSeg(0, 95, 44, 124, 3);
+  pathSeg(0, -hd - 3.6, 0, -99, 3); pathSeg(0, -50, -14, -66, 2.5); pathSeg(0, -62, 30, -110, 2.5);
+  pathSeg(PX1 - 0.6, 0, -150, 0, 4);
+  const paths = new THREE.Mesh(facadeUVs(mergeGeometries(pathSegs.map(flat)), 3),
+    new THREE.MeshStandardMaterial({ map: gravel, roughness: 1, metalness: 0 }));
+  paths.receiveShadow = true;
+  roof.add(paths);
+  floorMeshes.push(paths);
+
+  // Zypressen an der Allee und an den Ecken der Villa, Steineichen in der Landschaft
+  const cypressSpots = [];
+  for (let x = PX1 - 6; x > -112; x -= 6) cypressSpots.push([x, -4.6], [x, 4.6]);
+  cypressSpots.push([-25, -16], [-27.5, -14], [-25, 16], [-27.5, 14], [25, -17], [25, 17], [22, 19.5], [-22, -19.5]);
+  const oakSpots = [[40, 40], [48, 54], [-45, 40], [-58, 28], [80, 12], [86, -22], [-82, -32], [-92, 26], [72, 72],
+    [-72, 78], [104, 58], [-100, -64], [32, -40], [-52, -40], [96, -78], [-112, 92], [112, -6], [22, 60], [-22, 56], [64, -58]];
+  const leafy = new THREE.MeshStandardMaterial({ map: makeLeafyTexture('#1f3f1c', '#3f6b2e', 3000), roughness: 1, metalness: 0 });
+  const oakLeaves = new THREE.MeshStandardMaterial({ map: makeLeafyTexture('#33592a', '#6f9a48', 3000), roughness: 1, metalness: 0 });
+  const bark = new THREE.MeshStandardMaterial({ color: 0x5e4a3a, roughness: 1, metalness: 0 });
+  const trees = [
+    [new THREE.ConeGeometry(1, 1, 10).translate(0, 0.5, 0), leafy, cypressSpots, (s) => [0.85 * s, 7.5 * s, 0.85 * s], 0.25],
+    [new THREE.CylinderGeometry(0.2, 0.3, 1, 7).translate(0, 0.5, 0), bark, oakSpots, (s) => [s, 2.6 * s, s], 0],
+    [new THREE.IcosahedronGeometry(1, 2), oakLeaves, oakSpots, (s) => [3 * s, 2.3 * s, 3 * s], 4.2],
+  ];
+  const tm = new THREE.Matrix4(), tq = new THREE.Quaternion(), tp = new THREE.Vector3(), ts = new THREE.Vector3();
+  trees.forEach(([geo, mat, spots, scale, lift]) => {
+    const inst = new THREE.InstancedMesh(geo, mat, spots.length);
+    spots.forEach(([x, z], i) => {
+      const s = 0.85 + ((i * 37) % 11) / 30;
+      ts.set(...scale(s));
+      tp.set(x, lift * s, z);
+      inst.setMatrixAt(i, tm.compose(tp, tq, ts));
+    });
+    inst.castShadow = inst.receiveShadow = true;
+    roof.add(inst);
+  });
+  cypressSpots.forEach(([x, z]) => solid(x, z, 1.2, 1.2));
+  oakSpots.forEach(([x, z]) => solid(x, z, 0.9, 0.9));
+
+  // Kollisionen und Klickblocker der fernen Bauwerke
+  [[8, 4, 25], [-9, 1, 23.5], [-23, -5, 11.5]].forEach(([dx, dz, h2]) => solid(GIZA_X + dx, GIZA_Z + dz, h2 * 1.57, h2 * 1.57, h2 * 0.6));
+  solid(MAYA_X, MAYA_Z, 32, 32, 18);
+  for (const sx of [-1, 1]) for (const sz of [-1, 1]) solid(EIFFEL_X + sx * 0.15 * EH, EIFFEL_Z + sz * 0.15 * EH, 2.6, 2.6, 6);
+  solid(BURJ_X, BURJ_Z, 14, 14, 60);
+  [[-14, 6, 16, 1.6, 8], [12, 8, 10, 1.2, 12], [0, -14, 20, 1, 7]].forEach(([x, z, w2, h2, d2]) => solid(BURJ_X + x, BURJ_Z + z, w2, d2, h2));
+  solid(BURJ_X + 6, BURJ_Z + 19, 36, 10);
+  for (let i = 0; i < 6; i++) { // Kolosseum: Ellipse aus sechs Streifen
+    const z0 = -CB + i * CB / 3, zIn = Math.min(Math.abs(z0), Math.abs(z0 + CB / 3));
+    solid(COL_X, COL_Z + z0 + CB / 6, 2 * CA * Math.sqrt(1 - (zIn / CB) ** 2), CB / 3, 14);
+  }
+  [[-34, -104], [-37, -120], [-32, -147], [31, -100], [-15, -98], [17, -97]].forEach(([x, z]) => solid(x, z, 0.7, 0.7));
 
   // Palmen, zwei davon dicht neben der Venus
   const mats = {
@@ -3407,13 +3720,21 @@ function buildRoofTerrace() {
   palmParts.palms.forEach(({ palm }, i) => {
     for (let j = 0; j < 6; j++) {
       const a = j * 1.05 + i, r = 0.7 + Math.random() * 0.7, sz = 0.7 + Math.random() * 0.7;
-      bp.set(palm.position.x + Math.cos(a) * r, UPPER_Y + 0.12 * sz, palm.position.z + Math.sin(a) * r);
+      // ganz über ROOM_H bleiben: sonst gilt der Busch als Teil der Säle darunter und rechnet all deren Lichter
+      bp.set(palm.position.x + Math.cos(a) * r, UPPER_Y + 0.25 * sz, palm.position.z + Math.sin(a) * r);
       bs.set(sz, sz * 0.7, sz);
       bushes.setMatrixAt(i * 6 + j, bm.compose(bp, bq, bs));
     }
   });
   bushes.castShadow = bushes.receiveShadow = true;
   roofGroup.add(bushes);
+
+  // Alles draußen wirft und empfängt Schatten, nur Böden werfen keinen
+  roof.traverse((o) => {
+    if (!o.isMesh || !o.visible) return;
+    o.receiveShadow = true;
+    if (!floorMeshes.includes(o)) o.castShadow = true;
+  });
 
   // Wind und Wolken laufen wie die Drehteller nur, wenn man oben ist
   turntables.push({
@@ -3463,8 +3784,11 @@ function assignRoomLights(root) {
   const box = new THREE.Box3();
   root.traverse((o) => {
     if (!o.isMesh || !o.material.isMeshStandardMaterial) return;
-    box.setFromObject(o);
-    const rooms = roomsTouching(box);
+    // alles in roofGroup ist draußen: nur Tageslicht, auch wenn es ein paar Zentimeter unter ROOM_H reicht —
+    // sonst rechnete es die Lichter aller Säle darunter (die Büsche drückten so die Bildrate auf ein Fünftel)
+    let outside = false;
+    for (let p = o; p; p = p.parent) if (p === roofGroup) { outside = true; break; }
+    const rooms = outside ? [UPPER_ROOM] : roomsTouching(box.setFromObject(o));
     const key = rooms.join(',');
     if (!lightsNodes.has(key)) {
       lightsNodes.set(key, THREE.TSL.lights([...globalLights, ...rooms.flatMap((r) => roomLights[r])]));
@@ -3577,7 +3901,7 @@ function stepStair(step, dt) {
 // Steckt der Punkt in einer Wand (Spielerradius eingerechnet)?
 function isBlocked(x, z) {
   if (Math.hypot(x - STAIR_X, z - STAIR_Z) < stairBlockR()) return true;
-  if (stair.level && (x < ROOF.x0 + PLAYER_R || x > ROOF.x1 - PLAYER_R || z < ROOF.z0 + PLAYER_R || z > ROOF.z1 - PLAYER_R)) return true;
+  if (stair.level && Math.hypot(x - ROOF_CX, z - ROOF_CZ) > LAND_R - PLAYER_R) return true;
   for (const c of stair.level ? roofColliders : colliders) {
     if (x > c.minX - PLAYER_R && x < c.maxX + PLAYER_R &&
         z > c.minZ - PLAYER_R && z < c.maxZ + PLAYER_R) return true;
@@ -3604,9 +3928,9 @@ function resolveCollision(pos) {
       pos.z += (dz / dist) * overlap;
     }
   }
-  if (stair.level) { // auf dem Dach begrenzt nur die Brüstung samt Hecke
-    pos.x = THREE.MathUtils.clamp(pos.x, ROOF.x0 + PLAYER_R, ROOF.x1 - PLAYER_R);
-    pos.z = THREE.MathUtils.clamp(pos.z, ROOF.z0 + PLAYER_R, ROOF.z1 - PLAYER_R);
+  if (stair.level) { // oben: Villa und Bauwerke sind Kollisionsboxen, außen begrenzt ein Kreis
+    const dx = pos.x - ROOF_CX, dz = pos.z - ROOF_CZ, r = Math.hypot(dx, dz), max = LAND_R - PLAYER_R;
+    if (r > max) { pos.x = ROOF_CX + dx / r * max; pos.z = ROOF_CZ + dz / r * max; }
     return;
   }
   // Notanker gegen Durchtunneln bei großen Schritten: in den nächstgelegenen Saal klemmen
@@ -3633,7 +3957,7 @@ function navFree(x, z) {
 }
 // Gerade Strecke ohne Hindernis? (abgetastet alle 10 cm)
 function navLineFree(ax, az, bx, bz) {
-  const n = Math.max(1, Math.ceil(Math.hypot(bx - ax, bz - az) / 0.1));
+  const n = Math.max(1, Math.ceil(Math.hypot(bx - ax, bz - az) / (stair.level ? 0.2 : 0.1)));
   for (let i = 1; i <= n; i++) {
     if (!navFree(ax + (bx - ax) * i / n, az + (bz - az) * i / n)) return false;
   }
@@ -3643,17 +3967,20 @@ function navLineFree(ax, az, bx, bz) {
 // erreichbaren Punkt; null, wenn man sich nicht von der Stelle bewegen kann.
 function findPath(sx, sz, gx, gz) {
   if (navLineFree(sx, sz, gx, gz)) return [{ x: sx, z: sz }, { x: gx, z: gz }];
+  // draußen: Raster nur über Start und Ziel samt Rand, grob genug für höchstens ~90 000 Zellen
+  const m = 15 + 0.3 * Math.hypot(gx - sx, gz - sz);
   const b = stair.level
-    ? { x0: ROOF.x0, x1: ROOF.x1, z0: ROOF.z0, z1: ROOF.z1 }
+    ? { x0: Math.min(sx, gx) - m, x1: Math.max(sx, gx) + m, z0: Math.min(sz, gz) - m, z1: Math.max(sz, gz) + m }
     : ROOMS.reduce((r, { cell: [c, w] }) => ({
         x0: Math.min(r.x0, c * ROOM_W), x1: Math.max(r.x1, (c + 1) * ROOM_W),
         z0: Math.min(r.z0, w * ROOM_D), z1: Math.max(r.z1, (w + 1) * ROOM_D),
       }), { x0: Infinity, x1: -Infinity, z0: Infinity, z1: -Infinity });
-  const W = Math.ceil((b.x1 - b.x0) / NAV_CELL), H = Math.ceil((b.z1 - b.z0) / NAV_CELL);
-  const cx = (i) => b.x0 + (i % W + 0.5) * NAV_CELL, cz = (i) => b.z0 + (Math.floor(i / W) + 0.5) * NAV_CELL;
+  const cell = Math.max(NAV_CELL, Math.sqrt((b.x1 - b.x0) * (b.z1 - b.z0) / 90000));
+  const W = Math.ceil((b.x1 - b.x0) / cell), H = Math.ceil((b.z1 - b.z0) / cell);
+  const cx = (i) => b.x0 + (i % W + 0.5) * cell, cz = (i) => b.z0 + (Math.floor(i / W) + 0.5) * cell;
   const cellOf = (x, z) => {
-    const i = THREE.MathUtils.clamp(Math.floor((x - b.x0) / NAV_CELL), 0, W - 1);
-    const j = THREE.MathUtils.clamp(Math.floor((z - b.z0) / NAV_CELL), 0, H - 1);
+    const i = THREE.MathUtils.clamp(Math.floor((x - b.x0) / cell), 0, W - 1);
+    const j = THREE.MathUtils.clamp(Math.floor((z - b.z0) / cell), 0, H - 1);
     return j * W + i;
   };
   const free = new Int8Array(W * H).fill(-1); // −1 = noch nicht geprüft
@@ -3760,7 +4087,32 @@ loadingManager.onProgress = (url, loaded, total) => {
   needsRender = true; // neu geladene Textur zeigen
   loadFill.style.width = Math.round((loaded / total) * 100) + '%';
 };
+// Hinter dem Startbildschirm einmal alles zeichnen, auch Dach und Landschaft und ohne Sichtkegel-Auslese:
+// so übersetzt WebGPU alle Shader (auch die des Schattenpasses) und lädt die Texturen jetzt hoch statt
+// beim ersten Blick über die Treppe hinaus — das machte die Pause beim Hinaufgehen
+let warmedUp = false;
+async function warmUp() {
+  if (warmedUp) return;
+  warmedUp = true;
+  const culled = [];
+  scene.traverse((o) => { if (o.frustumCulled) { culled.push(o); o.frustumCulled = false; } });
+  roofGroup.visible = true;
+  try {
+    await renderer.compileAsync(scene, camera);
+    roofGroup.visible = true; // die Schleife kann es inzwischen wieder ausgeblendet haben
+    outdoor.sun.shadow.needsUpdate = true;
+    renderer.render(scene, camera);
+  } catch (e) {
+    console.warn('Vorübersetzen fehlgeschlagen', e);
+  }
+  roofGroup.visible = camera.position.y > ROOF_SEEN;
+  culled.forEach((o) => { o.frustumCulled = true; });
+  outdoor.sun.shadow.needsUpdate = true;
+  needsRender = true;
+}
+
 loadingManager.onLoad = () => {
+  warmUp();
   assetsReady = true;
   loadText.textContent = 'Bereit — klicken zum Betreten';
   startBtn.style.opacity = '1';
@@ -4227,9 +4579,13 @@ function travelTo(point) {
   focusState.toPos.set(end.x, EYE_H + stair.level * UPPER_Y + (onBench(end.x, end.z) ? BENCH_H : 0), end.z);
   focusState.fromQuat.copy(camera.quaternion);
   focusState.toQuat.copy(camera.quaternion);
-  focusState.path = path.length > 2 ? { pts: path, cum, len } : null;
+  // draußen über weite Strecken: spazieren, mit Blick in Laufrichtung, statt hinzufliegen
+  const stroll = stair.level > 0 && len > 12;
+  focusState.path = path.length > 2 || stroll ? { pts: path, cum, len } : null;
+  focusState.stroll = stroll;
   focusState.t = 0;
-  focusState.duration = THREE.MathUtils.clamp(len * 0.09, 0.28, focusState.path ? 3.0 : 1.0);
+  focusState.duration = stroll ? THREE.MathUtils.clamp(len / 9, 1.5, 18)
+    : THREE.MathUtils.clamp(len * 0.09, 0.28, focusState.path ? 3.0 : 1.0);
   focusState.animating = true;
   focusState.active = false;
   return true;
@@ -4272,10 +4628,14 @@ function raycastPaintingAt(event) {
 
 function raycastFloorAt(event) {
   raycaster.setFromCamera(eventToNDC(event), camera);
-  const hits = raycaster.intersectObjects(floorMeshes, false);
-  // durch die Öffnung sichtbarer Boden des anderen Geschosses zählt nicht
-  const hit = hits.find((h) => Math.abs(h.point.y - stair.level * UPPER_Y) < 0.1);
-  return hit ? hit.point : null;
+  const hits = raycaster.intersectObjects(stair.level ? floorMeshes.concat(landBlockers) : floorMeshes, false);
+  for (const h of hits) {
+    // ein Bauwerk draußen: zu seinem Fuß gehen, so nah es geht
+    if (landBlockers.includes(h.object)) return new THREE.Vector3(h.point.x, UPPER_Y, h.point.z);
+    // durch die Öffnung sichtbarer Boden des anderen Geschosses zählt nicht
+    if (Math.abs(h.point.y - stair.level * UPPER_Y) < 0.1) return h.point;
+  }
+  return null;
 }
 
 // Klick auf die Treppe: zum Antritt gehen und von dort selbsttätig weiter
@@ -4304,8 +4664,15 @@ function focusPainting(spot) {
 }
 
 // Ein einziger Klick erledigt alles: Bild = Nahansicht, Boden = hingehen, daneben = zurück
+function stopStroll() {
+  focusState.animating = false;
+  focusState.path = null;
+  focusState.stroll = false;
+}
+
 function handleSelect(event) {
   // Während einer laufenden Fahrt ignorieren — so löst ein Doppelklick nicht Hin und Zurück aus
+  if (focusState.animating && focusState.stroll) stopStroll(); // ein neuer Klick lenkt den Spaziergang um
   if (!navActive || focusState.animating) return;
   if (stair.active) { // auf der Treppe: ein Klick hält nicht an, sondern geht (weiter) durch
     stair.auto = stair.dir;
@@ -4440,10 +4807,12 @@ infoBtn.addEventListener('click', () => {
 let currentRoomIdx = -1;
 let labelTimer = null;
 function updateRoomLabel() {
-  const idx = stair.level ? UPPER_ROOM : roomIndexAt(camera.position.x, camera.position.z);
+  const { x, z } = camera.position;
+  const outside = x < ROOF.x0 - 1 || x > ROOF.x1 + 1 || z < ROOF.z0 - 1 || z > ROOF.z1 + 1;
+  const idx = stair.level ? UPPER_ROOM + (outside ? 1 : 0) : roomIndexAt(x, z);
   if (idx >= 0 && idx !== currentRoomIdx) {
     currentRoomIdx = idx;
-    roomLabel.textContent = idx === UPPER_ROOM ? 'Dachterrasse' : ROOMS[idx].name;
+    roomLabel.textContent = idx === UPPER_ROOM ? 'Dachterrasse' : idx > UPPER_ROOM ? 'Landschaft' : ROOMS[idx].name;
     roomLabel.style.opacity = '1';
     clearTimeout(labelTimer);
     labelTimer = setTimeout(() => { roomLabel.style.opacity = '0'; }, 2600);
@@ -4596,6 +4965,8 @@ const clock = new THREE.Clock();
 function animate() {
   const dt = Math.min(clock.getDelta(), 0.05);
 
+  // Tasten beenden einen Spaziergang sofort
+  if (focusState.animating && focusState.stroll && (move.forward || move.back || move.left || move.right)) stopStroll();
   if (focusState.animating) {
     focusState.t += dt / focusState.duration;
     const k = Math.min(focusState.t, 1);
@@ -4613,6 +4984,7 @@ function animate() {
     if (k >= 1) {
       focusState.animating = false;
       focusState.path = null;
+      focusState.stroll = false;
       if (focusState.pendingSpot) { // Weg zum Bild zu Ende: jetzt heranzoomen
         const spot = focusState.pendingSpot;
         focusState.pendingSpot = null;
@@ -4703,7 +5075,34 @@ function animate() {
     roofGroup.visible = high;
     scene.fog.near = high ? 150 : 18;
     scene.fog.far = high ? 400 : 40;
+    scene.fog.color.set(high ? 0xe6eef0 : 0x0a0806); // draußen Dunst in der Farbe des Horizonts
+    camera.far = high ? LAND_DISC + 20 : 200;
+    camera.updateProjectionMatrix();
     needsRender = true;
+  }
+  // draußen, weiter als 12 m von der Treppe, sieht man nichts mehr von den Sälen
+  const showIndoor = !high || Math.hypot(camera.position.x - STAIR_X, camera.position.z - STAIR_Z) < 12;
+  if (showIndoor !== indoorShown) setIndoorVisible(showIndoor);
+  if (high) { // Himmel, Sonne und Schattenausschnitt gehen mit; der Schatten springt nur im 4-m-Raster
+    outdoor.dome.position.set(camera.position.x, UPPER_Y, camera.position.z);
+    outdoor.sunDisc.position.copy(outdoor.dome.position).addScaledVector(outdoor.sunDir, SKY_R - 8);
+    // Schattenausschnitt: im Garten eng und scharf (Palmwedel), draußen weit genug für Bauwerke samt Schatten.
+    // Nicht über ±100 m: ab etwa ±120 m (und mit 4096er-Karte) fielen unter WebGPU alle Schatten weg
+    const inGarden = Math.abs(camera.position.x - ROOF_CX) < 16 && Math.abs(camera.position.z - ROOF_CZ) < 16;
+    const half = inGarden ? 40 : 100, grid = inGarden ? 4 : 10, sc = outdoor.sun.shadow.camera;
+    if (sc.right !== half) {
+      outdoor.sun.shadow.needsUpdate = true;
+      sc.left = sc.bottom = -half;
+      sc.right = sc.top = half;
+      sc.updateProjectionMatrix();
+      outdoor.sun.shadow.normalBias = inGarden ? 0.03 : 0.06;
+    }
+    const tx = Math.round((camera.position.x - ROOF_CX) / grid) * grid, tz = Math.round((camera.position.z - ROOF_CZ) / grid) * grid;
+    if (ROOF_CX + tx !== outdoor.sun.target.position.x || ROOF_CZ + tz !== outdoor.sun.target.position.z || Math.hypot(tx, tz) < 45) {
+      outdoor.sun.shadow.needsUpdate = true; // verschoben, oder Palmen schwingen nah genug, dass man es sieht
+    }
+    outdoor.sun.target.position.set(ROOF_CX + tx, UPPER_Y, ROOF_CZ + tz);
+    outdoor.sun.position.copy(outdoor.sun.target.position).addScaledVector(outdoor.sunDir, 250);
   }
 
   camera.updateMatrixWorld();
