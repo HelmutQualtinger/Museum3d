@@ -1,7 +1,7 @@
 // Service Worker: macht die Galerie installierbar und offline nutzbar.
 // Seite: zuerst Netz (Updates kommen sofort an), sonst Cache.
 // three.js vom CDN und Gemälde von Commons: zuerst Cache — die URLs sind versioniert bzw. unveränderlich.
-const CACHE = 'galerie-v3';
+const CACHE = 'galerie-v4';
 const SHELL = ['./', 'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png'];
 
 self.addEventListener('install', (e) => {
@@ -28,6 +28,16 @@ self.addEventListener('fetch', (e) => {
       fetch(req, { cache: 'no-cache' })
         .then((res) => { caches.open(CACHE).then((c) => c.put('./', res.clone())); return res; })
         .catch(() => caches.match('./'))
+    );
+    return;
+  }
+
+  // Übersetzungen ändern sich mit der Seite: wie sie zuerst aus dem Netz, offline aus dem Cache
+  if (url.origin === self.location.origin && url.pathname.includes('/i18n/')) {
+    e.respondWith(
+      fetch(req, { cache: 'no-cache' })
+        .then((res) => { if (res.ok) { const copy = res.clone(); caches.open(CACHE).then((c) => c.put(req, copy)); } return res; })
+        .catch(() => caches.match(req))
     );
     return;
   }

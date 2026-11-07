@@ -138,6 +138,17 @@
     padding: 8px 20px; border-radius: 2px; cursor: pointer; }
   #installBtn:hover { color: #e8dfd0; border-color: #6b5f4f; }
   #overlay p.credits { font-size: 10px; letter-spacing: 0.04em; color: #6f6453; margin-top: 18px; }
+  /* Sprachwahl: Flagge oben links, Klick öffnet die Liste */
+  #lang { position: fixed; top: 14px; left: 16px; z-index: 30; font-family: 'Georgia', serif; }
+  #langBtn { display: flex; align-items: center; gap: 6px; background: rgba(12,10,8,0.7); border: 1px solid #4a4136;
+    border-radius: 2px; padding: 5px 8px; cursor: pointer; color: #e8dfd0; font: inherit; font-size: 12px; }
+  #langBtn:hover, #langMenu button:hover { border-color: #d8b978; }
+  #lang svg { width: 24px; height: 16px; display: block; box-shadow: 0 0 0 1px rgba(255,255,255,0.15); }
+  #langMenu { display: none; margin-top: 4px; background: rgba(14,12,10,0.95); border: 1px solid #4a4136; border-radius: 2px; padding: 4px; }
+  #lang.open #langMenu { display: block; }
+  #langMenu button { display: flex; align-items: center; gap: 10px; width: 100%; background: none; border: 1px solid transparent;
+    border-radius: 2px; padding: 6px 10px; cursor: pointer; color: #e8dfd0; font: inherit; font-size: 13px; text-align: left; }
+  #langMenu button.cur { color: #d8b978; }
   #installHint { display: none; max-width: 340px; margin: 12px auto 0; font-size: 13px; line-height: 1.6; color: #b8ab96; }
 </style>
 </head>
@@ -145,17 +156,17 @@
 
 <div id="overlay">
   <div class="panel">
-    <h1>Galerie der Meister</h1>
-    <p>Ein begehbares 3D-Museum mit sechs Sälen &mdash; Porträt, Landschaft, Moderne, Skulptur, Gauguin und Höhlenmalerei &mdash; und einer Dachterrasse.</p>
-    <p>Ziehen &mdash; umsehen &nbsp;·&nbsp; Klick auf den Boden &mdash; dorthin gehen</p>
-    <p>Klick auf ein Gemälde &mdash; Nahansicht &nbsp;·&nbsp; <span class="key">W</span><span class="key">A</span><span class="key">S</span><span class="key">D</span> oder Scrollrad &mdash; bewegen</p>
-    <p><span class="key">Esc</span> &mdash; zurück bzw. Menü</p>
-    <div class="start" id="startBtn">Klicken zum Betreten</div>
+    <h1 data-i18n>Galerie der Meister</h1>
+    <p data-i18n>Ein begehbares 3D-Museum mit sechs Sälen &mdash; Porträt, Landschaft, Moderne, Skulptur, Gauguin und Höhlenmalerei &mdash; und einer Dachterrasse.</p>
+    <p data-i18n>Ziehen &mdash; umsehen &nbsp;·&nbsp; Klick auf den Boden &mdash; dorthin gehen</p>
+    <p data-i18n>Klick auf ein Gemälde &mdash; Nahansicht &nbsp;·&nbsp; <span class="key">W</span><span class="key">A</span><span class="key">S</span><span class="key">D</span> oder Scrollrad &mdash; bewegen</p>
+    <p data-i18n><span class="key">Esc</span> &mdash; zurück bzw. Menü</p>
+    <div class="start" id="startBtn" data-i18n>Klicken zum Betreten</div>
     <div id="loadbar"><div id="loadfill"></div></div>
-    <div id="loadtext">Lade hochauflösende Gemälde …</div>
-    <p class="credits">3D-Modelle: David &mdash; Scan the World (CC BY-SA 4.0) &nbsp;·&nbsp; Maske des Tutanchamun &mdash; vmmaniac (CC BY 4.0) &nbsp;·&nbsp; Venus von Willendorf, Venus von Milo, Der Denker &mdash; Scan the World (CC BY-SA 4.0) &nbsp;·&nbsp; Pietà &mdash; Statens Museum for Kunst (Public Domain) &nbsp;·&nbsp; Osiris &mdash; Moacir Elias Santos / Casa Museu Eva Klabin (CC BY-SA 4.0) &nbsp;·&nbsp; Nofretete &mdash; Trigon Art 2008, © Ägyptisches Museum und Papyrussammlung, Staatliche Museen zu Berlin, via Cosmo Wenman (CC BY-NC-SA 4.0)<br>Fotos Höhlenmalerei: Thomas T. (CC BY-SA 2.0), Céréales Killer, Christelle Molinié (CC BY-SA 4.0)<br>Sternhimmel: d3-celestial, Olaf Frohn (BSD) &nbsp;·&nbsp; Sternbildlinien: Stellarium (CC BY-SA 4.0) &nbsp;·&nbsp; Sternbildfiguren: Johan Meuris / Stellarium (Free Art License) &nbsp;·&nbsp; Sternbild Assange nach einem Foto von David G Silvers, Cancillería del Ecuador (CC BY-SA 2.0, bearbeitet)</p>
-    <button id="installBtn" type="button">Als App installieren</button>
-    <div id="installHint">Tippe auf das Teilen-Symbol <svg width="14" height="17" viewBox="0 0 14 17" fill="none" stroke="currentColor" stroke-width="1.4" style="vertical-align:-3px"><path d="M7 1v10M3.5 4.5 7 1l3.5 3.5M4.5 7H1.5v9h11V7h-3"/></svg> und dann auf <b>„Zum Home-Bildschirm“</b>.</div>
+    <div id="loadtext" data-i18n>Lade hochauflösende Gemälde …</div>
+    <p class="credits" data-i18n>3D-Modelle: David &mdash; Scan the World (CC BY-SA 4.0) &nbsp;·&nbsp; Maske des Tutanchamun &mdash; vmmaniac (CC BY 4.0) &nbsp;·&nbsp; Venus von Willendorf, Venus von Milo, Der Denker &mdash; Scan the World (CC BY-SA 4.0) &nbsp;·&nbsp; Pietà &mdash; Statens Museum for Kunst (Public Domain) &nbsp;·&nbsp; Osiris &mdash; Moacir Elias Santos / Casa Museu Eva Klabin (CC BY-SA 4.0) &nbsp;·&nbsp; Nofretete &mdash; Trigon Art 2008, © Ägyptisches Museum und Papyrussammlung, Staatliche Museen zu Berlin, via Cosmo Wenman (CC BY-NC-SA 4.0)<br>Fotos Höhlenmalerei: Thomas T. (CC BY-SA 2.0), Céréales Killer, Christelle Molinié (CC BY-SA 4.0)<br>Sternhimmel: d3-celestial, Olaf Frohn (BSD) &nbsp;·&nbsp; Sternbildlinien: Stellarium (CC BY-SA 4.0) &nbsp;·&nbsp; Sternbildfiguren: Johan Meuris / Stellarium (Free Art License) &nbsp;·&nbsp; Sternbild Assange nach einem Foto von David G Silvers, Cancillería del Ecuador (CC BY-SA 2.0, bearbeitet)</p>
+    <button id="installBtn" type="button" data-i18n>Als App installieren</button>
+    <div id="installHint" data-i18n>Tippe auf das Teilen-Symbol <svg width="14" height="17" viewBox="0 0 14 17" fill="none" stroke="currentColor" stroke-width="1.4" style="vertical-align:-3px"><path d="M7 1v10M3.5 4.5 7 1l3.5 3.5M4.5 7H1.5v9h11V7h-3"/></svg> und dann auf <b>„Zum Home-Bildschirm“</b>.</div>
   </div>
 </div>
 
@@ -201,21 +212,85 @@
 
 <div id="roomLabel"></div>
 <div id="tooltip"></div>
-<div id="backBtn">← Zurück</div>
-<div id="infoBtn">ⓘ Über das Werk</div>
+<div id="backBtn" data-i18n>← Zurück</div>
+<div id="infoBtn" data-i18n>ⓘ Über das Werk</div>
 <div id="info" role="dialog" aria-label="Über das Werk">
-  <button id="infoClose" type="button" title="Schließen">✕</button>
+  <button id="infoClose" type="button" title="Schließen" data-i18n-title>✕</button>
   <h2 id="infoTitle"></h2>
   <p class="by" id="infoBy"></p>
   <button id="infoRead" type="button">▶ Vorlesen</button>
-  <h3>Das Werk</h3>
+  <h3 data-i18n>Das Werk</h3>
   <p id="infoWork"></p>
   <h3 id="infoArtistHead"></h3>
   <p id="infoArtist"></p>
 </div>
 <div id="photo"><figure><img id="photoImg" alt=""><figcaption><b id="photoTitle"></b><span id="photoCredit"></span></figcaption></figure></div>
-<div id="music"><button id="linesToggle" type="button" title="Sternbildlinien und Namen ein-/ausblenden">✶ Linien</button> <button id="artToggle" type="button" title="Sternbildfiguren ein-/ausblenden">✶ Figuren</button> <button id="weatherToggle" type="button" title="Wetter draußen wechseln"></button> <button id="musicToggle" type="button"></button></div>
-<div id="hud">Ziehen: umsehen · Klick auf den Boden: dorthin gehen · Klick auf ein Bild: Nahansicht · Klick auf eine Skulptur: Erläuterung · WASD / Scrollrad: bewegen</div>
+<div id="music"><button id="linesToggle" type="button" title="Sternbildlinien und Namen ein-/ausblenden" data-i18n data-i18n-title>✶ Linien</button> <button id="artToggle" type="button" title="Sternbildfiguren ein-/ausblenden" data-i18n data-i18n-title>✶ Figuren</button> <button id="weatherToggle" type="button" title="Wetter draußen wechseln" data-i18n-title></button> <button id="musicToggle" type="button"></button></div>
+<div id="hud" data-i18n>Ziehen: umsehen · Klick auf den Boden: dorthin gehen · Klick auf ein Bild: Nahansicht · Klick auf eine Skulptur: Erläuterung · WASD / Scrollrad: bewegen</div>
+
+<div id="lang"><button id="langBtn" type="button" aria-haspopup="true"></button><div id="langMenu" role="menu"></div></div>
+<script>
+// Sprachen: Deutsch steht im Quelltext, die anderen in i18n/<sprache>.json, Schlüssel ist jeweils der deutsche Text
+// (s: kurze Texte, Titel, Zeilen; works/artists: die Erläuterungen wie ABOUT_WORKS/ABOUT_ARTISTS). Das Wörterbuch
+// wird hier früh geladen, damit Startbild und Knöpfe gleich in der gewählten Sprache erscheinen; das Modul wartet
+// darauf (dictReady) und hört auf das Ereignis „sprache“, um Schilder, Tafeln und Anzeigen neu zu beschriften.
+(() => {
+  const flag = (k) => ({
+    de: '<rect width="5" height="3" fill="#000"/><rect y="1" width="5" height="1" fill="#d00"/><rect y="2" width="5" height="1" fill="#ffce00"/>',
+    fr: '<rect width="5" height="3" fill="#fff"/><rect width="1.67" height="3" fill="#002395"/><rect x="3.33" width="1.67" height="3" fill="#ed2939"/>',
+    it: '<rect width="5" height="3" fill="#fff"/><rect width="1.67" height="3" fill="#009246"/><rect x="3.33" width="1.67" height="3" fill="#ce2b37"/>',
+    en: '<rect width="5" height="3" fill="#012169"/><path d="M0,0L5,3M5,0L0,3" stroke="#fff" stroke-width=".6"/><path d="M0,0L5,3M5,0L0,3" stroke="#c8102e" stroke-width=".2"/><path d="M2.5,0V3M0,1.5H5" stroke="#fff" stroke-width="1"/><path d="M2.5,0V3M0,1.5H5" stroke="#c8102e" stroke-width=".6"/>',
+  })[k];
+  const LANGS = window.LANGS = {
+    de: { name: 'Deutsch', locale: 'de-AT' }, en: { name: 'English', locale: 'en-GB' },
+    fr: { name: 'Français', locale: 'fr-FR' }, it: { name: 'Italiano', locale: 'it-IT' },
+  };
+  const svg = (k) => `<svg viewBox="0 0 5 3" preserveAspectRatio="none">${flag(k)}</svg>`;
+  let l = null;
+  try { l = localStorage.getItem('sprache'); } catch {}
+  if (!LANGS[l]) { const n = (navigator.language || 'de').slice(0, 2).toLowerCase(); l = LANGS[n] ? n : 'de'; }
+  window.LANG = l;
+  const empty = { s: {}, works: {}, artists: {} };
+  const load = (k) => k === 'de' ? Promise.resolve(empty)
+    : fetch(`i18n/${k}.json`).then((r) => r.json()).catch(() => empty);
+  const box = document.getElementById('lang'), btn = document.getElementById('langBtn'), menu = document.getElementById('langMenu');
+  const DE_TITLE = document.title;
+  function apply(d) {
+    window.I18N = d;
+    document.documentElement.lang = window.LANG;
+    document.title = d.s[DE_TITLE] ?? DE_TITLE;
+    // Schlüssel ist der deutsche Text ohne Auszeichnung, mit zusammengefassten Leerzeichen; die Übersetzung darf HTML enthalten
+    const tmp = document.createElement('div');
+    for (const el of document.querySelectorAll('[data-i18n]')) {
+      if (el.dataset.de === undefined) el.dataset.de = el.innerHTML.trim();
+      tmp.innerHTML = el.dataset.de;
+      el.innerHTML = d.s[tmp.textContent.replace(/\s+/g, ' ').trim()] ?? el.dataset.de;
+    }
+    for (const el of document.querySelectorAll('[data-i18n-title]')) {
+      if (el.dataset.deTitle === undefined) el.dataset.deTitle = el.title;
+      el.title = d.s[el.dataset.deTitle] ?? el.dataset.deTitle;
+    }
+    btn.innerHTML = svg(window.LANG) + window.LANG.toUpperCase();
+    btn.title = LANGS[window.LANG].name;
+    menu.innerHTML = Object.keys(LANGS).map((k) =>
+      `<button type="button" data-l="${k}" class="${k === window.LANG ? 'cur' : ''}">${svg(k)}${LANGS[k].name}</button>`).join('');
+  }
+  window.dictReady = load(l).then((d) => { apply(d); return d; });
+  btn.addEventListener('click', (e) => { e.stopPropagation(); box.classList.toggle('open'); });
+  menu.addEventListener('click', async (e) => {
+    e.stopPropagation();
+    const k = e.target.closest('button')?.dataset.l;
+    box.classList.remove('open');
+    if (!k || k === window.LANG) return;
+    const d = await load(k);
+    window.LANG = k;
+    try { localStorage.setItem('sprache', k); } catch {}
+    apply(d);
+    window.dispatchEvent(new Event('sprache'));
+  });
+  document.addEventListener('click', () => box.classList.remove('open'));
+})();
+</script>
 
 <script type="importmap">
 {
@@ -233,6 +308,16 @@ import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
+
+// Sprache (siehe das Skript vor der Import-Map): tr übersetzt einen deutschen Text, setText/setTitle merken sich
+// den deutschen Text am Element, damit ein Sprachwechsel ihn neu übersetzt. relabels zeichnet Schilder und
+// Tafeln (Canvas-Texturen) neu.
+await window.dictReady;
+const tr = (de) => window.I18N.s[de] ?? de;
+const setText = (el, de) => { el.setAttribute('data-i18n', ''); el.dataset.de = de; el.textContent = tr(de); };
+const setTitle = (el, de) => { el.setAttribute('data-i18n-title', ''); el.dataset.deTitle = de; el.title = tr(de); };
+const relabels = [];
+window.addEventListener('sprache', () => { for (const f of relabels) f(); needsRender = true; });
 
 /* ---------------------------------------------------------------
    Sammlung: sechs Säle, einundfünfzig Bilder, zehn Skulpturen
@@ -471,7 +556,7 @@ const SCULPTURES = [
     url: 'models/nofretete-berlin.glb', height: 1.47, plinth: [1.4, 0.8, 1.4], textured: true, rotY: Math.PI, roof: true },
   // In Mykerinos' Kammer (Mitte x −86, z 133) an der Ostseite, nach Westen zum Eingang gewandt
   // (turn: Sockel samt Schild um 90° gedreht). Original eine 29 cm hohe Statuette, hier lebensgroß in Gold
-  { room: 1, x: -100.5, z: 133, title: 'Osiris · in Gold', artist: 'Ägypten, Casa Museu Eva Klabin, Rio de Janeiro',
+  { room: 1, x: -100.5, z: 133, title: 'Osiris · in Gold', artist: 'Casa Museu Eva Klabin, Rio de Janeiro · Altes Ägypten',
     url: 'models/osiris.glb', height: 1.75, plinth: [0.8, 0.5, 0.8], gold: true, rotY: Math.PI, turn: Math.PI / 2, roof: true },
   // auf der Dachterrasse, zwischen den Palmen: dreht sich nicht und braucht bei Tageslicht keinen Strahler
   { room: 1, x: 9.05, z: 13.4, title: 'Venus von Milo', artist: 'Alexandros von Antiochia, Melos, um 150–100 v. Chr.',
@@ -493,6 +578,8 @@ const SCULPTURES = [
 // Erläuterungen für das Infofeld: zum Werk (Schlüssel „Titel|Künstlerzeile“, genau wie oben)
 // und zum Künstler bzw. zur Herkunft (Schlüssel = Künstlerzeile bis zum ersten Komma oder „ · “)
 const ABOUT_ARTISTS = {
+  "Casa Museu Eva Klabin":
+    "Eva Klabin (1903–1991) stammte aus einer Industriellenfamilie und sammelte über Jahrzehnte Kunst aus fünf Jahrtausenden: ägyptische, griechische und römische Antiken, chinesisches Porzellan, europäische Malerei und Möbel. Ihr Haus an der Lagune Rodrigo de Freitas in Rio de Janeiro vermachte sie samt Sammlung einer Stiftung; seit 1995 ist es ein Museum, das die Räume so zeigt, wie sie darin lebte.",
   "Azteken":
     "Die Azteken, die sich selbst Mexica nannten, gründeten 1325 ihre Hauptstadt Tenochtitlan auf einer Insel im Texcoco-See, dort, wo heute Mexiko-Stadt liegt. Von dort beherrschten sie im 15. Jahrhundert ein Reich, das tributpflichtige Städte von der Golfküste bis zum Pazifik umfasste. Federarbeiten galten ihnen als kostbarer als Gold; eigene Kunsthandwerker, die amanteca, fertigten daraus Schilde, Gewänder und Kopfschmuck für Herrscher und Götterbilder. Moctezuma II. regierte ab 1502; 1519 landete Hernán Cortés an der Küste, 1521 fiel Tenochtitlan.",
   "Auguste Rodin":
@@ -681,7 +768,7 @@ const ABOUT_WORKS = {
     "Michelangelo schlug den David als 26-Jähriger aus einem riesigen Marmorblock, den andere Bildhauer schon angehauen und aufgegeben hatten. Er zeigt den biblischen Helden nicht nach dem Sieg, sondern vor dem Kampf gegen Goliath: angespannt, wachsam, die Schleuder über der Schulter. Die Figur ist mit Sockel 5,17 Meter hoch und wurde zum Symbol der freien Republik Florenz. Seit 1873 steht sie in der Galleria dell’Accademia; vor dem Palazzo Vecchio steht eine Kopie.",
   "Goldmaske des Tutanchamun · dreifach vergrößert|Ägypten, 18. Dynastie, um 1323 v. Chr.":
     "Die Maske lag direkt auf dem Gesicht der Mumie und sollte dem König im Jenseits ein ewiges, vollkommenes Antlitz geben. Sie besteht aus rund zehn Kilogramm Gold, eingelegt mit Lapislazuli, Quarz, Obsidian und farbigem Glas; das Original ist 54 Zentimeter hoch. Auf der Stirn sitzen Geier und Kobra, die Schutzgöttinnen von Ober- und Unterägypten. Howard Carter fand sie 1925 im Grab; sie befindet sich heute in Kairo.",
-  "Osiris · in Gold|Ägypten, Casa Museu Eva Klabin, Rio de Janeiro":
+  "Osiris · in Gold|Casa Museu Eva Klabin, Rio de Janeiro · Altes Ägypten":
     "Osiris war der Herrscher des Jenseits und der Gott der Wiedergeburt. Nach dem Mythos ermordete ihn sein Bruder Seth; seine Schwester und Gemahlin Isis fügte den zerstückelten Leib wieder zusammen und empfing von ihm den Sohn Horus. Dargestellt wird er als Mumie mit grüner oder schwarzer Haut, mit der Atef-Krone – der weißen Krone Oberägyptens zwischen zwei Straußenfedern – und mit Krummstab und Geißel vor der Brust, den Zeichen des Königtums. Jeder verstorbene König, später jeder Verstorbene, wurde im Totengericht „zu einem Osiris“. Statuetten wie diese stifteten Gläubige vor allem in der Spätzeit in seine Heiligtümer, besonders nach Abydos. Das Original, etwa 29 Zentimeter hoch, gehört zur ägyptischen Sammlung der Casa Museu Eva Klabin in Rio de Janeiro; der Archäologe Moacir Elias Santos hat es aus Fotografien als 3D-Modell rekonstruiert.",
   "Büste der Nofretete · dreifach vergrößert|Thutmosis, Amarna, um 1345 v. Chr.":
     "Nofretete war die Hauptgemahlin des Pharaos Echnaton; ihr Name bedeutet „Die Schöne ist gekommen“. Die Büste aus Kalkstein mit bemalter Stuckschicht diente vermutlich als Modell in der Werkstatt des Bildhauers Thutmosis — deshalb fehlt im linken Auge die Einlage. Eine deutsche Grabung unter Ludwig Borchardt fand sie 1912 in Amarna. Sie steht im Neuen Museum in Berlin; Ägypten fordert ihre Rückgabe.",
@@ -816,12 +903,12 @@ function drawSpray() {
   // Das Foto blendet über dem fertigen Bild des letzten Durchgangs ein und zum leeren Papier aus
   const coats = k < 0 ? (spray.t < SPRAY_FADE ? n : 0) : Math.min(k, n);
   for (let i = 0; i < coats; i++) g.drawImage(spray.layers[i].img, SPRAY_MARGIN, SPRAY_MARGIN);
-  let label = 'Fertiges Spraybild';
+  let label = tr('Fertiges Spraybild');
   if (k < 0) {
     g.globalAlpha = Math.min(1, spray.t / SPRAY_FADE, (SPRAY_PHOTO - spray.t) / SPRAY_FADE);
     g.drawImage(spray.photo, SPRAY_MARGIN, SPRAY_MARGIN);
     g.globalAlpha = 1;
-    label = 'Vorlage: Foto';
+    label = tr('Vorlage: Foto');
   } else if (k < n) {
     const { img, name } = spray.layers[k];
     const front = Math.min(1, Math.max(0, (local - SPRAY_LAY) / SPRAY_COAT)) * (SPRAY_H + 240) - 120;
@@ -837,7 +924,7 @@ function drawSpray() {
     g.globalAlpha = Math.min(1, local / SPRAY_LAY, (SPRAY_STEP - local) / SPRAY_LIFT) * 0.9;
     g.drawImage(spray.plates[k], 0, 0);
     g.globalAlpha = 1;
-    label = `Schablone ${k + 1} von ${n} · ${name}`;
+    label = `${tr('Schablone {k} von {n}').replace('{k}', k + 1).replace('{n}', n)} · ${tr(name)}`;
   }
   g.fillStyle = '#16181c';
   g.font = '24px Georgia, serif';
@@ -868,14 +955,9 @@ function makePlacardTexture(title, artist) {
   const c = document.createElement('canvas');
   c.width = 1024; c.height = 256;
   const ctx = c.getContext('2d');
-  ctx.fillStyle = '#efe6d4';
-  ctx.fillRect(0, 0, c.width, c.height);
-  ctx.strokeStyle = '#8a7c5a';
-  ctx.lineWidth = 4;
-  ctx.strokeRect(6, 6, c.width - 12, c.height - 12);
-  ctx.fillStyle = '#1c1810';
-  ctx.textAlign = 'center';
-
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.anisotropy = 4;
   // Schriftgrad verkleinern, bis der Text auf das Schild passt — lange Titel
   // wie "Der Wanderer über dem Nebelmeer" wurden sonst abgeschnitten
   const maxTextW = c.width - 80;
@@ -887,15 +969,24 @@ function makePlacardTexture(title, artist) {
       ctx.font = `${style} ${px}px Georgia, serif`;
     }
   };
-
-  fitFont(title, '600', 60);
-  ctx.fillText(title, c.width / 2, 118);
-  fitFont(artist, 'italic', 42);
-  ctx.fillStyle = '#4a4030';
-  ctx.fillText(artist, c.width / 2, 190);
-  const tex = new THREE.CanvasTexture(c);
-  tex.colorSpace = THREE.SRGBColorSpace;
-  tex.anisotropy = 4;
+  const draw = () => {
+    ctx.fillStyle = '#efe6d4';
+    ctx.fillRect(0, 0, c.width, c.height);
+    ctx.strokeStyle = '#8a7c5a';
+    ctx.lineWidth = 4;
+    ctx.strokeRect(6, 6, c.width - 12, c.height - 12);
+    ctx.fillStyle = '#1c1810';
+    ctx.textAlign = 'center';
+    const t = tr(title), a = tr(artist);
+    fitFont(t, '600', 60);
+    ctx.fillText(t, c.width / 2, 118);
+    fitFont(a, 'italic', 42);
+    ctx.fillStyle = '#4a4030';
+    ctx.fillText(a, c.width / 2, 190);
+    tex.needsUpdate = true;
+  };
+  draw();
+  relabels.push(draw);
   return tex;
 }
 
@@ -903,16 +994,20 @@ function makeSignTexture(text) {
   const c = document.createElement('canvas');
   c.width = 1024; c.height = 192;
   const ctx = c.getContext('2d');
-  ctx.fillStyle = 'rgba(10,8,6,0)';
-  ctx.fillRect(0, 0, c.width, c.height);
-  ctx.fillStyle = '#d8b978';
-  ctx.textAlign = 'center';
-  ctx.font = '400 78px Georgia, serif';
-  ctx.shadowColor = 'rgba(0,0,0,0.8)';
-  ctx.shadowBlur = 12;
-  ctx.fillText(text, c.width / 2, 120);
   const tex = new THREE.CanvasTexture(c);
   tex.colorSpace = THREE.SRGBColorSpace;
+  const draw = () => {
+    ctx.clearRect(0, 0, c.width, c.height);
+    ctx.fillStyle = '#d8b978';
+    ctx.textAlign = 'center';
+    ctx.font = '400 78px Georgia, serif';
+    ctx.shadowColor = 'rgba(0,0,0,0.8)';
+    ctx.shadowBlur = 12;
+    ctx.fillText(tr(text), c.width / 2, 120);
+    tex.needsUpdate = true;
+  };
+  draw();
+  relabels.push(draw);
   return tex;
 }
 
@@ -3048,7 +3143,8 @@ const WX_TEXT = { 0: 'klar', 1: 'heiter', 2: 'bewölkt', 3: 'bedeckt', 45: 'Nebe
   66: 'Eisregen', 67: 'Eisregen', 71: 'Schnee', 73: 'Schnee', 75: 'starker Schnee', 77: 'Schneegriesel',
   80: 'Schauer', 81: 'Schauer', 82: 'heftige Schauer', 85: 'Schneeschauer', 86: 'Schneeschauer',
   95: 'Gewitter', 96: 'Gewitter mit Hagel', 99: 'Gewitter mit Hagel' };
-const burjWx = { loading: false, at: 0, place: null, tz: undefined, temp: null, text: '', icon: '' };
+const burjWx = { loading: false, at: 0, place: null, tz: undefined, temp: null, code: null, icon: '' };
+relabels.push(() => { burjWx.at = 0; }); // Ortsname in der neuen Sprache holen
 // Wettersymbol zum WMO-Code; nachts Mond statt Sonne
 function wxIcon(code, day) {
   if (code <= 1) return day ? '☀️' : '🌙';
@@ -3073,7 +3169,7 @@ async function loadBurjWeather() {
     const loc = burjWx.loc || (burjWx.loc = await burjLocation());
     if (!loc.name) {
       try {
-        const r = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${loc.lat}&longitude=${loc.lon}&localityLanguage=de`);
+        const r = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${loc.lat}&longitude=${loc.lon}&localityLanguage=${window.LANG}`);
         const j = await r.json();
         loc.name = j.city || j.locality || j.principalSubdivision || '';
       } catch { loc.name = ''; }
@@ -3083,7 +3179,7 @@ async function loadBurjWeather() {
     burjWx.place = loc.name;
     burjWx.tz = j.timezone;
     burjWx.temp = j.current.temperature_2m;
-    burjWx.text = WX_TEXT[j.current.weather_code] ?? '';
+    burjWx.code = j.current.weather_code;
     burjWx.icon = wxIcon(j.current.weather_code, j.current.is_day === 1);
     burjWx.at = Date.now();
   } catch {
@@ -3094,12 +3190,13 @@ async function loadBurjWeather() {
 function drawBurjClock(g, w, h, t) {
   if (!burjWx.loading && Date.now() - burjWx.at > 15 * 60000) loadBurjWeather();
   const now = new Date(), tz = burjWx.tz; // Zeitzone des Wetterorts, bis dahin die des Browsers
-  const fmt = (o) => { try { return now.toLocaleString('de-AT', { ...o, timeZone: tz }); } catch { return now.toLocaleString('de-AT', o); } };
+  const loc = LANGS[window.LANG].locale;
+  const fmt = (o) => { try { return now.toLocaleString(loc, { ...o, timeZone: tz }); } catch { return now.toLocaleString(loc, o); } };
   const parts = [
     fmt({ hour: '2-digit', minute: '2-digit' }),
     fmt({ weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }),
   ];
-  if (burjWx.temp !== null) parts.push(`${burjWx.place ? burjWx.place + ' ' : ''}${burjWx.icon} ${Math.round(burjWx.temp)} °C ${burjWx.text}`.trim());
+  if (burjWx.temp !== null) parts.push(`${burjWx.place ? burjWx.place + ' ' : ''}${burjWx.icon} ${Math.round(burjWx.temp)} °C ${tr(WX_TEXT[burjWx.code] ?? '')}`.trim());
   // als Laufschrift ganz unten, wo sonst die Flagge weht: dort ist sie am Turm am größten zu sehen
   const y0 = h * (1 - FLAG_BAND[1]), y1 = h * (1 - FLAG_BAND[0]), S = 3.4;
   const px = Math.round((y1 - y0) * 0.8 / S / 0.75);
@@ -4077,24 +4174,26 @@ function buildRoofTerrace() {
   sculptureSpots.push({ mesh: penProxy, title: penTitle, artist: penArtist, sculpture: true });
   // Infotafel zum Kopfschmuck an der linken Innenwand, zwischen Vorderwand und Seitentür, zum Raum gewandt.
   // Unbeleuchtet (MeshBasic) wie die Schilder, damit sie im dunklen Tempelraum lesbar bleibt; anklickbar wie die Vitrine
-  const boardTex = canvasTex(1024, 1366, (g, w, h) => {
+  const drawBoard = (g, w, h) => {
     g.fillStyle = '#efe6d4'; g.fillRect(0, 0, w, h);
     g.strokeStyle = '#8a7c5a'; g.lineWidth = 6; g.strokeRect(14, 14, w - 28, h - 28);
     g.fillStyle = '#1c1810'; g.textAlign = 'center';
-    g.font = '600 62px Georgia, serif'; g.fillText('Federkopfschmuck', w / 2, 130);
-    g.fillText('des Moctezuma', w / 2, 205);
-    g.fillStyle = '#4a4030'; g.font = 'italic 42px Georgia, serif'; g.fillText(penArtist, w / 2, 275);
+    g.font = '600 62px Georgia, serif'; g.fillText(tr('Federkopfschmuck'), w / 2, 130);
+    g.fillText(tr('des Moctezuma'), w / 2, 205);
+    g.fillStyle = '#4a4030'; g.font = 'italic 42px Georgia, serif'; g.fillText(tr(penArtist), w / 2, 275);
     g.fillStyle = '#8a7c5a'; g.fillRect(w / 2 - 160, 315, 320, 3);
     g.fillStyle = '#1c1810'; g.textAlign = 'left'; g.font = '35px Georgia, serif';
     let y = 395, line = '';
-    for (const word of ABOUT_WORKS[`${penTitle}|${penArtist}`].split(' ')) { // Zeilen umbrechen
+    for (const word of aboutWork(`${penTitle}|${penArtist}`).split(' ')) { // Zeilen umbrechen
       if (line && g.measureText(line + ' ' + word).width > w - 150) { g.fillText(line, 75, y); y += 50; line = word; }
       else line = line ? line + ' ' + word : word;
     }
     g.fillText(line, 75, y);
     g.fillStyle = '#6a5e48'; g.textAlign = 'center'; g.font = 'italic 32px Georgia, serif';
-    g.fillText('Original: Weltmuseum Wien · Klick: mehr dazu', w / 2, h - 60);
-  });
+    g.fillText(tr('Original: Weltmuseum Wien · Klick: mehr dazu'), w / 2, h - 60);
+  };
+  const boardTex = canvasTex(1024, 1366, drawBoard);
+  relabels.push(() => { drawBoard(boardTex.image.getContext('2d'), 1024, 1366); boardTex.needsUpdate = true; });
   const board = new THREE.Mesh(new THREE.PlaneGeometry(1.0, 1.334), new THREE.MeshBasicMaterial({ map: boardTex }));
   const boardFrame = new THREE.Mesh(new THREE.BoxGeometry(0.04, 1.40, 1.07), new THREE.MeshStandardMaterial({ color: 0x2a1c12, roughness: 0.8, metalness: 0 }));
   const innerX = -(TW - TWALL);
@@ -5590,7 +5689,7 @@ loadingManager.onLoad = () => {
   applyWeather(weather); // auch die inzwischen geladenen Figuren auf dem Dach
   warmUp();
   assetsReady = true;
-  loadText.textContent = 'Bereit — klicken zum Betreten';
+  setText(loadText, 'Bereit — klicken zum Betreten');
   startBtn.style.opacity = '1';
 };
 
@@ -5624,7 +5723,7 @@ function openMenu() {
   backBtn.style.display = 'none';
   infoBtn.style.display = 'none';
   closeInfo();
-  hud.textContent = HUD_DEFAULT;
+  setText(hud, HUD_DEFAULT);
 }
 startBtn.addEventListener('click', closeMenu);
 
@@ -5836,8 +5935,8 @@ document.addEventListener('visibilitychange', () => {
 });
 
 function showMusic() {
-  musicToggle.textContent = musicOn ? '♪ Cool Jazz' : '♪ Musik aus';
-  musicToggle.title = musicOn ? 'Musik ausschalten' : 'Musik einschalten';
+  setText(musicToggle, musicOn ? '♪ Cool Jazz' : '♪ Musik aus');
+  setTitle(musicToggle, musicOn ? 'Musik ausschalten' : 'Musik einschalten');
   musicBox.classList.toggle('off', !musicOn);
 }
 musicToggle.addEventListener('click', () => {
@@ -5851,7 +5950,7 @@ showMusic();
 // Wetter draußen: Sonne → Mondnacht → Regen
 const weatherToggle = document.getElementById('weatherToggle');
 const WEATHER_ORDER = ['sonne', 'nacht', 'regen'];
-function showWeather() { weatherToggle.textContent = WEATHER[weather].label; }
+function showWeather() { setText(weatherToggle, WEATHER[weather].label); }
 weatherToggle.addEventListener('click', () => {
   const next = WEATHER_ORDER[(WEATHER_ORDER.indexOf(weather) + 1) % WEATHER_ORDER.length];
   try { localStorage.setItem('wetter', next); } catch {}
@@ -6045,7 +6144,7 @@ function enterFocus(spot, keepSavedPos) {
   focusState.animating = true;
   focusState.active = true;
   focusState.currentSpot = spot;
-  hud.textContent = HUD_FOCUS;
+  setText(hud, HUD_FOCUS);
   backBtn.style.display = 'block';
   infoBtn.style.display = ABOUT_WORKS[aboutKey(spot)] ? 'block' : 'none';
   if (infoOpen()) openInfo(spot); // beim Wechsel zum nächsten Bild gleich dessen Text
@@ -6064,7 +6163,7 @@ function exitFocus() {
   focusState.animating = true;
   focusState.active = false;
   focusState.currentSpot = null;
-  hud.textContent = HUD_DEFAULT;
+  setText(hud, HUD_DEFAULT);
   backBtn.style.display = 'none';
   infoBtn.style.display = 'none';
   closeInfo();
@@ -6294,10 +6393,11 @@ function skyObjectAt(event) {
   return best;
 }
 function skyTitle(key) {
-  if (key === 'Mond') return ['Der Mond', 'Vollmond'];
-  if (key === 'Assange') return ['Julian Assange', 'Sternbild'];
+  if (key === 'Mond') return [tr('Der Mond'), tr('Vollmond')];
+  if (key === 'Assange') return ['Julian Assange', tr('Sternbild')];
   const m = skyData.messier.find((x) => x[6] === key);
-  return [m && m[7] ? `${key} · ${GALAXY_DE[m[7]] || m[7]}` : key, 'Galaxie'];
+  const de = m && m[7] && (GALAXY_DE[m[7]] || m[7]);
+  return [de ? `${key} · ${window.LANG === 'en' ? m[7] : tr(de)}` : key, tr('Galaxie')];
 }
 const photoBox = document.getElementById('photo');
 function showPhoto(key) {
@@ -6306,7 +6406,7 @@ function showPhoto(key) {
   document.getElementById('photoImg').src = url;
   document.getElementById('photoImg').alt = title;
   document.getElementById('photoTitle').textContent = title;
-  document.getElementById('photoCredit').textContent = 'Foto: ' + credit + ' · Wikimedia Commons';
+  document.getElementById('photoCredit').textContent = tr('Foto') + ': ' + credit + ' · Wikimedia Commons';
   photoBox.style.display = 'flex';
 }
 function closePhoto() { photoBox.style.display = 'none'; }
@@ -6317,8 +6417,8 @@ function setHover(spot, x, y) {
   renderer.domElement.classList.toggle('hover', !!spot);
   if (!spot) { tooltip.style.opacity = '0'; return; }
   tooltip.textContent = '';
-  const t = document.createElement('b'); t.textContent = spot.title;
-  const a = document.createElement('i'); a.textContent = spot.artist;
+  const t = document.createElement('b'); t.textContent = tr(spot.title);
+  const a = document.createElement('i'); a.textContent = tr(spot.artist);
   tooltip.append(t, a);
   tooltip.style.left = x + 'px';
   tooltip.style.top = y + 'px';
@@ -6340,21 +6440,25 @@ let infoSpot = null;
 let reading = false;
 
 const aboutKey = (spot) => `${spot.title}|${spot.artist}`;
+// Erläuterung in der gewählten Sprache, sonst deutsch
+function aboutWork(key) { return ABOUT_WORKS[key] && (window.I18N.works[key] ?? ABOUT_WORKS[key]); }
+relabels.push(() => { if (infoOpen()) openInfo(infoSpot); });
 const artistKey = (artist) => artist.split(/,| · /)[0].trim();
 const infoOpen = () => infoBox.style.display === 'block';
 
 function openInfo(spot) {
-  const work = ABOUT_WORKS[aboutKey(spot)];
+  const work = aboutWork(aboutKey(spot));
   if (!work) return;
   stopReading();
   infoSpot = spot;
   const key = artistKey(spot.artist);
-  document.getElementById('infoTitle').textContent = spot.title;
-  document.getElementById('infoBy').textContent = spot.artist;
+  document.getElementById('infoTitle').textContent = tr(spot.title);
+  document.getElementById('infoBy').textContent = tr(spot.artist);
   document.getElementById('infoWork').textContent = work;
-  document.getElementById('infoArtistHead').textContent =
-    /v\. Chr\./.test(spot.artist) ? 'Herkunft' : key.startsWith('Fraktal') ? 'Der Mathematiker' : 'Der Künstler';
-  document.getElementById('infoArtist').textContent = ABOUT_ARTISTS[key] || '';
+  setText(document.getElementById('infoArtistHead'),
+    /v\. Chr\./.test(spot.artist) ? 'Herkunft' : key.startsWith('Fraktal') ? 'Der Mathematiker'
+      : key === 'Casa Museu Eva Klabin' ? 'Die Sammlung' : 'Der Künstler');
+  document.getElementById('infoArtist').textContent = window.I18N.artists[key] ?? ABOUT_ARTISTS[key] ?? '';
   infoBox.style.display = 'block';
   infoBox.scrollTop = 0;
 }
@@ -6368,13 +6472,14 @@ function closeInfo() {
 // dann Apples Premium-/Enhanced-Stimmen, dann Googles Online-Stimme. Apples
 // Spaßstimmen (Eddy, Flo, Grandma …) klingen künstlich und fallen weg.
 const NOVELTY_VOICES = /\b(Eddy|Flo|Grandma|Grandpa|Oma|Opa|Reed|Rocko|Sandy|Shelley|Albert|Bad News|Bahh|Bells|Boing|Bubbles|Cellos|Good News|Jester|Organ|Superstar|Trinoids|Whisper|Wobble|Zarvox)\b/i;
+const SPEECH_LANG = { de: 'de-DE', en: 'en-GB', fr: 'fr-FR', it: 'it-IT' };
 function voiceScore(v) {
   return (/natural|neural/i.test(v.name) ? 8 : 0) + (/premium/i.test(v.name) ? 6 : /enhanced|erweitert|verbessert/i.test(v.name) ? 5 : 0)
     + (/google/i.test(v.name) ? 4 : 0) + (/online/i.test(v.name) ? 2 : 0)
-    + (v.lang === 'de-DE' ? 1 : 0) - (NOVELTY_VOICES.test(v.name) ? 20 : 0);
+    + (v.lang.replace('_', '-') === SPEECH_LANG[window.LANG] ? 1 : 0) - (NOVELTY_VOICES.test(v.name) ? 20 : 0);
 }
 function bestVoice() {
-  return speechSynthesis.getVoices().filter((v) => v.lang.startsWith('de'))
+  return speechSynthesis.getVoices().filter((v) => v.lang.startsWith(window.LANG))
     .sort((a, b) => voiceScore(b) - voiceScore(a))[0] || null;
 }
 if (canSpeak) speechSynthesis.getVoices(); // lädt die Stimmenliste vor — sie kommt in Chrome verzögert
@@ -6384,7 +6489,7 @@ if (canSpeak) speechSynthesis.getVoices(); // lädt die Stimmenliste vor — sie
 function startReading() {
   if (!infoSpot) return;
   const paragraphs = [
-    `${infoSpot.title}. ${infoSpot.artist.replace(/ · /g, ', ')}.`,
+    `${tr(infoSpot.title)}. ${tr(infoSpot.artist).replace(/ · /g, ', ')}.`,
     document.getElementById('infoWork').textContent,
     `${document.getElementById('infoArtistHead').textContent}. ${document.getElementById('infoArtist').textContent}`,
   ];
@@ -6393,20 +6498,20 @@ function startReading() {
   speechSynthesis.cancel();
   parts.forEach((part, i) => {
     const u = new SpeechSynthesisUtterance(part);
-    u.lang = 'de-DE';
+    u.lang = SPEECH_LANG[window.LANG];
     if (voice) u.voice = voice;
     u.rate = 0.98;
     if (i === parts.length - 1) u.onend = () => { if (reading) stopReading(); };
     speechSynthesis.speak(u);
   });
   reading = true;
-  infoRead.textContent = '■ Anhalten';
+  setText(infoRead, '■ Anhalten');
   duckMusic(true);
 }
 function stopReading() {
   if (canSpeak) speechSynthesis.cancel();
   reading = false;
-  infoRead.textContent = '▶ Vorlesen';
+  setText(infoRead, '▶ Vorlesen');
   duckMusic(false);
 }
 
@@ -6426,7 +6531,7 @@ function updateRoomLabel() {
   const idx = stair.level ? UPPER_ROOM + (outside ? 1 : 0) : roomIndexAt(x, z);
   if (idx >= 0 && idx !== currentRoomIdx) {
     currentRoomIdx = idx;
-    roomLabel.textContent = idx === UPPER_ROOM ? 'Dachterrasse' : idx > UPPER_ROOM ? 'Landschaft' : ROOMS[idx].name;
+    setText(roomLabel, idx === UPPER_ROOM ? 'Dachterrasse' : idx > UPPER_ROOM ? 'Landschaft' : ROOMS[idx].name);
     roomLabel.style.opacity = '1';
     clearTimeout(labelTimer);
     labelTimer = setTimeout(() => { roomLabel.style.opacity = '0'; }, 2600);
