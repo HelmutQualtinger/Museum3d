@@ -218,6 +218,7 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { DRACOLoader } from 'three/addons/loaders/DRACOLoader.js';
+import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
 
@@ -2794,6 +2795,7 @@ function buildRoofTerrace() {
     patch.scale.set(rx, rz, 1);
     patch.position.set(x, 0, z);
     roof.add(patch);
+    return patch;
   };
 
   // Steinlagen eines Giza-Mantels; v läuft vom Fuß zur Spitze. casing = Anteil von oben,
@@ -2898,6 +2900,438 @@ function buildRoofTerrace() {
   const door = new THREE.Mesh(new THREE.BoxGeometry(1.5, 2.2, 0.1), new THREE.MeshStandardMaterial({ color: 0x26231f, roughness: 1 }));
   door.position.set(MAYA_X, flightH + 1.2, MAYA_Z - 3.53);
   roof.add(door);
+
+  // Hinter dem Denker: links der Eiffelturm auf dem Marsfeld, rechts der Burj Khalifa in der Wüste,
+  // beide 34 bzw. 85 m hoch (330 : 828 m), der Eiffelturm näher. Alles bleibt über y = −0,2 (über ROOM_H in Weltkoordinaten).
+  // Fachwerk: Eckstreben, Riegel und Andreaskreuze, dazwischen durchsichtig. Gut 40 % deckend,
+  // damit es in den kleinen Mipmaps über alphaTest bleibt statt zu verschwinden
+  const lattice = canvasTex(256, 256, (g, w, h) => {
+    g.strokeStyle = '#6b5640';
+    g.lineWidth = 36;
+    g.strokeRect(0, 0, w, h);
+    g.lineWidth = 14;
+    g.beginPath();
+    g.moveTo(0, 0); g.lineTo(w, h);
+    g.moveTo(w, 0); g.lineTo(0, h);
+    g.stroke();
+    g.globalCompositeOperation = 'source-atop'; // Dunst nur auf die Streben
+    hazeOver(g, w, h);
+  });
+  lattice.wrapS = lattice.wrapT = THREE.RepeatWrapping;
+  const latticeMat = (rx, ry) => {
+    const t = lattice.clone();
+    t.repeat.set(rx, ry);
+    return new THREE.MeshStandardMaterial({ map: t, alphaTest: 0.3, side: THREE.DoubleSide, roughness: 0.9, metalness: 0 });
+  };
+  const ironMat = new THREE.MeshStandardMaterial({ color: 0x75604a, roughness: 0.9, metalness: 0 });
+
+  const EIFFEL_X = -30, EIFFEL_Z = -78, EH = 34;
+  groundPatch(EIFFEL_X, EIFFEL_Z, 26, 16, 0x5f8f4a);
+  const eiffel = new THREE.Group();
+  eiffel.position.set(EIFFEL_X, -0.2, EIFFEL_Z);
+  roof.add(eiffel);
+  // vier Pfeiler von den Ecken bis zur ersten Etage
+  const legMat = latticeMat(6, 2);
+  for (const sx of [-1, 1]) for (const sz of [-1, 1]) {
+    const curve = new THREE.QuadraticBezierCurve3(
+      new THREE.Vector3(sx * 0.15 * EH, 0, sz * 0.15 * EH),
+      new THREE.Vector3(sx * 0.135 * EH, 0.1 * EH, sz * 0.135 * EH),
+      new THREE.Vector3(sx * 0.095 * EH, 0.175 * EH, sz * 0.095 * EH));
+    eiffel.add(new THREE.Mesh(new THREE.TubeGeometry(curve, 8, 0.032 * EH, 4, false), legMat));
+  }
+  // die Bögen zwischen den Pfeilern
+  for (let i = 0; i < 4; i++) {
+    const arch = new THREE.Mesh(new THREE.TorusGeometry(0.112 * EH, 0.007 * EH, 4, 20, Math.PI), ironMat);
+    arch.scale.y = 1.12;
+    arch.position.y = 0.02 * EH;
+    arch.rotation.y = i * Math.PI / 2;
+    arch.translateZ(0.122 * EH);
+    eiffel.add(arch);
+  }
+  // Schaft über der ersten Etage: vierseitige Drehform mit dem geschwungenen Umriss (halbe Breite → Eckabstand)
+  const shaftGeo = new THREE.LatheGeometry(
+    [[0.105, 0.17], [0.08, 0.25], [0.06, 0.35], [0.045, 0.45], [0.03, 0.6], [0.02, 0.75], [0.012, 0.88]]
+      .map(([hw2, y]) => new THREE.Vector2(hw2 * Math.SQRT2 * EH, y * EH)), 4, Math.PI / 4).toNonIndexed();
+  shaftGeo.computeVertexNormals();
+  eiffel.add(new THREE.Mesh(shaftGeo, latticeMat(4, 9)));
+  [[0.25, 0.022, 0.17], [0.14, 0.018, 0.35], [0.034, 0.035, 0.885]].forEach(([s, t, y]) => {
+    const deck = new THREE.Mesh(new THREE.BoxGeometry(s * EH, t * EH, s * EH), ironMat);
+    deck.position.y = y * EH;
+    eiffel.add(deck);
+  });
+  const mast = new THREE.Mesh(new THREE.CylinderGeometry(0.003 * EH, 0.005 * EH, 0.1 * EH, 6), ironMat);
+  mast.position.y = 0.95 * EH;
+  eiffel.add(mast);
+
+  // Burj Khalifa: Y-förmiger Grundriss, drei Flügel mit gerundeten Enden um einen Kern; die 27 Rücksprünge
+  // wandern reihum von Flügel zu Flügel nach oben (bis ≈ 72 % der Höhe), darüber gestufte Rundtürme und
+  // die Spitze. Maßstab 85 : 828 m, ein Geschoss also ≈ 0,4 m
+  const BURJ_X = 54, BURJ_Z = -128, BH = 85;
+  groundPatch(BURJ_X, BURJ_Z, 30, 18, 0xdcc49a);
+  groundPatch(BURJ_X + 6, BURJ_Z + 19, 20, 6, 0x4f86a8).position.y = 0.04; // Burj Lake
+  // Fassade, eine Kachel = 2 × 2 m: fünf Geschosse, acht Achsen; Glas mit unterschiedlich gespiegeltem Himmel,
+  // helle Brüstungsbänder und Edelstahl-Lisenen
+  const facade = canvasTex(256, 256, (g, w, h) => {
+    const fh = h / 5, cw = w / 8;
+    for (let f = 0; f < 5; f++) for (let c = 0; c < 8; c++) {
+      const r = Math.random() * 38;
+      const sky = g.createLinearGradient(0, f * fh, 0, f * fh + fh);
+      sky.addColorStop(0, `rgb(${112 + r},${134 + r},${156 + r})`);
+      sky.addColorStop(1, `rgb(${84 + r},${104 + r},${124 + r})`);
+      g.fillStyle = sky;
+      g.fillRect(c * cw, f * fh, cw, fh);
+    }
+    for (let f = 0; f < 5; f++) {
+      g.fillStyle = '#b7c2ca';
+      g.fillRect(0, f * fh, w, 9);
+      g.fillStyle = 'rgba(50,60,70,0.4)';
+      g.fillRect(0, f * fh + 9, w, 2);
+    }
+    for (let c = 0; c < 8; c++) {
+      g.fillStyle = '#e6ecf0';
+      g.fillRect(c * cw, 0, 5, h);
+      g.fillStyle = '#8796a2';
+      g.fillRect(c * cw + 5, 0, 2, h);
+    }
+    hazeOver(g, w, h);
+  });
+  facade.wrapS = facade.wrapT = THREE.RepeatWrapping;
+  // UVs in Metern: Wände nach ihrer waagrechten Richtung, damit Lisenen und Geschosse überall gleich groß
+  // sind; die Richtung kommt aus der Dreiecksfläche, nicht aus den (gerundeten) Normalen
+  const _a = new THREE.Vector3(), _b = new THREE.Vector3(), _c = new THREE.Vector3();
+  const facadeUVs = (geo, tile) => {
+    const pos = geo.attributes.position, uv = geo.attributes.uv;
+    for (let i = 0; i < pos.count; i += 3) {
+      _a.fromBufferAttribute(pos, i); _b.fromBufferAttribute(pos, i + 1); _c.fromBufferAttribute(pos, i + 2);
+      const n = _c.sub(_b).cross(_a.clone().sub(_b)).normalize();
+      const tx = -n.z, tz = n.x, tl = Math.hypot(tx, tz) || 1;
+      for (let j = i; j < i + 3; j++) {
+        const x = pos.getX(j), y = pos.getY(j), z = pos.getZ(j);
+        if (Math.abs(n.y) > 0.7) uv.setXY(j, x / tile, z / tile);
+        else uv.setXY(j, (x * tx + z * tz) / tl / tile, y / tile);
+      }
+    }
+    return geo;
+  };
+  const wingShape = (len, wd) => {
+    const s = new THREE.Shape();
+    s.moveTo(0, -wd / 2);
+    s.lineTo(len - wd / 2, -wd / 2);
+    s.absarc(len - wd / 2, 0, wd / 2, -Math.PI / 2, Math.PI / 2, false);
+    s.lineTo(0, wd / 2);
+    s.closePath();
+    return s;
+  };
+  const wingPart = (len, wd, y0, y1, k) => {
+    const geo = new THREE.ExtrudeGeometry(wingShape(len, wd), { depth: y1 - y0, bevelEnabled: false, curveSegments: 8 });
+    geo.rotateX(-Math.PI / 2);
+    geo.translate(0, y0, 0);
+    geo.rotateY(Math.PI / 2 + k * Math.PI * 2 / 3);
+    return geo;
+  };
+  const WING_TOP = 0.72 * BH, L0 = 0.085 * BH, BAND = 0.3;
+  const shell = [], bands = [], wingY = [-0.2, -0.2, -0.2];
+  for (let s = 0; s < 27; s++) {
+    const k = s % 3, m = Math.floor(s / 3);
+    const y = WING_TOP * (0.1 + 0.9 * (s + 1) / 27);
+    const len = L0 * Math.pow(1 - m / 10, 0.6), wd = 0.046 * BH * (1 - 0.3 * y / WING_TOP);
+    shell.push(wingPart(len, wd, wingY[k], y, k));
+    // dunkles Technikgeschoss unter jedem Rücksprung, ein wenig vorstehend
+    bands.push(wingPart(len + 0.04, wd + 0.08, y - BAND, y, k));
+    wingY[k] = y;
+  }
+  // Kern und Rundtürme über den Flügeln (Radius, Höhe als Anteil von BH)
+  const core = new THREE.LatheGeometry(
+    [[0.03, 0], [0.027, 0.72], [0.025, 0.725], [0.025, 0.76], [0.019, 0.765], [0.019, 0.8], [0.013, 0.805], [0.013, 0.835]]
+      .map(([r, y]) => new THREE.Vector2(r * BH, y * BH)), 16).toNonIndexed();
+  core.computeVertexNormals();
+  shell.push(core);
+  [0.76, 0.8, 0.835].forEach((y) => {
+    const ring = new THREE.CylinderGeometry(0.026 * BH, 0.026 * BH, BAND, 16, 1, true).toNonIndexed();
+    const r = y === 0.76 ? 0.026 : y === 0.8 ? 0.02 : 0.014;
+    ring.scale(r / 0.026, 1, r / 0.026);
+    ring.translate(0, y * BH - BAND / 2, 0);
+    bands.push(ring);
+  });
+  const burj = new THREE.Group();
+  burj.position.set(BURJ_X, 0, BURJ_Z);
+  burj.rotation.y = 0.3;
+  roof.add(burj);
+  const shellGeo = facadeUVs(mergeGeometries(shell.map((g) => g.index ? g.toNonIndexed() : g)), 2);
+  burj.add(new THREE.Mesh(shellGeo, new THREE.MeshStandardMaterial({
+    map: facade, emissive: 0xffffff, emissiveMap: facade, emissiveIntensity: 0.2, roughness: 0.35, metalness: 0,
+  })));
+  burj.add(new THREE.Mesh(mergeGeometries(bands.map((g) => g.index ? g.toNonIndexed() : g)),
+    new THREE.MeshStandardMaterial({ color: 0x76818a, roughness: 0.6, metalness: 0 })));
+  // Spitze: schlanker Stahlschaft mit Rippen, oben fast ein Mast
+  const spireGeo = new THREE.LatheGeometry(
+    [[0.009, 0.835], [0.007, 0.9], [0.0045, 0.95], [0.002, 0.985], [0.0008, 1]]
+      .map(([r, y]) => new THREE.Vector2(r * BH, y * BH)), 8).toNonIndexed();
+  spireGeo.computeVertexNormals();
+  burj.add(new THREE.Mesh(spireGeo, new THREE.MeshStandardMaterial({
+    color: 0xc9d2d9, emissive: 0xc9d2d9, emissiveIntensity: 0.15, roughness: 0.4, metalness: 0,
+  })));
+  // Sockelbauten am Fuß
+  const podiumMat = new THREE.MeshStandardMaterial({ color: 0xd8cdb8, roughness: 0.9, metalness: 0 });
+  [[-14, 6, 16, 1.6, 8], [12, 8, 10, 1.2, 12], [0, -14, 20, 1, 7]].forEach(([x, z, w2, h2, d2]) => {
+    const p = new THREE.Mesh(new THREE.BoxGeometry(w2, h2, d2), podiumMat);
+    p.position.set(BURJ_X + x, h2 / 2 - 0.1, BURJ_Z + z);
+    roof.add(p);
+  });
+
+  // Kolosseum: den Pyramiden gegenüber, hinter dem Denker zwischen Eiffelturm und Burj Khalifa.
+  // 1 : 3,5 (188 × 156 × 48 m → 54 × 45 × 14 m). Außenring mit drei Arkadengeschossen (Halbsäulen,
+  // Gebälk) und der Attika mit Fenstern, Pilastern und Konsolen; vorn rechts ist er wie in Wirklichkeit
+  // eingestürzt, die Bruchkanten fallen stufenweise ab und sind mit Ziegeln ausgebessert. Dort steht der
+  // zweite Ring frei. Innen Ränge über radialen Ziegelmauern, Arenamauer, Hypogäum und Holzboden.
+  const COL_X = 0, COL_Z = -128, CA = 27, CB = 22.5, BAYS = 80;
+  groundPatch(COL_X, COL_Z, 36, 30, 0xbfb196).position.y = 0.06;
+  const travertine = canvasTex(512, 512, (g, w, h) => {
+    const rowH = h / 6; // Lagen von 0,67 m bei 4 m Kachel
+    for (let r = 0; r < 6; r++) {
+      let x = -Math.random() * 60;
+      while (x < w) {
+        const bw = 70 + Math.random() * 90, l = Math.random();
+        g.fillStyle = `rgb(${205 + l * 32 | 0},${182 + l * 30 | 0},${138 + l * 32 | 0})`;
+        g.fillRect(x, r * rowH, bw, rowH);
+        g.fillStyle = 'rgba(90,70,45,0.35)';
+        g.fillRect(x, r * rowH, 2, rowH);
+        x += bw;
+      }
+      g.fillStyle = 'rgba(90,70,45,0.45)';
+      g.fillRect(0, r * rowH + rowH - 2, w, 2);
+    }
+    for (let i = 0; i < 70; i++) { // dunkle Krusten, vom Regen in Streifen gezogen
+      g.fillStyle = `rgba(${70 + Math.random() * 30 | 0},${62 + Math.random() * 25 | 0},50,${(0.08 + Math.random() * 0.14).toFixed(2)})`;
+      g.fillRect(Math.random() * w, Math.random() * h, 3 + Math.random() * 14, 20 + Math.random() * 120);
+    }
+    weather(g, w, h, 120, 'rgba(120,96,60,0.14)', 'rgba(245,232,205,0.16)');
+    for (let i = 0; i < 90; i++) { // Löcher der herausgebrochenen Eisenklammern in den Fugen
+      g.fillStyle = 'rgba(40,30,22,0.75)';
+      g.beginPath();
+      g.ellipse(Math.random() * w, (Math.floor(Math.random() * 6) + 1) * rowH - 2, 3 + Math.random() * 4, 4 + Math.random() * 5, 0, 0, 7);
+      g.fill();
+    }
+    hazeOver(g, w, h);
+  });
+  travertine.wrapS = travertine.wrapT = THREE.RepeatWrapping;
+  const brick = canvasTex(256, 256, (g, w, h) => {
+    g.fillStyle = '#8a5a44'; // Mörtel
+    g.fillRect(0, 0, w, h);
+    for (let r = 0; r * 10 < h; r++) for (let x = (r % 2) * -16; x < w; x += 32) {
+      const l = Math.random();
+      g.fillStyle = `rgb(${150 + l * 50 | 0},${72 + l * 34 | 0},${48 + l * 22 | 0})`;
+      g.fillRect(x + 1, r * 10 + 1, 30, 7.5);
+    }
+    weather(g, w, h, 40, 'rgba(60,40,30,0.18)', 'rgba(220,180,150,0.14)');
+    hazeOver(g, w, h);
+  });
+  brick.wrapS = brick.wrapT = THREE.RepeatWrapping;
+  const planks = canvasTex(256, 256, (g, w, h) => {
+    for (let x = 0; x < w; x += 16) {
+      const l = Math.random() * 30;
+      g.fillStyle = `rgb(${128 + l | 0},${92 + l | 0},${60 + l * 0.6 | 0})`;
+      g.fillRect(x, 0, 16, h);
+      g.fillStyle = 'rgba(50,34,20,0.6)';
+      g.fillRect(x, 0, 1.5, h);
+    }
+    hazeOver(g, w, h);
+  });
+  planks.wrapS = planks.wrapT = THREE.RepeatWrapping;
+  const stoneMat = (map, color, glow, side = THREE.FrontSide) => new THREE.MeshStandardMaterial({
+    map, color, emissive: 0xffffff, emissiveMap: map, emissiveIntensity: glow, roughness: 0.95, metalness: 0, side });
+  const travMat = stoneMat(travertine, 0xffffff, 0.12);
+  const shadeMat = stoneMat(travertine, 0x9a8a72, 0.04); // Innenring und Gänge: im Halbdunkel
+  const vaultMat = stoneMat(travertine, 0x857661, 0.03, THREE.DoubleSide);
+  const brickMat = stoneMat(brick, 0xffffff, 0.1);
+  const caveaMat = stoneMat(brick, 0xd9c0a8, 0.08, THREE.DoubleSide);
+  const woodMat = stoneMat(planks, 0xffffff, 0.1);
+  const flat = (g) => g.index ? g.toNonIndexed() : g;
+  const parts = { trav: [], shade: [], vault: [], brick: [], cavea: [], wood: [] };
+
+  // Joche in gleichen Bogenlängen um die Ellipse: Mitte, Außennormale, Breite
+  const ellipseFrames = (a, b, n) => {
+    const N = 2000, acc = [0];
+    for (let i = 1; i <= N; i++) {
+      const t0 = (i - 1) / N * Math.PI * 2, t1 = i / N * Math.PI * 2;
+      acc.push(acc[i - 1] + Math.hypot(a * (Math.cos(t1) - Math.cos(t0)), b * (Math.sin(t1) - Math.sin(t0))));
+    }
+    const per = acc[N], frames = [];
+    let j = 0;
+    for (let k = 0; k < n; k++) {
+      const target = per * (k + 0.5) / n;
+      while (acc[j + 1] < target) j++;
+      const th = (j + (target - acc[j]) / (acc[j + 1] - acc[j])) / N * Math.PI * 2;
+      const nx = Math.cos(th) / a, nz = Math.sin(th) / b, nl = Math.hypot(nx, nz);
+      frames.push({ th, x: a * Math.cos(th), z: b * Math.sin(th), nx: nx / nl, nz: nz / nl, w: per / n });
+    }
+    return frames;
+  };
+  // lokal: x = Tangente, y = oben, z = nach außen
+  const _pm = new THREE.Matrix4();
+  const place = (geo, f) => flat(geo).applyMatrix4(_pm.set(
+    f.nz, 0, f.nx, f.x,
+    0, 1, 0, 0,
+    -f.nx, 0, f.nz, f.z,
+    0, 0, 0, 1));
+  const box = (w, h, d, x, y, z) => new THREE.BoxGeometry(w, h, d).translate(x, y, z);
+  // Wandstück eines Jochs mit Bogen; sill = Brüstung unter dem Bogen (0 im Erdgeschoss)
+  const archBay = (w, h, open, sill, depth, y0) => {
+    const r = open / 2, spring = h - 0.55 - r, s = new THREE.Shape();
+    if (sill === 0) {
+      s.moveTo(-w / 2, 0); s.lineTo(-r, 0); s.lineTo(-r, spring);
+      s.absarc(0, spring, r, Math.PI, 0, true);
+      s.lineTo(r, 0); s.lineTo(w / 2, 0); s.lineTo(w / 2, h); s.lineTo(-w / 2, h); s.closePath();
+    } else {
+      s.moveTo(-w / 2, 0); s.lineTo(w / 2, 0); s.lineTo(w / 2, h); s.lineTo(-w / 2, h); s.closePath();
+      const hole = new THREE.Path();
+      hole.moveTo(-r, sill); hole.lineTo(r, sill); hole.lineTo(r, spring);
+      hole.absarc(0, spring, r, 0, Math.PI, false);
+      hole.closePath();
+      s.holes.push(hole);
+    }
+    return new THREE.ExtrudeGeometry(s, { depth, bevelEnabled: false, curveSegments: 6 }).translate(0, y0, -depth / 2);
+  };
+  const LEVELS = [{ h: 3.1, sill: 0, col: 0.2 }, { h: 3.45, sill: 0.5, col: 0.18 }, { h: 3.4, sill: 0.5, col: 0.17 }];
+  const ATTIC = 4.05, OUT_T = 0.9, IN_T = 0.7, RING_GAP = 3.2;
+  const C0 = -0.25, C1 = 1.25; // eingestürzter Abschnitt des Außenrings (θ, +X = 0, +Z = π/2)
+  const inCollapse = (th) => { const t = th > Math.PI ? th - Math.PI * 2 : th; return t >= C0 && t <= C1; };
+
+  // Außenring
+  const outer = ellipseFrames(CA, CB, BAYS);
+  outer.forEach((f, k) => {
+    let d = 0; // Abstand in Jochen bis zum nächsten stehenden Joch
+    if (inCollapse(f.th)) {
+      for (d = 1; d < BAYS; d++) {
+        if (!inCollapse(outer[(k + d) % BAYS].th) || !inCollapse(outer[(k - d + BAYS) % BAYS].th)) break;
+      }
+    }
+    const levels = d === 0 ? 3 : Math.max(0, 4 - d);
+    const w = f.w * 1.03;
+    let y = 0;
+    for (let l = 0; l < levels; l++) {
+      const L = LEVELS[l];
+      const patched = d > 0 && l === levels - 1; // ausgebesserte Bruchkante
+      (patched ? parts.brick : parts.trav).push(place(archBay(w, L.h, 1.25, L.sill, OUT_T, y), f));
+      const colH = L.h - 0.5;
+      parts.trav.push(
+        place(new THREE.CylinderGeometry(L.col, L.col * 1.06, colH, 10, 1, true, -Math.PI / 2, Math.PI).translate(-w / 2, y + colH / 2, OUT_T / 2), f),
+        place(box(L.col * 2.8, 0.14, L.col * 1.8, -w / 2, y + colH - 0.07, OUT_T / 2), f),      // Kapitell
+        place(box(L.col * 2.6, 0.12, L.col * 1.7, -w / 2, y + 0.06, OUT_T / 2), f),             // Basis
+        place(box(w, 0.36, 0.26, 0, y + L.h - 0.18, OUT_T / 2 + 0.1), f),                       // Gebälk
+        place(box(w, 0.08, 0.4, 0, y + L.h - 0.04, OUT_T / 2 + 0.1), f));                       // Gesims
+      y += L.h;
+    }
+    if (d === 0) { // Attika
+      const s = new THREE.Shape();
+      s.moveTo(-w / 2, 0); s.lineTo(w / 2, 0); s.lineTo(w / 2, ATTIC); s.lineTo(-w / 2, ATTIC); s.closePath();
+      if (k % 2 === 0) {
+        const win = new THREE.Path();
+        win.moveTo(-0.2, 1.4); win.lineTo(0.2, 1.4); win.lineTo(0.2, 2.05); win.lineTo(-0.2, 2.05); win.closePath();
+        s.holes.push(win);
+      }
+      parts.trav.push(
+        place(new THREE.ExtrudeGeometry(s, { depth: OUT_T, bevelEnabled: false }).translate(0, y, -OUT_T / 2), f),
+        place(box(0.32, ATTIC - 0.55, 0.1, -w / 2, y + 0.2 + (ATTIC - 0.55) / 2, OUT_T / 2 + 0.05), f), // Pilaster
+        place(box(0.18, 0.22, 0.24, 0, y + 3.0, OUT_T / 2 + 0.12), f),                                 // Konsole
+        place(box(w, 0.32, 0.36, 0, y + ATTIC - 0.16, OUT_T / 2 + 0.1), f));                            // Kranzgesims
+    }
+  });
+
+  // Innenring: drei Arkadengeschosse ohne Säulen; wo der Außenring fehlt, steht er im Licht
+  const IA = CA - RING_GAP, IB = CB - RING_GAP, IN_H = LEVELS[0].h + LEVELS[1].h + LEVELS[2].h;
+  ellipseFrames(IA, IB, BAYS).forEach((f) => {
+    const lit = inCollapse(f.th) || inCollapse(f.th - 0.15) || inCollapse(f.th + 0.15);
+    let y = 0;
+    LEVELS.forEach((L) => {
+      (lit ? parts.trav : parts.shade).push(
+        place(archBay(f.w * 1.03, L.h, 1.0, L.sill, IN_T, y), f),
+        place(box(f.w * 1.03, 0.2, 0.3, 0, y + L.h - 0.1, IN_T / 2 + 0.1), f));
+      y += L.h;
+    });
+  });
+
+  // Fläche zwischen zwei Ellipsen (Gewölbe der Umgänge, Zuschauerränge), θ von th0 bis th1
+  const ringStrip = (a1, b1, y1, a2, b2, y2, th0, th1, n) => {
+    const pos = [];
+    for (let i = 0; i < n; i++) {
+      const t0 = th0 + (th1 - th0) * i / n, t1 = th0 + (th1 - th0) * (i + 1) / n;
+      const A = [a1 * Math.cos(t0), y1, b1 * Math.sin(t0)], B = [a1 * Math.cos(t1), y1, b1 * Math.sin(t1)];
+      const C = [a2 * Math.cos(t1), y2, b2 * Math.sin(t1)], D = [a2 * Math.cos(t0), y2, b2 * Math.sin(t0)];
+      pos.push(...A, ...C, ...B, ...A, ...D, ...C);
+    }
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+    g.setAttribute('uv', new THREE.Float32BufferAttribute(new Float32Array(pos.length / 3 * 2), 2));
+    g.computeVertexNormals();
+    return g;
+  };
+  let vaultY = 0;
+  LEVELS.forEach((L) => { // Gewölbe über den Umgängen, nur wo der Außenring steht
+    vaultY += L.h;
+    parts.vault.push(ringStrip(CA - OUT_T / 2, CB - OUT_T / 2, vaultY, IA + IN_T / 2, IB + IN_T / 2, vaultY, C1, C0 + Math.PI * 2, 160));
+  });
+
+  // Arena (12 × 7 m Halbachsen) mit Podiumsmauer, Ränge vom Innenring hinab
+  const AA = 12, AB = 7, POD = 3.4;
+  parts.cavea.push(ringStrip(IA - IN_T / 2, IB - IN_T / 2, IN_H, AA + 0.5, AB + 0.5, POD, 0, Math.PI * 2, 160));
+  const podShape = new THREE.Shape().absellipse(0, 0, AA + 0.5, AB + 0.5, 0, Math.PI * 2, false);
+  podShape.holes.push(new THREE.Path().absellipse(0, 0, AA, AB, 0, Math.PI * 2, true));
+  parts.trav.push(flat(new THREE.ExtrudeGeometry(podShape, { depth: POD, bevelEnabled: false, curveSegments: 64 }).rotateX(-Math.PI / 2)));
+  // radiale Ziegelmauern unter den verlorenen Sitzreihen, mit Durchgang und gebrochener Krone
+  const inner = ellipseFrames(IA - IN_T / 2, IB - IN_T / 2, BAYS);
+  inner.forEach((f) => {
+    const qx = (AA + 0.5) * Math.cos(f.th), qz = (AB + 0.5) * Math.sin(f.th);
+    let dx = qx - f.x, dz = qz - f.z;
+    const len = Math.hypot(dx, dz);
+    dx /= len; dz /= len;
+    const top = (s) => IN_H + (POD - IN_H) * s + 0.3 + Math.random() * 0.9;
+    const s = new THREE.Shape();
+    s.moveTo(0, 0); s.lineTo(len, 0); s.lineTo(len, top(1));
+    for (const t of [0.8, 0.6, 0.4, 0.2]) s.lineTo(len * t, top(t));
+    s.lineTo(0, top(0)); s.closePath();
+    const door = new THREE.Path();
+    door.moveTo(len * 0.35, 0.01); door.lineTo(len * 0.35 + 0.9, 0.01); door.lineTo(len * 0.35 + 0.9, 1.6);
+    door.absarc(len * 0.35 + 0.45, 1.6, 0.45, 0, Math.PI, false);
+    door.closePath();
+    s.holes.push(door);
+    parts.brick.push(new THREE.ExtrudeGeometry(s, { depth: 0.35, bevelEnabled: false, curveSegments: 4 })
+      .translate(0, 0, -0.175)
+      .applyMatrix4(_pm.set(dx, 0, -dz, f.x, 0, 1, 0, 0, dz, 0, dx, f.z, 0, 0, 0, 1)));
+  });
+  // Hypogäum: Längsmauern der Gänge unter der Arena, im Osten der rekonstruierte Holzboden
+  for (let z = -AB + 0.9; z < AB - 0.5; z += 1.1) {
+    const half = AA * Math.sqrt(1 - (z / AB) ** 2) - 0.4;
+    if (half > 1) parts.brick.push(box(half * 2, 1.6, 0.25, 0, 0.8, z));
+  }
+  const deckT = Math.acos(4 / AA), deck = new THREE.Shape();
+  deck.moveTo(4, -AB * Math.sin(deckT));
+  deck.absellipse(0, 0, AA, AB, -deckT, deckT, false);
+  deck.closePath();
+  parts.wood.push(flat(new THREE.ExtrudeGeometry(deck, { depth: 0.15, bevelEnabled: false, curveSegments: 24 })
+    .rotateX(-Math.PI / 2).translate(0, 1.6, 0)));
+
+  const colosseum = new THREE.Group();
+  colosseum.position.set(COL_X, 0, COL_Z);
+  roof.add(colosseum);
+  [['trav', travMat, 4], ['shade', shadeMat, 4], ['vault', vaultMat, 4], ['brick', brickMat, 2], ['cavea', caveaMat, 2], ['wood', woodMat, 2]]
+    .forEach(([key, mat, tile]) => {
+      colosseum.add(new THREE.Mesh(facadeUVs(mergeGeometries(parts[key].map(flat)), tile), mat));
+    });
+
+  // Pinien rund um den Platz
+  const pineMat = new THREE.MeshStandardMaterial({ map: makeLeafyTexture('#2c5428', '#5f8f40', 2500), roughness: 1, metalness: 0 });
+  const barkMat = new THREE.MeshStandardMaterial({ color: 0x6e5440, roughness: 1, metalness: 0 });
+  [[-34, -104, 6.5], [-37, -120, 5.8], [-32, -147, 6.2], [31, -100, 6], [-15, -98, 5.5], [17, -97, 6.3]].forEach(([x, z, h], i) => {
+    const lean = (i % 2 ? 1 : -1) * 0.08;
+    const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.26, h, 6).translate(0, h / 2, 0), barkMat);
+    trunk.position.set(x, -0.1, z);
+    trunk.rotation.z = lean;
+    const crown = new THREE.Mesh(new THREE.SphereGeometry(1, 14, 8), pineMat);
+    crown.scale.set(h * 0.45, h * 0.17, h * 0.42);
+    crown.position.set(x - Math.sin(lean) * h, h, z);
+    roof.add(trunk, crown);
+  });
 
   // Rasen mit Öffnung für die Treppe; UVs in Metern
   const lawnShape = new THREE.Shape();
@@ -3355,6 +3789,8 @@ function openMenu() {
   }
   focusState.active = false;
   focusState.animating = false;
+  focusState.path = null;
+  focusState.pendingSpot = null;
   dropHiRes();
   saveMandelView();
   backBtn.style.display = 'none';
@@ -3597,6 +4033,7 @@ const focusState = {
   fromQuat: new THREE.Quaternion(), toQuat: new THREE.Quaternion(),
   savedPos: new THREE.Vector3(), savedQuat: new THREE.Quaternion(),
   currentSpot: null,
+  path: null, pendingSpot: null, // Umweg beim Gehen; Bild, das danach herangezoomt wird
   // 0 = Bild füllt den Schirm, 1 = herausgezoomt, Schild darunter lesbar,
   // ZOOM_MIN = vierfache Vergrößerung für Details
   zoom: 0, zoomTarget: 0,
@@ -3741,6 +4178,7 @@ function enterFocus(spot, keepSavedPos) {
   focusState.toQuat.copy(lookAtQuaternion(target, _focusLook));
 
   focusState.t = 0;
+  focusState.path = null;
   // Weite Wege (anderer Saal) dauern länger, damit der Wechsel nachvollziehbar bleibt
   focusState.duration = THREE.MathUtils.clamp(camera.position.distanceTo(target) * 0.07, 0.55, 1.4);
   focusState.animating = true;
@@ -3760,6 +4198,7 @@ function exitFocus() {
   focusState.fromQuat.copy(camera.quaternion);
   focusState.toQuat.copy(focusState.savedQuat);
   focusState.t = 0;
+  focusState.path = null;
   focusState.duration = 0.55;
   focusState.animating = true;
   focusState.active = false;
@@ -3851,12 +4290,25 @@ function stairClicked(event) {
   return true;
 }
 
+// Bild anklicken: liegt eine Wand oder ein Sockel zwischen Besucher und
+// Betrachtungspunkt, erst um das Hindernis herum davor gehen, dann heranzoomen
+function focusPainting(spot) {
+  const target = new THREE.Vector3();
+  focusPose(spot, 0, new THREE.Vector2(), target, _focusLook);
+  // die letzten 0,6 m liegen oft schon im Wandabstand — die zählen nicht
+  const dx = target.x - camera.position.x, dz = target.z - camera.position.z;
+  const d = Math.hypot(dx, dz), f = Math.max(0, d - 0.6) / (d || 1);
+  if (navLineFree(camera.position.x, camera.position.z, camera.position.x + dx * f, camera.position.z + dz * f)
+      || !travelTo(target)) { enterFocus(spot); return; }
+  focusState.pendingSpot = spot;
+}
+
 // Ein einziger Klick erledigt alles: Bild = Nahansicht, Boden = hingehen, daneben = zurück
 function handleSelect(event) {
   // Während einer laufenden Fahrt ignorieren — so löst ein Doppelklick nicht Hin und Zurück aus
   if (!navActive || focusState.animating) return;
-  if (stair.active) { // auf der Treppe: Klick hält an bzw. geht weiter
-    stair.auto = stair.auto ? 0 : stair.dir;
+  if (stair.active) { // auf der Treppe: ein Klick hält nicht an, sondern geht (weiter) durch
+    stair.auto = stair.dir;
     return;
   }
   const spot = raycastPaintingAt(event);
@@ -3874,7 +4326,7 @@ function handleSelect(event) {
     return;
   }
 
-  if (spot) { enterFocus(spot); return; }
+  if (spot) { focusPainting(spot); return; }
   if (stairClicked(event)) return;
   const floorPoint = raycastFloorAt(event);
   if (floorPoint) travelTo(floorPoint);
