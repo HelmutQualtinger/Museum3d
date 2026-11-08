@@ -164,7 +164,7 @@
     <div class="start" id="startBtn" data-i18n>Klicken zum Betreten</div>
     <div id="loadbar"><div id="loadfill"></div></div>
     <div id="loadtext" data-i18n>Lade hochauflösende Gemälde …</div>
-    <p class="credits" data-i18n>3D-Modelle: David &mdash; Scan the World (CC BY-SA 4.0) &nbsp;·&nbsp; Maske des Tutanchamun &mdash; vmmaniac (CC BY 4.0) &nbsp;·&nbsp; Venus von Willendorf, Venus von Milo, Der Denker &mdash; Scan the World (CC BY-SA 4.0) &nbsp;·&nbsp; Pietà &mdash; Statens Museum for Kunst (Public Domain) &nbsp;·&nbsp; Osiris &mdash; Moacir Elias Santos / Casa Museu Eva Klabin (CC BY-SA 4.0) &nbsp;·&nbsp; Nofretete &mdash; Trigon Art 2008, © Ägyptisches Museum und Papyrussammlung, Staatliche Museen zu Berlin, via Cosmo Wenman (CC BY-NC-SA 4.0)<br>Fotos Höhlenmalerei: Thomas T. (CC BY-SA 2.0), Céréales Killer, Christelle Molinié (CC BY-SA 4.0)<br>Sternhimmel: d3-celestial, Olaf Frohn (BSD) &nbsp;·&nbsp; Sternbildlinien: Stellarium (CC BY-SA 4.0) &nbsp;·&nbsp; Sternbildfiguren: Johan Meuris / Stellarium (Free Art License) &nbsp;·&nbsp; Sternbild Assange nach einem Foto von David G Silvers, Cancillería del Ecuador (CC BY-SA 2.0, bearbeitet)</p>
+    <p class="credits" data-i18n>3D-Modelle: David &mdash; Scan the World (CC BY-SA 4.0) &nbsp;·&nbsp; Maske des Tutanchamun &mdash; vmmaniac (CC BY 4.0) &nbsp;·&nbsp; Venus von Willendorf, Venus von Milo, Der Denker &mdash; Scan the World (CC BY-SA 4.0) &nbsp;·&nbsp; Pietà &mdash; Statens Museum for Kunst (Public Domain) &nbsp;·&nbsp; Osiris &mdash; Moacir Elias Santos / Casa Museu Eva Klabin (CC BY-SA 4.0) &nbsp;·&nbsp; Nofretete &mdash; Trigon Art 2008, © Ägyptisches Museum und Papyrussammlung, Staatliche Museen zu Berlin, via Cosmo Wenman (CC BY-NC-SA 4.0)<br>Fotos Höhlenmalerei: Thomas T. (CC BY-SA 2.0), Céréales Killer, Christelle Molinié (CC BY-SA 4.0)<br>Sternhimmel: d3-celestial, Olaf Frohn (BSD) &nbsp;·&nbsp; Sternbildlinien: Stellarium (CC BY-SA 4.0) &nbsp;·&nbsp; Sternbildfiguren: Johan Meuris / Stellarium (Free Art License) &nbsp;·&nbsp; Sternbild Assange nach einem Foto von David G Silvers, Cancillería del Ecuador (CC BY-SA 2.0, bearbeitet) &nbsp;·&nbsp; Foto IC 1396A (Elefantenrüssel-Nebel): Sternwarte Eifel, Dr. Markus Breidenich</p>
     <button id="installBtn" type="button" data-i18n>Als App installieren</button>
     <div id="installHint" data-i18n>Tippe auf das Teilen-Symbol <svg width="14" height="17" viewBox="0 0 14 17" fill="none" stroke="currentColor" stroke-width="1.4" style="vertical-align:-3px"><path d="M7 1v10M3.5 4.5 7 1l3.5 3.5M4.5 7H1.5v9h11V7h-3"/></svg> und dann auf <b>„Zum Home-Bildschirm“</b>.</div>
   </div>
@@ -2747,7 +2747,14 @@ try {
 } catch {}
 
 function loadSkyData() {
-  if (!skyDataLoading) skyDataLoading = fetch('himmel/sterne.json').then((r) => r.json()).then((d) => { skyData = d; });
+  if (!skyDataLoading) skyDataLoading = fetch('himmel/sterne.json').then((r) => r.json()).then((d) => {
+    // Cepheus zeigt statt der Stellarium-Figur den Ottifanten (himmel/ottifant-rot.webp: roter Rand, graue Füllung auf Schwarz). Hier im
+    // Code statt in sterne.json, weil der Service Worker die JSON-Datei aus dem Cache liefert
+    // Um seine Mitte um −144° gedreht, so dass die Rüsselspitze (Bildpixel 140, 80) auf IC 1396A zeigt und fast darauf liegt
+    Object.assign(d.cons.find((c) => c.id === 'Cep'), { img: 'ottifant-rot.webp', size: [512, 286], alpha: 0.7,
+      anchors: [[140, 80, 324.169, 57.939], [375, 110, 2.343, 70.156], [250, 235, 313.857, 73.584]] });
+    skyData = d;
+  });
   return skyDataLoading;
 }
 function loadSkyArt() {
@@ -2838,11 +2845,11 @@ for (const pt of Object.values(PSEUDO_CONS.pts)) {
 // in der Form der Katalogdaten: Sterne [ra, dec, mag, B−V], Linien wie bei den echten Sternbildern
 const PSEUDO_STARS = Object.values(PSEUDO_CONS.pts).map(([, , m, ra, dec]) => [ra, dec, m, 0.6]);
 const PSEUDO_LINES = { name: PSEUDO_CONS.name, lines: PSEUDO_CONS.lines.map((l) => l.map((n) => PSEUDO_CONS.pts[n].slice(3))) };
-// Dazu als milchig durchscheinendes Bild sein Porträt (himmel/assange.webp: Foto von David G Silvers, Cancillería del
-// Ecuador, 2014, CC BY-SA 2.0 — freigestellt, grau, nach unten ausgeblendet, auf Schwarz). Wie die Stellarium-Figuren
+// Dazu als milchig durchscheinendes Bild sein Porträt (himmel/assange-rot2.webp: Foto von David G Silvers, Cancillería del
+// Ecuador, 2014, CC BY-SA 2.0 — freigestellt, grau, nach unten ausgeblendet, auf Schwarz, ganz rot getönt, Kopf und Schultern rot umrandet wie der Ottifant). Wie die Stellarium-Figuren
 // über drei Anker gelegt: Augen und Kinn im Bild (Pixel) auf die Sterne des Linienbilds; das linke Auge im Bild
 // liegt am Himmel im Osten (x > 0), sonst wäre das Gesicht gespiegelt. Zu sehen nur mit den Figuren.
-const PSEUDO_ART = { img: 'assange.webp', size: [512, 695], alpha: 0.42, anchors: [
+const PSEUDO_ART = { img: 'assange-rot2.webp', size: [512, 695], alpha: 0.75, anchors: [
   [193, 211, ...PSEUDO_CONS.pts.eyeR.slice(3)], [283, 196, ...PSEUDO_CONS.pts.eyeL.slice(3)], [251, 373, ...PSEUDO_CONS.pts.chin.slice(3)]] };
 let pseudoArtLoading = false;
 function loadPseudoArt() {
@@ -2852,6 +2859,9 @@ function loadPseudoArt() {
   img.onload = () => { skyArt.set(PSEUDO_ART.img, img); if (weather === 'nacht') redrawSky(); };
   img.src = 'himmel/' + PSEUDO_ART.img;
 }
+// Der Elefantenrüssel-Nebel IC 1396A im Cepheus (kein Messier-Objekt): wie die Galaxien als Nebelfleck gemalt,
+// mit den Linien beschriftet und anklickbar; das Foto liegt lokal in himmel/ (SKY_PHOTOS)
+const SKY_EXTRA = { name: 'IC 1396A', ra: 324.25, dec: 57.5, de: 'Elefantenrüssel-Nebel', label: 'Elefantenrüssel' };
 const cross3 = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
 
 // Milchstraße: erst in äquatorialen Koordinaten rastern, dann Pixel für Pixel auf den Ortshimmel umrechnen
@@ -2923,6 +2933,16 @@ function drawStarSky(g, W, H) {
     grad.addColorStop(1, `rgba(${col},0)`);
     g.setTransform(rx / p[2], 0, 0, ry, p[0], p[1]);
     g.rotate((ra * 7 + dec * 3) % 3.14);
+    g.fillStyle = grad;
+    g.beginPath(); g.arc(0, 0, 1, 0, 7); g.fill();
+  }
+  {
+    skyDir(SKY_EXTRA.ra, SKY_EXTRA.dec, lst, d);
+    skyPx(d, W, H, p);
+    const r = 60 * W / 360 / 60 * 2.2, grad = g.createRadialGradient(0, 0, 0, 0, 0, 1);
+    grad.addColorStop(0, 'rgba(255,150,170,0.35)');
+    grad.addColorStop(1, 'rgba(255,150,170,0)');
+    g.setTransform(r / p[2], 0, 0, r * 0.7, p[0], p[1]);
     g.fillStyle = grad;
     g.beginPath(); g.arc(0, 0, 1, 0, 7); g.fill();
   }
@@ -3039,6 +3059,13 @@ function drawStarSky(g, W, H) {
       skyPx(d, W, H, p);
       g.setTransform(-1 / p[2], 0, 0, 1, p[0], p[1] + 16 * Math.max(k, 0.6));
       g.fillText(alt ? `${name} ${alt}` : name, 0, 0);
+      g.setTransform(1, 0, 0, 1, 0, 0);
+    }
+    skyDir(SKY_EXTRA.ra, SKY_EXTRA.dec, lst, d);
+    if (Math.abs(d[1]) <= 0.97) {
+      skyPx(d, W, H, p);
+      g.setTransform(-1 / p[2], 0, 0, 1, p[0], p[1] + 16 * Math.max(k, 0.6));
+      g.fillText(`${SKY_EXTRA.name} ${tr(SKY_EXTRA.label)}`, 0, 0);
       g.setTransform(1, 0, 0, 1, 0, 0);
     }
   }
@@ -6355,6 +6382,7 @@ const SKY_PHOTOS = {
   M95: ['https://thumb.wikimedia.org/wikipedia/commons/thumb/f/fd/The_VLT_goes_lion_hunting.jpg/1280px-The_VLT_goes_lion_hunting.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', "ESO · CC BY 3.0"],
   M33: ['https://thumb.wikimedia.org/wikipedia/commons/thumb/6/64/VST_snaps_a_very_detailed_view_of_the_Triangulum_Galaxy.jpg/1280px-VST_snaps_a_very_detailed_view_of_the_Triangulum_Galaxy.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', "ESO · CC BY 4.0"],
   M74: ['https://thumb.wikimedia.org/wikipedia/commons/thumb/d/d6/Webb_and_Hubble%E2%80%99s_Views_of_Spiral_Galaxy_NGC_628_%282024-105%29.png/1280px-Webb_and_Hubble%E2%80%99s_Views_of_Spiral_Galaxy_NGC_628_%282024-105%29.png?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', "NASA, ESA, CSA, STScI, Janice Lee (STScI), Thomas Williams (Oxford) … · Public domain"],
+  'IC 1396A': ['himmel/elefantenruessel.jpg', 'Sternwarte Eifel, Dr. Markus Breidenich'],
   Mond: ['https://thumb.wikimedia.org/wikipedia/commons/thumb/e/e1/FullMoon2010.jpg/1280px-FullMoon2010.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail', "Gregory H. Revera · CC BY-SA 3.0"],
 };
 const GALAXY_DE = {
@@ -6382,6 +6410,10 @@ function skyObjectAt(event) {
     const a = ang(d), limit = Math.max(1.4, da / 60 * 2.2 * 0.7);
     if (a < limit && a < bestA) { best = name; bestA = a; }
   }
+  {
+    const d = skyDir(SKY_EXTRA.ra, SKY_EXTRA.dec, skyLst), a = ang(d);
+    if (d[1] >= 0.03 && a < 1.6 && a < bestA) { best = SKY_EXTRA.name; bestA = a; }
+  }
   // das Pseudo-Sternbild Assange, wenn Linien oder Figuren zu sehen sind: Klick irgendwo auf das Porträt
   // (gut 10° um seine Mitte), Mond und Galaxien darin haben Vorrang
   if (!best && (skyOpts.lines || skyOpts.art)) {
@@ -6395,6 +6427,7 @@ function skyObjectAt(event) {
 function skyTitle(key) {
   if (key === 'Mond') return [tr('Der Mond'), tr('Vollmond')];
   if (key === 'Assange') return ['Julian Assange', tr('Sternbild')];
+  if (key === SKY_EXTRA.name) return [`${key} · ${tr(SKY_EXTRA.de)}`, tr('Gasnebel')];
   const m = skyData.messier.find((x) => x[6] === key);
   const de = m && m[7] && (GALAXY_DE[m[7]] || m[7]);
   return [de ? `${key} · ${window.LANG === 'en' ? m[7] : tr(de)}` : key, tr('Galaxie')];
@@ -6406,7 +6439,7 @@ function showPhoto(key) {
   document.getElementById('photoImg').src = url;
   document.getElementById('photoImg').alt = title;
   document.getElementById('photoTitle').textContent = title;
-  document.getElementById('photoCredit').textContent = tr('Foto') + ': ' + credit + ' · Wikimedia Commons';
+  document.getElementById('photoCredit').textContent = tr('Foto') + ': ' + credit + (url.startsWith('http') ? ' · Wikimedia Commons' : '');
   photoBox.style.display = 'flex';
 }
 function closePhoto() { photoBox.style.display = 'none'; }
