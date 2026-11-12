@@ -515,7 +515,7 @@ const DIVIDER_PAINTINGS = {
     // keine Bilddatei: die GPU rechnet die Spirale live und beliebig tief zoombar (makeMandelbrotTexture)
     { segIndex: 0, face: 1, def: { title: 'Mandelbrot-Spirale (Relief)', artist: 'Fraktal nach Benoît Mandelbrot · in Echtzeit berechnet', procedural: makeMandelbrotTexture, ratio: 0.667 } },
     // keine Bilddatei: an der Wand das Vorschaubild, in der Nahansicht läuft die Webseite selbst (webFrame)
-    { segIndex: 1, face: -1, def: { title: 'LichtOrgel', artist: 'Interaktive Web-App, 2026', url: 'https://helmutqualtinger.github.io/LichtOrgel/og-image.jpg', ratio: 630 / 1200, web: 'https://helmutqualtinger.github.io/LichtOrgel/' } },
+    { segIndex: 1, face: -1, def: { title: 'LichtOrgel', artist: 'Interaktive Web-App, 2026', url: 'https://helmutqualtinger.github.io/LichtOrgel/og-image.jpg', ratio: 630 / 1200, web: '../LichtOrgel/?embed' } },
     { segIndex: 1, face: 1, def: { title: 'Der Traum', artist: 'Henri Rousseau, 1910', url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/eb/Henri_Rousseau_-_Le_R%C3%AAve_-_Google_Art_Project.jpg/1280px-Henri_Rousseau_-_Le_R%C3%AAve_-_Google_Art_Project.jpg', ratio: 0.681 } },
   ],
 };
@@ -5806,7 +5806,6 @@ function openMenu() {
   focusState.path = null;
   focusState.pendingSpot = null;
   dropHiRes();
-  closeWebFrame();
   saveMandelView();
   backBtn.style.display = 'none';
   infoBtn.style.display = 'none';
@@ -6232,7 +6231,6 @@ function enterFocus(spot, keepSavedPos) {
   focusState.animating = true;
   focusState.active = true;
   focusState.currentSpot = spot;
-  if (spot.web) openWebFrame(spot); else closeWebFrame();
   setText(hud, HUD_FOCUS);
   backBtn.style.display = 'block';
   infoBtn.style.display = ABOUT_WORKS[aboutKey(spot)] ? 'block' : 'none';
@@ -6240,48 +6238,81 @@ function enterFocus(spot, keepSavedPos) {
   setHover(null);
 }
 
-// Web-App in der Nahansicht: ein iframe genau über der Leinwand, erst wenn die Kamera steht.
-// Geladen wird beim Hinfahren, beim Verlassen wird die Seite entladen — so läuft ihr Ton nicht weiter.
+// Web-App (LichtOrgel): der iframe ist geladen, sobald man in die Nähe kommt, und liegt unsichtbar
+// hinter der 3D-Ansicht. Solange das Bild im Blickfeld ist, setzt die Seite jedes Frame in ihr
+// embed.canvas zusammen, das hier als Textur auf die Leinwand kommt — stumm. Erst in der Nahansicht
+// liegt der iframe sichtbar über der Leinwand, ist bedienbar und hörbar (der Jazz wird dann leiser).
+// Gleiche Herkunft ist nötig (relative URL, GitHub Pages bzw. lokal ein Server über beiden Ordnern).
 const webFrame = document.getElementById('webFrame');
 const _webCorner = new THREE.Vector3();
-function openWebFrame(spot) {
-  if (webFrame.dataset.src !== spot.web) { webFrame.src = spot.web; webFrame.dataset.src = spot.web; }
-  duckMusic(true);
-  webFrame.onload = () => { // gleiche Herkunft (GitHub Pages): Esc in der Seite beendet auch die Nahansicht
+const web = { spot: null, focused: false, tex: null, ctx: null, last: 0, hidden: '' };
+const WEB_NEAR = 30;     // ab dieser Entfernung (m) wird die Seite geladen und läuft
+const WEB_FPS = 30;      // Texturaktualisierungen pro Sekunde
+function webEmbed() {
+  try { return webFrame.contentWindow.lichtorgelEmbed || null; } catch { return null; }
+}
+function loadWebFrame(spot) {
+  webFrame.src = spot.web;
+  webFrame.dataset.src = spot.web;
+  webFrame.onload = () => { // Esc in der Seite beendet auch die Nahansicht
     try {
       webFrame.contentWindow.addEventListener('keydown', (e) => { if (e.key === 'Escape' && focusState.active) exitFocus(); });
-    } catch { /* fremde Herkunft (lokal): dann nur über „Zurück“ */ }
+    } catch { /* fremde Herkunft */ }
   };
 }
-function closeWebFrame() {
-  if (!webFrame.dataset.src) return;
-  webFrame.style.display = 'none';
-  webFrame.removeAttribute('src');
-  webFrame.src = 'about:blank';
-  delete webFrame.dataset.src;
-  duckMusic(false);
-}
 // Bildschirmrechteck der Leinwand aus ihren vier Ecken
-function placeWebFrame() {
-  const spot = focusState.currentSpot;
-  const show = focusState.active && !focusState.animating && spot && spot.web;
-  if (!show) { webFrame.style.display = 'none'; return; }
-  const mesh = spot.mesh, w = spot.width / 2, h = spot.height / 2;
+function webFrameRect(spot) {
+  const w = spot.width / 2, h = spot.height / 2;
   const rect = renderer.domElement.getBoundingClientRect();
   let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
   for (const [sx, sy] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
-    _webCorner.set(sx * w, sy * h, 0).applyMatrix4(mesh.matrixWorld).project(camera);
+    _webCorner.set(sx * w, sy * h, 0).applyMatrix4(spot.mesh.matrixWorld).project(camera);
     const px = rect.left + (_webCorner.x + 1) / 2 * rect.width, py = rect.top + (1 - _webCorner.y) / 2 * rect.height;
     x0 = Math.min(x0, px); x1 = Math.max(x1, px); y0 = Math.min(y0, py); y1 = Math.max(y1, py);
   }
-  const st = webFrame.style;
-  st.left = `${Math.round(x0)}px`; st.top = `${Math.round(y0)}px`;
-  st.width = `${Math.round(x1 - x0)}px`; st.height = `${Math.round(y1 - y0)}px`;
-  st.display = 'block';
+  return `left:${Math.round(x0)}px;top:${Math.round(y0)}px;width:${Math.round(x1 - x0)}px;height:${Math.round(y1 - y0)}px;`;
+}
+// läuft nach updateTurntables, das _frustum setzt
+function updateWebFrame(now) {
+  const spot = web.spot ??= paintingHotspots.find((h) => h.web);
+  if (!spot) return;
+  const menu = overlay.style.display !== 'none';
+  const focused = !menu && focusState.active && focusState.currentSpot === spot;
+  const settled = focused && !focusState.animating;
+  const near = !menu && !document.hidden && camera.position.y < ROOF_SEEN && camera.position.distanceTo(spot.worldPos) < WEB_NEAR;
+  if (!webFrame.dataset.src && (near || focused)) loadWebFrame(spot);
+  const seen = near && !settled && _frustum.intersectsObject(spot.mesh);
+  if (focused !== web.focused) { web.focused = focused; duckMusic(focused); }
+
+  const E = webEmbed();
+  if (E) {
+    if (E.muted !== !focused) E.setMuted(!focused);
+    E.paused = !(seen || settled);
+    E.capture = seen;
+  }
+  // sichtbar über der Leinwand, sonst unsichtbar dahinter (läuft dort trotzdem, für die Textur)
+  const css = settled ? webFrameRect(spot) + 'opacity:1;pointer-events:auto;z-index:4;display:block;'
+    : 'left:0;top:0;width:960px;height:560px;opacity:0;pointer-events:none;z-index:-1;display:block;';
+  if (css !== web.hidden) { webFrame.style.cssText = css; web.hidden = css; }
+
+  if (E && seen && now - web.last > 1000 / WEB_FPS) {
+    web.last = now;
+    if (!web.tex) {
+      const c = Object.assign(document.createElement('canvas'), { width: E.canvas.width, height: E.canvas.height });
+      web.ctx = c.getContext('2d');
+      web.tex = preparePaintingTexture(new THREE.CanvasTexture(c));
+    }
+    web.ctx.drawImage(E.canvas, 0, 0);
+    if (spot.mesh.material.map !== web.tex) {
+      setPaintingTexture(spot.mesh, web.tex);
+      spot.mesh.userData.loTex = web.tex; // bleibt nach dem Verlassen der Nahansicht
+    }
+    web.tex.needsUpdate = true;
+    needsRender = true;
+  }
 }
 
 function exitFocus() {
-  closeWebFrame();
   saveMandelView();
   focusState.fromPos.copy(camera.position);
   focusState.toPos.copy(focusState.savedPos);
@@ -7007,8 +7038,8 @@ function animate() {
   }
 
   camera.updateMatrixWorld();
-  placeWebFrame();
   updateTurntables(dt); // stellt auch _frustum für die Palette ein
+  updateWebFrame(performance.now());
   updateMandelbrot(); // setzt bei neuem Fraktalbild selbst needsRender
   if (needsRender || !camera.matrixWorld.equals(lastCamMatrix)) settleFrames = SETTLE_FRAMES;
   if (settleFrames > 0) {
