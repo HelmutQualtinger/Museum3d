@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Galerie der Meister — begehbares 3D-Museum</title>
-<meta name="description" content="Ein begehbares 3D-Museum im Browser: sechs Säle, fünfzig Werke von der Höhlenmalerei aus Lascaux und Chauvet bis Kandinsky und ein Mandelbrot-Fraktal, dazu Michelangelos David und Pietà, die Venus von Willendorf, Nofretete, die Goldmaske des Tutanchamun, eine Kupfervase, ein Goldwürfel, ein goldener Osiris und auf der Dachterrasse die Venus von Milo und Rodins Denker in 3D, dazu im Tempel der Maya-Pyramide den Federkopfschmuck des Moctezuma. Ziehen zum Umsehen, klicken zum Gehen — ohne Installation.">
+<meta name="description" content="Ein begehbares 3D-Museum im Browser: sechs Säle, fünfzig Werke von der Höhlenmalerei aus Lascaux und Chauvet bis Kandinsky, ein Mandelbrot-Fraktal und eine Lichtorgel, dazu Michelangelos David und Pietà, die Venus von Willendorf, Nofretete, die Goldmaske des Tutanchamun, eine Kupfervase, ein Goldwürfel, ein goldener Osiris und auf der Dachterrasse die Venus von Milo und Rodins Denker in 3D, dazu im Tempel der Maya-Pyramide den Federkopfschmuck des Moctezuma. Ziehen zum Umsehen, klicken zum Gehen — ohne Installation.">
 <link rel="canonical" href="https://helmutqualtinger.github.io/Museum3d/">
 <meta name="theme-color" content="#0a0806">
 
@@ -22,7 +22,7 @@
 <meta property="og:site_name" content="Galerie der Meister">
 <meta property="og:locale" content="de_DE">
 <meta property="og:title" content="Galerie der Meister — begehbares 3D-Museum">
-<meta property="og:description" content="Sechs Säle, fünfzig Werke von der Höhlenmalerei aus Lascaux und Chauvet bis Kandinsky und ein Mandelbrot-Fraktal, dazu Michelangelos David und Pietà, die Venus von Willendorf, Nofretete, die Maske des Tutanchamun, eine Kupfervase, ein Goldwürfel, ein goldener Osiris und die Venus von Milo und Rodins Denker in 3D, dazu im Tempel der Maya-Pyramide den Federkopfschmuck des Moctezuma. Ziehen zum Umsehen, klicken zum Gehen — direkt im Browser, ohne Installation.">
+<meta property="og:description" content="Sechs Säle, fünfzig Werke von der Höhlenmalerei aus Lascaux und Chauvet bis Kandinsky, ein Mandelbrot-Fraktal und eine Lichtorgel, dazu Michelangelos David und Pietà, die Venus von Willendorf, Nofretete, die Maske des Tutanchamun, eine Kupfervase, ein Goldwürfel, ein goldener Osiris und die Venus von Milo und Rodins Denker in 3D, dazu im Tempel der Maya-Pyramide den Federkopfschmuck des Moctezuma. Ziehen zum Umsehen, klicken zum Gehen — direkt im Browser, ohne Installation.">
 <meta property="og:url" content="https://helmutqualtinger.github.io/Museum3d/">
 <meta property="og:image" content="https://helmutqualtinger.github.io/Museum3d/docs/og-image.jpg">
 <meta property="og:image:type" content="image/jpeg">
@@ -32,7 +32,7 @@
 
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Galerie der Meister — begehbares 3D-Museum">
-<meta name="twitter:description" content="Sechs Säle, fünfzig Werke von der Höhlenmalerei aus Lascaux und Chauvet bis Kandinsky und ein Mandelbrot-Fraktal, dazu Michelangelos David und Pietà, die Venus von Willendorf, Nofretete, die Maske des Tutanchamun, eine Kupfervase, ein Goldwürfel, ein goldener Osiris und die Venus von Milo und Rodins Denker in 3D, dazu im Tempel der Maya-Pyramide den Federkopfschmuck des Moctezuma. Ziehen zum Umsehen, klicken zum Gehen — direkt im Browser.">
+<meta name="twitter:description" content="Sechs Säle, fünfzig Werke von der Höhlenmalerei aus Lascaux und Chauvet bis Kandinsky, ein Mandelbrot-Fraktal und eine Lichtorgel, dazu Michelangelos David und Pietà, die Venus von Willendorf, Nofretete, die Maske des Tutanchamun, eine Kupfervase, ein Goldwürfel, ein goldener Osiris und die Venus von Milo und Rodins Denker in 3D, dazu im Tempel der Maya-Pyramide den Federkopfschmuck des Moctezuma. Ziehen zum Umsehen, klicken zum Gehen — direkt im Browser.">
 <meta name="twitter:image" content="https://helmutqualtinger.github.io/Museum3d/docs/og-image.jpg">
 <meta name="twitter:image:alt" content="Blick durch den Saal Porträt mit Rembrandts Selbstbildnis, durch einen breiten Durchgang in den Saal Landschaft.">
 
@@ -51,6 +51,9 @@
   }
   #tooltip b { display: block; font-weight: 600; font-size: 13px; }
   #tooltip i { display: block; color: #a2957d; font-size: 11px; margin-top: 2px; }
+  #webFrame {
+    position: fixed; z-index: 4; display: none; border: 0; background: #05030a;
+  }
   #backBtn {
     position: fixed; top: 20px; right: 22px; z-index: 6; display: none;
     font-family: 'Georgia', serif; font-size: 12px; letter-spacing: 0.12em;
@@ -212,6 +215,7 @@
 
 <div id="roomLabel"></div>
 <div id="tooltip"></div>
+<iframe id="webFrame" title="LichtOrgel" allow="microphone; display-capture; autoplay; fullscreen"></iframe>
 <div id="backBtn" data-i18n>← Zurück</div>
 <div id="infoBtn" data-i18n>ⓘ Über das Werk</div>
 <div id="info" role="dialog" aria-label="Über das Werk">
@@ -320,7 +324,7 @@ const relabels = [];
 window.addEventListener('sprache', () => { for (const f of relabels) f(); needsRender = true; });
 
 /* ---------------------------------------------------------------
-   Sammlung: sechs Säle, einundfünfzig Bilder, zehn Skulpturen
+   Sammlung: sechs Säle, zweiundfünfzig Bilder (eins davon eine Web-App), zehn Skulpturen
 --------------------------------------------------------------- */
 const ROOM_W = 16;   // Breite (X) je Saal
 const ROOM_D = 14;   // Tiefe (Z)
@@ -510,6 +514,8 @@ const DIVIDER_PAINTINGS = {
     { segIndex: 0, face: -1, def: { title: 'Der Heuwagen', artist: 'John Constable, 1821', url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/John_Constable_-_The_Hay_Wain_%281821%29.jpg/1280px-John_Constable_-_The_Hay_Wain_%281821%29.jpg', ratio: 0.69 } },
     // keine Bilddatei: die GPU rechnet die Spirale live und beliebig tief zoombar (makeMandelbrotTexture)
     { segIndex: 0, face: 1, def: { title: 'Mandelbrot-Spirale (Relief)', artist: 'Fraktal nach Benoît Mandelbrot · in Echtzeit berechnet', procedural: makeMandelbrotTexture, ratio: 0.667 } },
+    // keine Bilddatei: an der Wand das Vorschaubild, in der Nahansicht läuft die Webseite selbst (webFrame)
+    { segIndex: 1, face: -1, def: { title: 'LichtOrgel', artist: 'Interaktive Web-App, 2026', url: 'https://helmutqualtinger.github.io/LichtOrgel/og-image.jpg', ratio: 630 / 1200, web: 'https://helmutqualtinger.github.io/LichtOrgel/' } },
     { segIndex: 1, face: 1, def: { title: 'Der Traum', artist: 'Henri Rousseau, 1910', url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/eb/Henri_Rousseau_-_Le_R%C3%AAve_-_Google_Art_Project.jpg/1280px-Henri_Rousseau_-_Le_R%C3%AAve_-_Google_Art_Project.jpg', ratio: 0.681 } },
   ],
 };
@@ -620,6 +626,8 @@ const ABOUT_ARTISTS = {
     "Paul Klee (1879–1940) wurde bei Bern geboren und war Maler, Grafiker und Musiker. Er lehrte von 1921 bis 1931 am Bauhaus und schuf rund 10 000 Werke, oft kleinformatig, poetisch und voller Humor. Die Nationalsozialisten diffamierten seine Kunst als „entartet“; er kehrte 1933 in die Schweiz zurück.",
   "Michelangelo Buonarroti":
     "Michelangelo Buonarroti (1475–1564) war Bildhauer, Maler, Architekt und Dichter der italienischen Renaissance. Er arbeitete für die Medici in Florenz und für mehrere Päpste in Rom, wo er die Decke und die Altarwand der Sixtinischen Kapelle ausmalte und die Kuppel des Petersdoms entwarf. Schon zu Lebzeiten nannte man ihn „il Divino“, den Göttlichen.",
+  "Interaktive Web-App":
+    "Eine Web-App ist ein Programm, das ohne Installation im Browser läuft: Seite, Gestaltung und Programmcode stecken hier in einer einzigen HTML-Datei, die über GitHub Pages ausgeliefert wird. Bild und Ton entstehen erst im Gerät des Betrachters — mit Web Audio, WebGL und WebGPU. Wer will, kann sie auch wie eine App auf dem Startbildschirm installieren.",
   "Vierfarb-Sprayschablone":
     "Das Verfahren stammt aus der Straßenkunst und dem Siebdruck der Pop-Art: Ein Foto wird auf wenige Tonwerte reduziert, jeder Tonwert wird zu einer eigenen Schablone. Hier berechnet ein Python-Programm die Trennung, setzt Stege, damit keine Insel aus der Platte fällt, und erzeugt die Schnittkonturen für vier Platten aus 1 Millimeter dickem PETG im Format 420 × 510 Millimeter.",
   "CAD-Entwurf":
@@ -756,6 +764,8 @@ const ABOUT_WORKS = {
     "Für jeden Punkt c der Zahlenebene wird z → z² + c immer wieder berechnet: Bleibt z begrenzt, gehört c zur Mandelbrot-Menge, sonst bestimmt die Geschwindigkeit des Entweichens die Farbe. Dieses Bild wird nicht geladen, sondern von der Grafikkarte live gerechnet, mit Licht und Schatten wie ein Relief. In der Nahansicht kann man rund 10²³-fach hineinzoomen — immer neue Spiralen und kleine Kopien der ganzen Menge tauchen auf.",
   "Der Traum|Henri Rousseau, 1910":
     "Eine nackte Frau liegt auf einem roten Sofa mitten in einem dichten Dschungel, zwischen Löwen, Vögeln, einem Elefanten und einem Flöte spielenden Schlangenbeschwörer. Rousseau erklärte, die Frau träume, sie sei in den Urwald versetzt worden. Es ist sein letztes großes Bild, gemalt im Jahr seines Todes, und hängt im Museum of Modern Art in New York.",
+  "LichtOrgel|Interaktive Web-App, 2026":
+    "Eine psychedelische Lichtorgel wie in den Diskotheken der Siebzigerjahre, nur im Browser: Sie zerlegt den Klang in zehn Frequenzbänder und lässt 14 Effekte darauf tanzen, von Plasma und Tunnel bis zu Mandelbrot- und Julia-Fraktalen, die die Grafikkarte live berechnet. Den Ton liefern selbst erzeugte Synthesizer-Loops, das Mikrofon, eigene Musik oder Internetradio. In der Nahansicht läuft die Seite selbst auf der Leinwand; „Zurück“ beendet sie.",
   "Maria|Vierfarb-Sprayschablone, 2026":
     "Das Bildnis entsteht hier vor den Augen des Betrachters. Am Anfang steht das Foto, dann folgt das Spraybild von hell nach dunkel, Platte für Platte. Zuerst legt Sonnengelb Gesicht und Schultern an, Korallrosa setzt die Schatten, Petrol füllt Hintergrund und Tiefen, zuletzt zeichnet Tiefschwarz Haar, Augen und Brauen. Jede Schicht verdeckt einen Teil der vorigen; erst die letzte macht das Gesicht lesbar. Das Motivfeld misst 360 × 450 Millimeter.",
   "Pietà|Michelangelo Buonarroti, 1498–1499":
@@ -1481,7 +1491,7 @@ function buildPainting(def, maxW, maxH) {
   canvasMesh.castShadow = false;
   canvasMesh.receiveShadow = true;
   group.add(canvasMesh);
-  canvasMesh.userData.url = def.url;
+  canvasMesh.userData.url = def.web ? null : def.url; // Web-App: kein Hochauflösen, dort läuft die Seite
   if (def.procedural) mandel.mesh = canvasMesh;
   if (def.spray) spray.mesh = canvasMesh;
   canvasMesh.userData.loTex = tex;
@@ -1727,6 +1737,7 @@ function buildRoom(index, def) {
       height: p.userData.height,
       placardDrop: p.userData.placardDrop,
       fractal: !!pdef.procedural, // Mandelbrot: Zoom rechnet das Fraktal statt die Kamera
+      web: pdef.web, // Web-App: in der Nahansicht liegt die Seite als iframe über der Leinwand
       title: pdef.title,
       artist: pdef.artist,
     });
@@ -1835,6 +1846,7 @@ function buildRoom(index, def) {
       height: p.userData.height,
       placardDrop: p.userData.placardDrop,
       fractal: !!pdef.procedural, // Mandelbrot: Zoom rechnet das Fraktal statt die Kamera
+      web: pdef.web, // Web-App: in der Nahansicht liegt die Seite als iframe über der Leinwand
       title: pdef.title,
       artist: pdef.artist,
     });
@@ -2682,6 +2694,7 @@ const LAND_R = 190;    // so weit geht man draußen, gemessen von der Mitte der 
 const LAND_DISC = 440; // Radius der Landschaftsscheibe; dahinter nur noch Dunst
 const landBlockers = []; // unsichtbare Klötze um Bauwerke draußen: ein Klick darauf trifft nicht den Boden dahinter
 let climb = null;        // besteigbare Pyramide, siehe groundAt/climbBlocked
+let colo = null;         // begehbares Kolosseum, siehe coloGround/coloBlocked
 const tombs = [];        // Gänge und Kammern der Giza-Pyramiden als Raster, siehe underStone
 const climbMeshes = [];  // ihre Treppe und oberste Stufe: Klickziele mit Höhe
 const outdoor = {};    // Himmel, Sonnenscheibe und Sonnenlicht wandern mit dem Besucher
@@ -4835,6 +4848,7 @@ function buildRoofTerrace() {
       }
     }
     const levels = d === 0 ? 3 : Math.max(0, 4 - d);
+    f.open = levels > 0; // im Erdgeschoss steht ein Bogen (sonst ist hier gar keine Mauer mehr)
     const w = f.w * 1.03;
     let y = 0;
     for (let l = 0; l < levels; l++) {
@@ -4868,16 +4882,22 @@ function buildRoofTerrace() {
 
   // Innenring: drei Arkadengeschosse ohne Säulen; wo der Außenring fehlt, steht er im Licht
   const IA = CA - RING_GAP, IB = CB - RING_GAP, IN_H = LEVELS[0].h + LEVELS[1].h + LEVELS[2].h;
-  ellipseFrames(IA, IB, BAYS).forEach((f) => {
+  // Im Osten (+X, θ = 0) führt ein Tor durch den Innenring und ein Einschnitt durch die Ränge zur Arena:
+  // die beiden Joche beiderseits der Achse bekommen im Erdgeschoss einen gemeinsamen breiten Bogen
+  const GATE = 0.16; // halber Öffnungswinkel des Einschnitts in Rängen und Podiumsmauer (Ellipsenparameter)
+  const innerFrames = ellipseFrames(IA, IB, BAYS);
+  innerFrames.forEach((f, k) => {
     const lit = inCollapse(f.th) || inCollapse(f.th - 0.15) || inCollapse(f.th + 0.15);
+    const gate = k === 0 || k === BAYS - 1;
     let y = 0;
-    LEVELS.forEach((L) => {
-      (lit ? parts.trav : parts.shade).push(
-        place(archBay(f.w * 1.03, L.h, 1.0, L.sill, IN_T, y), f),
-        place(box(f.w * 1.03, 0.2, 0.3, 0, y + L.h - 0.1, IN_T / 2 + 0.1), f));
+    LEVELS.forEach((L, l) => {
+      if (!(gate && l === 0)) (lit ? parts.trav : parts.shade).push(place(archBay(f.w * 1.03, L.h, 1.0, L.sill, IN_T, y), f));
+      (lit ? parts.trav : parts.shade).push(place(box(f.w * 1.03, 0.2, 0.3, 0, y + L.h - 0.1, IN_T / 2 + 0.1), f));
       y += L.h;
     });
   });
+  const gateW = (innerFrames[0].w + innerFrames[BAYS - 1].w) * 1.03;
+  parts.trav.push(place(archBay(gateW, LEVELS[0].h, 2.4, 0, IN_T, 0), { x: IA, z: 0, nx: 1, nz: 0 }));
 
   // Fläche zwischen zwei Ellipsen (Gewölbe der Umgänge, Zuschauerränge), θ von th0 bis th1
   const ringStrip = (a1, b1, y1, a2, b2, y2, th0, th1, n) => {
@@ -4902,13 +4922,15 @@ function buildRoofTerrace() {
 
   // Arena (12 × 7 m Halbachsen) mit Podiumsmauer, Ränge vom Innenring hinab
   const AA = 12, AB = 7, POD = 3.4;
-  parts.cavea.push(ringStrip(IA - IN_T / 2, IB - IN_T / 2, IN_H, AA + 0.5, AB + 0.5, POD, 0, Math.PI * 2, 160));
-  const podShape = new THREE.Shape().absellipse(0, 0, AA + 0.5, AB + 0.5, 0, Math.PI * 2, false);
-  podShape.holes.push(new THREE.Path().absellipse(0, 0, AA, AB, 0, Math.PI * 2, true));
+  parts.cavea.push(ringStrip(IA - IN_T / 2, IB - IN_T / 2, IN_H, AA + 0.5, AB + 0.5, POD, GATE, Math.PI * 2 - GATE, 156));
+  const podShape = new THREE.Shape().absellipse(0, 0, AA + 0.5, AB + 0.5, GATE, Math.PI * 2 - GATE, false);
+  podShape.absellipse(0, 0, AA, AB, Math.PI * 2 - GATE, GATE, true);
+  podShape.closePath();
   parts.trav.push(flat(new THREE.ExtrudeGeometry(podShape, { depth: POD, bevelEnabled: false, curveSegments: 64 }).rotateX(-Math.PI / 2)));
   // radiale Ziegelmauern unter den verlorenen Sitzreihen, mit Durchgang und gebrochener Krone
   const inner = ellipseFrames(IA - IN_T / 2, IB - IN_T / 2, BAYS);
   inner.forEach((f) => {
+    if (f.th < GATE + 0.05 || f.th > Math.PI * 2 - GATE - 0.05) return; // im Einschnitt zur Arena
     const qx = (AA + 0.5) * Math.cos(f.th), qz = (AB + 0.5) * Math.sin(f.th);
     let dx = qx - f.x, dz = qz - f.z;
     const len = Math.hypot(dx, dz);
@@ -4938,14 +4960,28 @@ function buildRoofTerrace() {
   deck.closePath();
   parts.wood.push(flat(new THREE.ExtrudeGeometry(deck, { depth: 0.15, bevelEnabled: false, curveSegments: 24 })
     .rotateX(-Math.PI / 2).translate(0, 1.6, 0)));
+  // Holzrampe vom Tor im Innenring durch den Einschnitt hinauf auf den Arenaboden
+  const DECK_Y = 1.75, RAMP_U0 = IA - IN_T / 2, RAMP_U1 = AA + 0.5;
+  const ramp = new THREE.Shape();
+  ramp.moveTo(RAMP_U0, 0); ramp.lineTo(AA - 0.2, 0); ramp.lineTo(AA - 0.2, DECK_Y); ramp.lineTo(RAMP_U1, DECK_Y); ramp.closePath();
+  parts.wood.push(flat(new THREE.ExtrudeGeometry(ramp, { depth: 2.2, bevelEnabled: false }).translate(0, 0, -1.1)));
 
   const colosseum = new THREE.Group();
   colosseum.position.set(COL_X, 0, COL_Z);
   roof.add(colosseum);
   [['trav', travMat, 4], ['shade', shadeMat, 4], ['vault', vaultMat, 4], ['brick', brickMat, 2], ['cavea', caveaMat, 2], ['wood', woodMat, 2]]
     .forEach(([key, mat, tile]) => {
-      colosseum.add(new THREE.Mesh(facadeUVs(mergeGeometries(parts[key].map(flat)), tile), mat));
+      const mesh = new THREE.Mesh(facadeUVs(mergeGeometries(parts[key].map(flat)), tile), mat);
+      colosseum.add(mesh);
+      (key === 'wood' ? climbMeshes : landBlockers).push(mesh); // Holzboden und Rampe: Klickziele mit Höhe
     });
+  // begehbar (Weltkoordinaten, siehe coloGround/coloBlocked): durch die Bögen des Außenrings oder die
+  // Einsturzlücke in den Umgang, durch das Osttor und über die Rampe auf den Holzboden der Arena
+  colo = { x: cx + COL_X, z: cz + COL_Z, outer: outer.map((f) => ({ x: f.x, z: f.z, tx: f.nz, tz: -f.nx, open: f.open })),
+    oa: CA + OUT_T / 2, ob: CB + OUT_T / 2, ia: CA - OUT_T / 2, ib: CB - OUT_T / 2,
+    ga: IA + IN_T / 2, gb: IB + IN_T / 2, ha: IA - IN_T / 2, hb: IB - IN_T / 2,
+    pa: AA + 0.5, pb: AB + 0.5, aa: AA, ab: AB, deckU: 4, deckY: DECK_Y, u0: RAMP_U0, u1: RAMP_U1,
+    arch: 0.47, gate: 0.75, lane: 0.65 };
 
   // Pinien rund um den Platz
   const pineMat = new THREE.MeshStandardMaterial({ map: makeLeafyTexture('#2c5428', '#5f8f40', 2500), roughness: 1, metalness: 0 });
@@ -5245,10 +5281,6 @@ function buildRoofTerrace() {
   solid(BURJ_X, BURJ_Z, 14, 14, 60);
   [[-14, 6, 16, 1.6, 8], [12, 8, 10, 1.2, 12], [0, -14, 20, 1, 7]].forEach(([x, z, w2, h2, d2]) => solid(BURJ_X + x, BURJ_Z + z, w2, d2, h2));
   solid(BURJ_X + 6, BURJ_Z + 19, 36, 10);
-  for (let i = 0; i < 6; i++) { // Kolosseum: Ellipse aus sechs Streifen
-    const z0 = -CB + i * CB / 3, zIn = Math.min(Math.abs(z0), Math.abs(z0 + CB / 3));
-    solid(COL_X, COL_Z + z0 + CB / 6, 2 * CA * Math.sqrt(1 - (zIn / CB) ** 2), CB / 3, 14);
-  }
   [[-34, -104], [-37, -120], [-32, -147], [31, -100], [-15, -98], [17, -97]].forEach(([x, z]) => solid(x, z, 0.7, 0.7));
 
   // Palmen, zwei davon dicht neben der Venus
@@ -5460,6 +5492,33 @@ function stepStair(step, dt) {
 // die vier Treppen: Abstand nach außen (s) und quer (l) je Seite
 const climbSides = (dx, dz) => [[-dz, dx], [dz, dx], [-dx, dz], [dx, dz]];
 function groundAt(x, z) {
+  return Math.max(mayaGround(x, z), coloGround(x, z));
+}
+// Kolosseum: Rampe vom Osttor hinauf, oben der Holzboden der Arena
+function coloGround(x, z) {
+  if (!colo) return 0;
+  const u = x - colo.x, v = z - colo.z;
+  if (u < colo.deckU - 1 || Math.abs(v) > colo.ab || (u / colo.ga) ** 2 + (v / colo.gb) ** 2 > 1) return 0;
+  if (Math.abs(v) <= 1.2 && u > colo.u1) return THREE.MathUtils.clamp((colo.u0 - u) / (colo.u0 - colo.u1), 0, 1) * colo.deckY;
+  return (u / colo.pa) ** 2 + (v / colo.pb) ** 2 <= 1 ? colo.deckY : 0;
+}
+// Steckt der Punkt im Kolosseum in Mauerwerk oder über der Arenagrube? Ellipsenringe, um den Spielerradius erweitert
+function coloBlocked(x, z) {
+  if (!colo) return false;
+  const R = PLAYER_R, u = x - colo.x, v = z - colo.z;
+  const e = (a, b) => (u / a) ** 2 + (v / b) ** 2;
+  if (e(colo.oa + R, colo.ob + R) > 1) return false; // draußen
+  if (e(colo.ia - R, colo.ib - R) >= 1) { // Außenring: nur durch einen Bogen oder wo er eingestürzt ist
+    let best = null, bd = Infinity;
+    for (const f of colo.outer) { const d = (u - f.x) ** 2 + (v - f.z) ** 2; if (d < bd) { bd = d; best = f; } }
+    return best.open && Math.abs((u - best.x) * best.tx + (v - best.z) * best.tz) > colo.arch;
+  }
+  if (e(colo.ga + R, colo.gb + R) >= 1) return false; // Umgang zwischen den Ringen
+  if (e(colo.ha - R, colo.hb - R) >= 1) return !(u > 0 && Math.abs(v) < colo.gate); // Innenring: Osttor
+  if (e(colo.aa - R, colo.ab - R) >= 1) return !(u > 0 && Math.abs(v) < colo.lane); // Ränge, Podium: Einschnitt
+  return u < colo.deckU + R; // Arena: nur auf dem Holzboden
+}
+function mayaGround(x, z) {
   if (!climb) return 0;
   const dx = x - climb.x, dz = z - climb.z;
   if (Math.abs(dx) < climb.tw && Math.abs(dz) < climb.tw) return climb.floor; // im Tempel
@@ -5482,6 +5541,7 @@ function underStone(x, z) {
   return false;
 }
 function climbBlocked(x, z) {
+  if (coloBlocked(x, z)) return true;
   if (!climb) return false;
   const R = PLAYER_R, dx = x - climb.x, dz = z - climb.z, adx = Math.abs(dx), adz = Math.abs(dz);
   if (Math.max(adx, adz) > climb.out + R) return false;
@@ -5746,6 +5806,7 @@ function openMenu() {
   focusState.path = null;
   focusState.pendingSpot = null;
   dropHiRes();
+  closeWebFrame();
   saveMandelView();
   backBtn.style.display = 'none';
   infoBtn.style.display = 'none';
@@ -6087,7 +6148,7 @@ function dropHiRes() {
 // über den Bildrand hinausläuft — beim Zurückzoomen kehrt er so zur Mitte zurück.
 const ZOOM_MIN = -1;
 // Beim Mandelbrot-Bild bleibt die Kamera bei zoom 0 stehen; tiefer zoomt das Fraktal selbst
-const zoomMinFor = (spot) => (spot.fractal ? MANDEL_ZOOM_MIN : ZOOM_MIN);
+const zoomMinFor = (spot) => (spot.fractal ? MANDEL_ZOOM_MIN : spot.web ? 0 : ZOOM_MIN);
 const zoomMaxFor = (spot) => (spot.fractal ? MANDEL_ZOOM_MAX + 1 : 1);
 const focusDistScale = (zoom) => Math.pow(4, Math.min(zoom, 0));
 function focusPose(spot, zoom, pan, outPos, outLook) {
@@ -6171,6 +6232,7 @@ function enterFocus(spot, keepSavedPos) {
   focusState.animating = true;
   focusState.active = true;
   focusState.currentSpot = spot;
+  if (spot.web) openWebFrame(spot); else closeWebFrame();
   setText(hud, HUD_FOCUS);
   backBtn.style.display = 'block';
   infoBtn.style.display = ABOUT_WORKS[aboutKey(spot)] ? 'block' : 'none';
@@ -6178,7 +6240,48 @@ function enterFocus(spot, keepSavedPos) {
   setHover(null);
 }
 
+// Web-App in der Nahansicht: ein iframe genau über der Leinwand, erst wenn die Kamera steht.
+// Geladen wird beim Hinfahren, beim Verlassen wird die Seite entladen — so läuft ihr Ton nicht weiter.
+const webFrame = document.getElementById('webFrame');
+const _webCorner = new THREE.Vector3();
+function openWebFrame(spot) {
+  if (webFrame.dataset.src !== spot.web) { webFrame.src = spot.web; webFrame.dataset.src = spot.web; }
+  duckMusic(true);
+  webFrame.onload = () => { // gleiche Herkunft (GitHub Pages): Esc in der Seite beendet auch die Nahansicht
+    try {
+      webFrame.contentWindow.addEventListener('keydown', (e) => { if (e.key === 'Escape' && focusState.active) exitFocus(); });
+    } catch { /* fremde Herkunft (lokal): dann nur über „Zurück“ */ }
+  };
+}
+function closeWebFrame() {
+  if (!webFrame.dataset.src) return;
+  webFrame.style.display = 'none';
+  webFrame.removeAttribute('src');
+  webFrame.src = 'about:blank';
+  delete webFrame.dataset.src;
+  duckMusic(false);
+}
+// Bildschirmrechteck der Leinwand aus ihren vier Ecken
+function placeWebFrame() {
+  const spot = focusState.currentSpot;
+  const show = focusState.active && !focusState.animating && spot && spot.web;
+  if (!show) { webFrame.style.display = 'none'; return; }
+  const mesh = spot.mesh, w = spot.width / 2, h = spot.height / 2;
+  const rect = renderer.domElement.getBoundingClientRect();
+  let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+  for (const [sx, sy] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
+    _webCorner.set(sx * w, sy * h, 0).applyMatrix4(mesh.matrixWorld).project(camera);
+    const px = rect.left + (_webCorner.x + 1) / 2 * rect.width, py = rect.top + (1 - _webCorner.y) / 2 * rect.height;
+    x0 = Math.min(x0, px); x1 = Math.max(x1, px); y0 = Math.min(y0, py); y1 = Math.max(y1, py);
+  }
+  const st = webFrame.style;
+  st.left = `${Math.round(x0)}px`; st.top = `${Math.round(y0)}px`;
+  st.width = `${Math.round(x1 - x0)}px`; st.height = `${Math.round(y1 - y0)}px`;
+  st.display = 'block';
+}
+
 function exitFocus() {
+  closeWebFrame();
   saveMandelView();
   focusState.fromPos.copy(camera.position);
   focusState.toPos.copy(focusState.savedPos);
@@ -6821,7 +6924,7 @@ function animate() {
       const yaw = _yawEuler.y;
       const sinY = Math.sin(yaw), cosY = Math.cos(yaw);
       // auf der steilen Pyramidentreppe langsamer
-      const g = stair.level ? groundAt(px, pz) : 0, slow = g > 0 && g < climb.h ? 0.45 : 1;
+      const g = stair.level ? mayaGround(px, pz) : 0, slow = g > 0 && g < climb.h ? 0.45 : 1;
       camera.position.x += (-sinY * stepFwd + cosY * stepSide) * slow;
       camera.position.z += (-cosY * stepFwd - sinY * stepSide) * slow;
     }
@@ -6904,6 +7007,7 @@ function animate() {
   }
 
   camera.updateMatrixWorld();
+  placeWebFrame();
   updateTurntables(dt); // stellt auch _frustum für die Palette ein
   updateMandelbrot(); // setzt bei neuem Fraktalbild selbst needsRender
   if (needsRender || !camera.matrixWorld.equals(lastCamMatrix)) settleFrames = SETTLE_FRAMES;
